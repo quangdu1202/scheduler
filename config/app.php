@@ -169,6 +169,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
+        Adobrovolsky97\LaravelRepositoryServicePattern\LaravelRepositoryServicePatternServiceProvider::class,
+
     ])->toArray(),
 
     /*

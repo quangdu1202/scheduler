@@ -18,9 +18,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('calendar');
+Route::get('/filter', [HomeController::class, 'filter'])->name('calendar.filter');
 Route::get('rooms', [HomeController::class, 'rooms'])->name('rooms');
 Route::get('weekly', [HomeController::class, 'weeklyCalendar'])->name('weekly');
-Route::post('getCellData', [HomeController::class, 'getCellData']);
+Route::get('getCellData', [HomeController::class, 'getCellData']);
 Route::post('getRoomData', [RoomController::class, 'getRoomData']);
 
 Route::get('mark-by-module', [MarkController::class, 'markByModule'])->name('mark-by-module');

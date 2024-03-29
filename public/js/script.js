@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
     const sidebar = $('#sidebar');
     const toggleBtn = $('.toggle-btn');
 
@@ -38,12 +39,11 @@ $(document).ready(function() {
         const slot= $(this).data('slot');
 
         // Get the CSRF token from the meta tag
-        const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
         if (!$(this).hasClass('disabled')) {
             $.ajax({
                 url: '/getCellData',
-                method: 'POST',
+                method: 'get',
                 data: {
                     date: date,
                     slot: slot
@@ -63,7 +63,7 @@ $(document).ready(function() {
                 },
                 error: function(response) {
                     console.log(response);
-                    console.log('Error occurred during AJAX request');
+                    // console.log('Error occurred during AJAX request');
                 }
             });
         }
@@ -74,6 +74,14 @@ $(document).ready(function() {
         if (event.target === modal[0] || event.target === closeBtn[0]) {
             modal.fadeOut('fast');
         }
+    });
+
+    /*
+    ** Calendar select filters
+    */
+
+    $('#calendar-room-select, #calendar-module-select').on('change', function(){
+        $('#calendar-filter').submit();
     });
 });
 

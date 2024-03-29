@@ -7,8 +7,10 @@
     "require": {
         "php": "^8.1",
         "ext-calendar": "*",
+        "adobrovolsky97/laravel-repository-service-pattern": "^2.1",
         "bpampuch/pdfmake": "*",
         "datatables.net/datatables.net-bs5": "*",
+        "doctrine/dbal": "^3.8",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",

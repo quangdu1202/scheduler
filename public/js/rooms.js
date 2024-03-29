@@ -55,8 +55,8 @@ $(document).ready(function() {
                 roomInfoModal.fadeIn('fast');
 
             },
-            error: function() {
-                console.log('Error occurred during AJAX request');
+            error: function(response) {
+                console.log(response);
             }
         });
     })
