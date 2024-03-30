@@ -59,6 +59,7 @@ $(document).ready(function() {
                     cellContent.html(response);
                     // Show the modal
                     modal.fadeIn('fast');
+                    modal.css('display', 'flex');
 
                 },
                 error: function(response) {

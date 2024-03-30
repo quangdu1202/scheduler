@@ -137,11 +137,33 @@ class HomeController extends Controller
         $firstDayOfMonth = $date->copy()->startOfMonth();
         $lastDayOfMonth = $date->copy()->endOfMonth();
 
+        // Determine the start padding based on the day of the week (0 = Monday, 6 = Sunday)
+        $startPadding = $firstDayOfMonth->dayOfWeek === 0 ? 6 : $firstDayOfMonth->dayOfWeek - 1;
+
+        // Add days from the previous month
+        $prevMonthLastDay = $firstDayOfMonth->copy()->subDays($startPadding);
+
+        // Determine the end padding based on the day of the week (0 = Monday, 6 = Sunday)
+        $endPadding = $lastDayOfMonth->dayOfWeek === 0 ? 0 : 7 - $lastDayOfMonth->dayOfWeek;
+
+        // Add days from the next month
+        $nextMonthFirstDay = $lastDayOfMonth->copy()->addDays($endPadding + 1);
+
         $monthDays = [];
 
-        while ($firstDayOfMonth <= $lastDayOfMonth) {
-            $monthDays[] = $firstDayOfMonth->copy();
-            $firstDayOfMonth->addDay();
+        // Add days from the previous month
+        for ($i = 0; $i < $startPadding; $i++) {
+            $monthDays[] = $prevMonthLastDay->copy()->addDays($i);
+        }
+
+        // Add days from the current month
+        for ($currentDay = $firstDayOfMonth; $currentDay <= $lastDayOfMonth; $currentDay->addDay()) {
+            $monthDays[] = $currentDay->copy();
+        }
+
+        // Add days from the next month
+        for ($i = 0; $i < $endPadding; $i++) {
+            $monthDays[] = $nextMonthFirstDay->copy()->addDays($i);
         }
 
         return $monthDays;
@@ -207,7 +229,7 @@ class HomeController extends Controller
 
         $date = date('Y-m-d', strtotime($inputDate));
 
-        $practiceClass = $this->practiceClass->where('schedule_date', $date)->first();
+        $practiceClass = $this->practiceClass->where(['schedule_date' => $date ,'session' => $slot])->first();
 
         $responseHTML = "$practiceClass";
 

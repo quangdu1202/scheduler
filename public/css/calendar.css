@@ -37,7 +37,7 @@
 .main-table th,
 .main-table td {
     cursor: pointer;
-    width: 14%;
+    max-width: 1px;
 }
 
 .main-table .single-cell {
@@ -68,6 +68,7 @@
 
 .main-table td .cell-content .cell-item {
     position: relative;
+    padding-top: 12px;
     height: 32%;
     border-radius: 2px;
     border: 1px solid #c9c9c9;
@@ -91,14 +92,35 @@
     background-color: #62b959;
     padding: 2px 4px;
 }
-.main-table .today .cell-top {
-    font-weight: 700;
-    color: #be0829;
+
+.registered {
+    background: #006bda !important;
 }
 
-.main-table .highlight {
-    background: #ffa931 !important;
+.cell-class-details {
+    font-weight: 500;
     color: #fff;
+}
+
+.cell-class-details p {
+    margin: 0;
+    padding: 0;
+    max-height: 2.4em; /* Adjust according to font size and line height */
+    line-height: 1.2em; /* Adjust according to font size and line height */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.main-table .row-week {
+    color: #b60000;
+    font-weight: 700;
+}
+
+.main-table .highlight .cell-date  {
+    color: #ff0000;
     font-weight: 700;
 }
 
@@ -137,6 +159,7 @@
 /* Modal styles */
 .popup-modal {
     display: none;
+    align-items: center;
     position: fixed;
     z-index: 999;
     left: 0;
@@ -179,8 +202,8 @@
 ** DataTable
 */
 
-#schedule-table.dataTable thead>tr>th.dt-ordering-asc span.dt-column-order:before {
-    content: none;
+#schedule-table span.dt-column-order{
+    display: none;
 }
 
 #rooms-table.dataTable td.dt-type-numeric {
@@ -200,4 +223,12 @@ table.dataTable thead>tr>th.dt-orderable-desc span.dt-column-order {
 div.dt-container div.dt-search {
     display: inline-block;
     margin-right: 35px;
+}
+
+div.dt-container .dt-length {
+    display: inline-block;
+}
+#module-select {
+    display: inline-block;
+    padding-left: 30px;
 }
