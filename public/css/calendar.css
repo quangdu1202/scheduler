@@ -1,6 +1,25 @@
-* {
-    font-family: "Roboto", sans-serif;
-    box-sizing: border-box;
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.1); /* Semi-transparent black overlay */
+    z-index: 9999; /* Ensure the overlay appears on top of other elements */
+    pointer-events: none; /* Allow pointer events to pass through the overlay */
+}
+
+.overlay.active {
+    pointer-events: auto; /* Disable pointer events on the overlay */
+}
+
+.button-loading {
+    color: transparent !important;
+    background: #0b5ed7 url("/images/loading.gif") no-repeat center;
+    background-size: 32px;
 }
 
 .right-content {
@@ -97,12 +116,16 @@
     background: #006bda !important;
 }
 
-.cell-class-details {
+.cell-action {
+    width: 70px;
+}
+
+.cell-class-details p:first-child {
     font-weight: 500;
-    color: #fff;
 }
 
 .cell-class-details p {
+    color: #fff;
     margin: 0;
     padding: 0;
     max-height: 2.4em; /* Adjust according to font size and line height */
@@ -124,8 +147,13 @@
     font-weight: 700;
 }
 
-.main-table .single-cell .cell-item:hover {
-    background: #63aaf3;
+.main-table .single-cell .cell-item:not(.registered):not(.active):hover {
+    background: #63aaf3 url("/images/plus.png") no-repeat center;
+    color: #fff;
+}
+
+.main-table .single-cell .cell-item.active {
+    background: #63aaf3 none;
     color: #fff;
 }
 

@@ -224,10 +224,10 @@ class HomeController extends Controller
 
     public function getCellData(Request $request)
     {
-        $inputDate = $request->input('date');
+        $date = $request->input('date');
         $slot = $request->input('slot');
 
-        $date = date('Y-m-d', strtotime($inputDate));
+        $date = date('Y-m-d', strtotime($date));
 
         $practiceClass = $this->practiceClass->where(['schedule_date' => $date ,'session' => $slot])->first();
 
@@ -242,5 +242,29 @@ class HomeController extends Controller
         $room = $request->room;
 
         return response($room);
+    }
+
+    public function registerSchedule(Request $request)
+    {
+        $date = date('Y-m-d', strtotime($request->input('date')));
+        $slot = $request->input('slot');
+
+        $newPracticeClass = $this->practiceClass->create([
+            'ten_lop_thuc_hanh' => 'Lap trinh C (test)',
+            'schedule_date' => $date,
+            'session' => $slot,
+            'practice_room_id' => 1,
+            'teacher_id' => 1,
+            'module_id' => 1
+        ]);
+
+        if ($newPracticeClass) {
+            $response = ['status' => 'success'];
+        }else {
+            $response = ['status' => 'error'];
+        }
+
+
+        return $response;
     }
 }

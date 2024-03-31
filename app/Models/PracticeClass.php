@@ -12,6 +12,18 @@ class PracticeClass extends Model
     use HasFactory;
 
     /**
+     * @var string[]
+     */
+    protected $fillable = [
+        'ten_lop_thuc_hanh',
+        'schedule_date',
+        'session',
+        'practice_room_id',
+        'teacher_id',
+        'module_id'
+    ];
+
+    /**
      * @return BelongsTo
      */
     public function module(): BelongsTo
