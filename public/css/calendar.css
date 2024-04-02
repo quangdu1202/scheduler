@@ -116,6 +116,10 @@
     background: #006bda !important;
 }
 
+.recurring-select {
+    padding-right: 3.75rem !important;
+}
+
 .cell-action {
     width: 70px;
 }
@@ -185,6 +189,7 @@
 }
 
 /* Modal styles */
+/*
 .popup-modal {
     display: none;
     align-items: center;
@@ -224,6 +229,7 @@
     text-decoration: none;
     cursor: pointer;
 }
+*/
 
 
 /*

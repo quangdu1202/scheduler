@@ -43,51 +43,53 @@ $(document).ready(function() {
     const scheduleTable = $('#schedule-table');
 
     // Info modal popup
-    const closeBtn = $('.close');
-    $(document).on('click', function(event) {
-        if (event.target === modal[0] || event.target === closeBtn[0]) {
-            modal.fadeOut('fast');
-        }
-    });
 
-    scheduleTable.on('click', '.cell-item', function() {
-        const date = $(this).data('date');
-        const slot= $(this).data('slot');
+    $(document).ready(function() {
+        const modal = new bootstrap.Modal(document.getElementById('cell-popup-modal'));
 
-        // Get the CSRF token from the meta tag
+        scheduleTable.on('click', '.cell-item', function() {
+            const date = $(this).data('date');
+            const slot = $(this).data('slot');
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-        if ($(this).hasClass('registered')) {
-            $.ajax({
-                url: '/getCellData',
-                method: 'get',
-                data: {
-                    date: date,
-                    slot: slot
-                },
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    console.log(response);
-                    // Display the date and retrieved data in the modal
-                    modalDate.text(date);
-                    // Update the modal content with the retrieved data
-                    cellContent.html(response);
-                    // Show the modal
-                    modal.fadeIn('fast');
-                    modal.css('display', 'flex');
+            if ($(this).hasClass('registered')) {
+                $.ajax({
+                    url: '/getCellData',
+                    method: 'get',
+                    data: {
+                        date: date,
+                        slot: slot
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(practiceClass) {
+                        if (typeof practiceClass === 'string' || practiceClass instanceof String) {
+                            practiceClass = JSON.parse(practiceClass);
+                        }
 
-                },
-                error: function(response) {
-                    console.log(response);
-                    // console.log('Error occurred during AJAX request');
-                }
-            });
-        }else{
-            console.log('Empty Cell Clicked');
-            $(this).find('.cell-class-register').removeClass('visually-hidden');
-            $(this).addClass('active');
-        }
+                        // Update the modal content with the retrieved data
+                        $('#class-id').text(practiceClass.id || '');
+                        $('#class-name').text(practiceClass.ten_lop_thuc_hanh || '');
+                        $('#class-schedule-date').text(practiceClass.schedule_date || '');
+                        $('#class-session').text(practiceClass.session || '');
+                        $('#class-practice-room-id').text(practiceClass.practice_room_id || '');
+                        $('#class-teacher-id').text(practiceClass.teacher_id || '');
+                        $('#class-module-id').text(practiceClass.module_id || '');
+
+                        // Show the modal with Bootstrap's method
+                        modal.show();
+                    },
+                    error: function(response) {
+                        console.error('Error occurred during AJAX request:', response);
+                    }
+                });
+            } else {
+                console.log('Empty Cell Clicked');
+                $(this).find('.cell-class-register').removeClass('visually-hidden');
+                $(this).addClass('active');
+            }
+        });
     });
 
     /*
@@ -97,6 +99,7 @@ $(document).ready(function() {
     /*
     ** Register form inside cell
     */
+
     scheduleTable.on('click', '.cell-class-register', function (event) {
         event.stopPropagation();
     });
@@ -111,6 +114,8 @@ $(document).ready(function() {
         $(this).closest('.cell-class-register').addClass('visually-hidden');
         $(this).closest('.cell-item').removeClass('active');
     });
+
+    /*Submit Register*/
 
     scheduleTable.on('click', '.action-submit-register', function (event) {
         event.preventDefault();
@@ -129,7 +134,7 @@ $(document).ready(function() {
 
         const date = cell.data('date');
         const slot= cell.data('slot');
-        const recurring = null;
+        const recurring = recurringSelect.val();
 
         submitBtn.closest('.cell-register-fieldset').attr('disabled', 'disabled');
         submitBtn.addClass('button-loading');
@@ -141,7 +146,7 @@ $(document).ready(function() {
             data: {
                 date: date,
                 slot: slot,
-                recurring: recurringSelect.val()
+                recurring: recurring
             },
             headers: {
                 'X-CSRF-TOKEN': csrfToken
@@ -181,7 +186,7 @@ $(document).ready(function() {
     ** Calendar select filters
     */
 
-    $('#calendar-room-select, #calendar-module-select').on('change', function(){
+    $('#calendar-room-select, #calendar-class-select').on('change', function(){
         $('#calendar-filter').submit();
     });
 

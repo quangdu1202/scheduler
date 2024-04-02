@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('practice_rooms', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('location');
+            $table->integer('pc_qty');
+            $table->tinyInteger('status');
             $table->timestamps();
         });
     }

@@ -9,6 +9,7 @@
             <h1 class="h2">Schedule Calendar</h1>
         </div>
 
+        {{--Navigation--}}
         <div class="text-center mb-4 d-flex justify-content-center flex-wrap">
             <h2 class="fw-bold d-block w-100">{{ $selectedDate->format('F Y') }}</h2>
             <div class="nav d-flex justify-content-center w-100">
@@ -36,31 +37,34 @@
             </div>
         </div>
 
+        {{--Filter--}}
         <div class="mb-3 d-flex">
             <form id="calendar-filter" action="{{ route('calendar.filter') }}"
                   class="align-items-center d-flex flex-wrap">
+                <input type="hidden" name="date" value="{{$selectedDate->copy()->format('Y-m-d')}}">
                 <div class="d-flex align-items-center">
-                    <label for="calendar-module-select" class="me-2 text-nowrap fw-bold">Module Class:</label>
-                    <select name="calendar-module-select" id="calendar-module-select" class="form-select">
-                        <option value="1">202320503196001</option>
-                        <option value="2">202320503197001</option>
-                        <option value="3">20224IT6030002</option>
-                        <option value="4">20231LP6013037</option>
+                    <label for="calendar-class-select" class="me-2 text-nowrap fw-bold">Practice Class:</label>
+                    <select name="class" id="calendar-class-select" class="form-select">
+                        <option value="0">--Select module---</option>
+                        @foreach($modules as $module)
+                            <option value="{{$module->id}}" {{$module->id == $filter['module']}}>{{$module->module_name}}</option>
+                        @endforeach
                     </select>
                 </div>
 
                 <div class="d-flex align-items-center ms-5">
                     <label for="calendar-room-select" class="me-2 text-nowrap fw-bold">Room:</label>
-                    <select name="calendar-room-select" id="calendar-room-select" class="form-select">
-                        <option value="1">PM 1 (601 - A1)</option>
-                        <option value="2">PM 3 (701 - A1)</option>
-                        <option value="3">PM 6 (801 - A1)</option>
-                        <option value="4">PM 9 (802 - A1)</option>
+                    <select name="room" id="calendar-room-select" class="form-select">
+                        <option value="0">--Select room---</option>
+                        @foreach($rooms as $room)
+                            <option value="{{$room->id}}" {{$room->id == $filter['room']}}>{{$room->name}}</option>
+                        @endforeach
                     </select>
                 </div>
             </form>
         </div>
 
+        {{--Main table--}}
         <div class="table-responsive">
             <table id="schedule-table"
                    class="mt-1 table table-bordered text-center main-table w-100 border-opacity-25 border-dark h-100">
@@ -133,9 +137,10 @@
                                                                 <select id="recurring-select-{{$date->format('j-n-y')}}"
                                                                         class="form-select is-invalid recurring-select border border-dark d-inline-block w-75"
                                                                         name="recurring" required aria-describedby>
-                                                                    <option value="-1">No repeat</option>
-                                                                    <option value="1">Weekly</option>
-                                                                    <option value="2">Biweekly</option>
+                                                                    <option value="-1">--------</option>
+                                                                    <option value="0">No repeat</option>
+                                                                    <option value="1">Weekly (10 weeks)</option>
+                                                                    <option value="2">Biweekly (5 weeks)</option>
                                                                 </select>
                                                                 <div
                                                                     class="cell-register-actions w-100 d-flex justify-content-evenly">
@@ -164,10 +169,41 @@
             </table>
         </div>
 
-        <div id="cell-popup-modal" class="popup-modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <div id="cell-content"></div>
+        {{--Cell Info Popup Modal--}}
+        <div id="cell-popup-modal" class="popup-modal modal fade" tabindex="-1" aria-labelledby="cellPopupModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cellPopupModalLabel">Class Information</h5>
+                        <button type="button" class="close btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="cell-content">
+                        <div class="mb-3">
+                            <strong>ID:</strong> <span id="class-id"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Class Name:</strong> <span id="class-name"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Schedule Date:</strong> <span id="class-schedule-date"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Session:</strong> <span id="class-session"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Practice Room ID:</strong> <span id="class-practice-room-id"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Teacher ID:</strong> <span id="class-teacher-id"></span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Module ID:</strong> <span id="class-module-id"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -199,8 +235,10 @@
                         '<option value="2">2</option>' +
                         '<option value="-1">All</option>' +
                         '</select> week(s)'
-                }
+                },
+                displayStart: {{floor($selectedDate->day / 7)}}
             });
+
             const $label = $('<label/>');
             $label.text('Module:').appendTo('#module-select');
             const $select = $('<select/>').appendTo('#module-select');
