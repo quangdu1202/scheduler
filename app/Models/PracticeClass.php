@@ -15,7 +15,7 @@ class PracticeClass extends Model
      * @var string[]
      */
     protected $fillable = [
-        'ten_lop_thuc_hanh',
+        'practice_class_name',
         'schedule_date',
         'session',
         'practice_room_id',

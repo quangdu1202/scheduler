@@ -70,7 +70,7 @@ $(document).ready(function() {
 
                         // Update the modal content with the retrieved data
                         $('#class-id').text(practiceClass.id || '');
-                        $('#class-name').text(practiceClass.ten_lop_thuc_hanh || '');
+                        $('#class-name').text(practiceClass.practice_class_name || '');
                         $('#class-schedule-date').text(practiceClass.schedule_date || '');
                         $('#class-session').text(practiceClass.session || '');
                         $('#class-practice-room-id').text(practiceClass.practice_room_id || '');

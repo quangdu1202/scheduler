@@ -66,6 +66,49 @@ class HomeController extends Controller
 
     /**
      * @param Request $request
+     * @param $filter
+     * @return Application|Factory|View|\Illuminate\Foundation\Application|\Illuminate\View\View
+     */
+    public function index(Request $request, $filter = null)
+    {
+        $today = now();
+        $selectedDate = $request->date ? Carbon::parse($request->date) : $today;
+        if ($filter) {
+            $selectedDate = Carbon::parse($filter['date']);
+            $practiceClasses = $this->practiceClass
+                ->whereYear('schedule_date', $selectedDate->year)
+                ->whereMonth('schedule_date', $selectedDate->month)
+                ->where('practice_room_id', $filter['room'])
+                ->get();
+        } else {
+            $practiceClasses = $this->practiceClass->all();
+        }
+
+        $modules = $this->module->getAll();
+
+        $rooms = $this->room->getAll();
+
+        $monthDays = $this->getMonthDays($selectedDate);
+
+        $weekday_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        $highlight_day = $selectedDate->format('Y-m-d');
+
+        return view('components.calendar', [
+            'filter',
+            'today' => $today,
+            'weekday_names' => $weekday_names,
+            'highlight_day' => $highlight_day,
+            'selectedDate' => $selectedDate,
+            'monthDays' => $monthDays,
+            'modules' => $modules,
+            'rooms' => $rooms,
+            'practiceClasses' => $practiceClasses,
+        ]);
+    }
+
+    /**
+     * @param Request $request
      * @return Application|Factory|View|\Illuminate\Foundation\Application|\Illuminate\View\View
      */
     public function weeklyCalendar(Request $request)
@@ -154,49 +197,6 @@ class HomeController extends Controller
         ];
 
         return $this->index($request, $filter);
-    }
-
-    /**
-     * @param Request $request
-     * @param $filter
-     * @return Application|Factory|View|\Illuminate\Foundation\Application|\Illuminate\View\View
-     */
-    public function index(Request $request, $filter = null)
-    {
-        $today = now();
-        $selectedDate = $request->date ? Carbon::parse($request->date) : $today;
-        if ($filter) {
-            $selectedDate = Carbon::parse($filter['date']);
-            $practiceClasses = $this->practiceClass
-                ->whereYear('schedule_date', $selectedDate->year)
-                ->whereMonth('schedule_date', $selectedDate->month)
-                ->where('practice_room_id', $filter['room'])
-                ->get();
-        } else {
-            $practiceClasses = $this->practiceClass->all();
-        }
-
-        $modules = $this->module->getAll();
-
-        $rooms = $this->room->getAll();
-
-        $monthDays = $this->getMonthDays($selectedDate);
-
-        $weekday_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-        $highlight_day = $selectedDate->format('Y-m-d');
-
-        return view('components.calendar', [
-            'filter',
-            'today' => $today,
-            'weekday_names' => $weekday_names,
-            'highlight_day' => $highlight_day,
-            'selectedDate' => $selectedDate,
-            'monthDays' => $monthDays,
-            'modules' => $modules,
-            'rooms' => $rooms,
-            'practiceClasses' => $practiceClasses,
-        ]);
     }
 
     /**
@@ -298,7 +298,7 @@ class HomeController extends Controller
     private function createPracticeClass($date, $slot)
     {
         return $this->practiceClass->create([
-            'ten_lop_thuc_hanh' => 'Lập trình C (test)',
+            'practice_class_name' => 'Lập trình C (test)',
             'schedule_date' => $date,
             'session' => $slot,
             'practice_room_id' => 1,

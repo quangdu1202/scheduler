@@ -17,7 +17,7 @@ class PracticeClassFactory extends Factory
         return [
 //            'created_at' => Carbon::now(),
 //            'updated_at' => Carbon::now(),
-            'ten_lop_thuc_hanh' => $this->faker->word,
+            'practice_class_name' => $this->faker->word,
             'schedule_date' => $this->faker->date(),
             'session' => $this->faker->randomElement([1, 2, 3]),
             // Assume we have Room, Teacher, and Module factories already created.
