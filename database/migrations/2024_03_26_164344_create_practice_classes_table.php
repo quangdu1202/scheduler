@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('practice_classes', function (Blueprint $table) {
             $table->id();
             $table->string('practice_class_name');
-            $table->date('schedule_date');
+            $table->date('schedule_date')->nullable();
             $table->enum('session', [1, 2, 3]);
             $table->foreignIdFor(Module::class);
             $table->foreignIdFor(PracticeRoom::class);

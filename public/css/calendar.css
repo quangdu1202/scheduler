@@ -254,6 +254,10 @@ table.dataTable thead>tr>th.dt-orderable-desc span.dt-column-order {
     right: 4px !important;
 }
 
+table.table.dataTable>tbody>tr {
+    vertical-align: middle;
+}
+
 div.dt-container div.dt-search {
     display: inline-block;
     margin-right: 35px;

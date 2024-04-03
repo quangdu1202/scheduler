@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MarkController;
 use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\PracticeClassController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,7 +28,7 @@ Route::post('registerSchedule', [HomeController::class, 'registerSchedule']);
 
 Route::get('mark-by-module', [MarkController::class, 'markByModule'])->name('mark-by-module');
 Route::get('mark-by-practice', [MarkController::class, 'markByPractice'])->name('mark-by-practice');
-Route::get('modules', [ModuleController::class, 'index'])->name('modules.index');
+Route::get('practice-class', [PracticeClassController::class, 'index'])->name('practice-class.index');
 
 
 //Auth::routes();
