@@ -1,29 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
-use App\Models\Module;
-use App\Models\PracticeClass;
-use App\Models\PracticeRoom;
-use App\Models\Teacher;
+use App\Models\Module\Module;
+use App\Models\PracticeClass\PracticeClass;
+use App\Models\PracticeRoom\PracticeRoom;
+use App\Models\Teacher\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class PracticeClassFactory extends Factory
+/**
+ * @extends Factory<PracticeClass>
+ */
+final class PracticeClassFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected $model = PracticeClass::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
     public function definition(): array
     {
         return [
-//            'created_at' => Carbon::now(),
-//            'updated_at' => Carbon::now(),
-            'practice_class_name' => $this->faker->word,
-            'schedule_date' => $this->faker->date(),
-            'session' => $this->faker->randomElement([1, 2, 3]),
-            // Assume we have Room, Teacher, and Module factories already created.
-            'practice_room_id' => PracticeRoom::factory(), // Replace with the actual model reference
-            'teacher_id' => Teacher::factory(), // Replace with the actual model reference
+            'practice_class_name' => fake()->word,
+            'schedule_date' => fake()->optional()->date(),
+            'session' => fake()->randomNumber(),
             'module_id' => Module::factory(),
+            'practice_room_id' => PracticeRoom::factory(),
+            'teacher_id' => Teacher::factory(),
+            'recurring_id' => fake()->optional()->randomNumber(),
+            'registered_qty' => fake()->randomNumber(),
         ];
     }
 }

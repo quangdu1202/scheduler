@@ -8,25 +8,27 @@
             <h1 class="h2">Practice Class Management</h1>
         </div>
 
-        <div class="top-nav nav mb-3 d-flex justify-content-between">
-            <form action="#" class="d-flex align-items-center">
+        <div class="top-nav nav mb-3 d-flex align-items-center">
+            <!-- Action Buttons (Add new, etc.) -->
+            <div class="action-buttons">
+                <a href="#" id="add-class-new" class="btn btn-primary btn-sm" type="button">
+                    <i class="lni lni-circle-plus align-middle"></i> Add new
+                </a>
+            </div>
+            <div class="vr mx-5"></div>
+            <form id="practice-class-filter" action="#" class="d-flex align-items-center">
                 <label for="module-select" class="me-2 text-nowrap fw-bold">Module:</label>
-                <select name="module-select" id="module-select" class="form-select">
-                    <option value="-1" selected>All</option>
+                <select name="module" id="module-select" class="form-select">
+                    <option value="-1" selected>--- Select Module ---</option>
                     <option value="1">Nhập môn lập trình máy tính</option>
                     <option value="2">Kỹ thuật lập trình</option>
                     <option value="3">Cơ sở dữ liệu</option>
                     <option value="4">Kiến trúc máy tính</option>
                 </select>
             </form>
-            <!-- Button Group for Export and Import -->
-            <div class="nav-buttons">
-                {{--<button type="button" class="btn btn-danger">Export PDF</button>--}}
-                <button type="button" class="btn btn-primary">Import CSV</button>
-            </div>
         </div>
 
-        <!-- Points Table -->
+        <!-- Practice Classes Table -->
         <div class="table-responsive">
             <table id="module-management-table" class="table table-bordered table-hover w-100 text-center">
                 <thead class="thead-light">

@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Teacher;
 
-use App\Models\Teacher;
+use App\Models\Teacher\Teacher;
 use App\Repositories\Teacher\Contracts\TeacherRepositoryInterface;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Repositories\BaseRepository;
 

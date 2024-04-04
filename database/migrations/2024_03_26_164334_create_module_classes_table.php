@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Module;
-use App\Models\Teacher;
+use App\Models\Module\Module;
+use App\Models\Teacher\Teacher;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

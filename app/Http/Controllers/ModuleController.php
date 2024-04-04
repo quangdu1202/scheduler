@@ -6,7 +6,5 @@ class ModuleController extends Controller
 {
     public function index()
     {
-
-        return view('components.modules');
     }
 }

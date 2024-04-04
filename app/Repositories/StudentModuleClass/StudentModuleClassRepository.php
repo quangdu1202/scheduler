@@ -2,7 +2,7 @@
 
 namespace App\Repositories\StudentModuleClass;
 
-use App\Models\StudentModuleClass;
+use App\Models\StudentModuleClass\StudentModuleClass;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Repositories\BaseRepository;
 use App\Repositories\StudentModuleClass\Contracts\StudentModuleClassRepositoryInterface;
 

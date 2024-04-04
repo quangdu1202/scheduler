@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Student;
 
-use App\Models\Student;
+use App\Models\Student\Student;
 use App\Repositories\Student\Contracts\StudentRepositoryInterface;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Repositories\BaseRepository;
 

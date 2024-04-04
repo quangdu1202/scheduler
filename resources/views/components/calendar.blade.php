@@ -45,7 +45,7 @@
                 <div class="d-flex align-items-center">
                     <label for="calendar-class-select" class="me-2 text-nowrap fw-bold">Practice Class:</label>
                     <select name="class" id="calendar-class-select" class="form-select">
-                        <option value="0">--Select module---</option>
+                        <option value="0">--- Select module ---</option>
                         @foreach($modules as $module)
                             <option value="{{$module->id}}" {{$module->id == $filter['module']}}>{{$module->module_name}}</option>
                         @endforeach
@@ -55,7 +55,7 @@
                 <div class="d-flex align-items-center ms-5">
                     <label for="calendar-room-select" class="me-2 text-nowrap fw-bold">Room:</label>
                     <select name="room" id="calendar-room-select" class="form-select">
-                        <option value="0">--Select room---</option>
+                        <option value="0">--- Select room ---</option>
                         @foreach($rooms as $room)
                             <option value="{{$room->id}}" {{$room->id == $filter['room']}}>{{$room->name}}</option>
                         @endforeach
@@ -238,13 +238,6 @@
                 },
                 displayStart: {{floor($selectedDate->day / 7)}}
             });
-
-            const $label = $('<label/>');
-            $label.text('Module:').appendTo('#module-select');
-            const $select = $('<select/>').appendTo('#module-select');
-            $('<option/>').val('1').text('option #1').appendTo($select);
-            $('<option/>').val('2').text('option #2').appendTo($select);
-            $('<option/>').val('3').text('option #3').appendTo($select);
         });
     </script>
 @endsection

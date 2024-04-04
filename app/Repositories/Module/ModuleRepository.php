@@ -3,7 +3,7 @@
 namespace App\Repositories\Module;
 
 use Adobrovolsky97\LaravelRepositoryServicePattern\Repositories\BaseRepository;
-use App\Models\Module;
+use App\Models\Module\Module;
 use App\Repositories\Module\Contracts\ModuleRepositoryInterface;
 
 /**
@@ -11,11 +11,11 @@ use App\Repositories\Module\Contracts\ModuleRepositoryInterface;
  */
 class ModuleRepository extends BaseRepository implements ModuleRepositoryInterface
 {
-	/**
-	 * @return string
-	 */
-	protected function getModelClass(): string
-	{
-		return Module::class;
-	}
+    /**
+     * @return string
+     */
+    protected function getModelClass(): string
+    {
+        return Module::class;
+    }
 }

@@ -1,20 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
-use App\Models\ModuleClass;
+use App\Models\Module\Module;
+use App\Models\ModuleClass\ModuleClass;
+use App\Models\Teacher\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Carbon;
 
-class ModuleClassFactory extends Factory
+/**
+ * @extends Factory<ModuleClass>
+ */
+final class ModuleClassFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected $model = ModuleClass::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
     public function definition(): array
     {
         return [
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
+            'module_class_name' => fake()->word,
+            'module_id' => Module::factory(),
+            'teacher_id' => Teacher::factory(),
         ];
     }
 }

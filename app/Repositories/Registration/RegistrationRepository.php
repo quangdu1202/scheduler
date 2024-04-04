@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Registration;
 
-use App\Models\Registration;
+use App\Models\Registration\Registration;
 use App\Repositories\Registration\Contracts\RegistrationRepositoryInterface;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Repositories\BaseRepository;
 

@@ -2,7 +2,7 @@
 
 namespace App\Repositories\OriginalClass;
 
-use App\Models\OriginalClass;
+use App\Models\OriginalClass\OriginalClass;
 use App\Repositories\OriginalClass\Contracts\OriginalClassRepositoryInterface;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Repositories\BaseRepository;
 

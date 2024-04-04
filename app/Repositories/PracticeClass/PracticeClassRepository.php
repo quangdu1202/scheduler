@@ -2,7 +2,7 @@
 
 namespace App\Repositories\PracticeClass;
 
-use App\Models\PracticeClass;
+use App\Models\PracticeClass\PracticeClass;
 use App\Repositories\PracticeClass\Contracts\PracticeClassRepositoryInterface;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Repositories\BaseRepository;
 

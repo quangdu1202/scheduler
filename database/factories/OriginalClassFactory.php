@@ -1,20 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
-use App\Models\OriginalClass;
+use App\Models\OriginalClass\OriginalClass;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Carbon;
 
-class OriginalClassFactory extends Factory
+/**
+ * @extends Factory<OriginalClass>
+ */
+final class OriginalClassFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected $model = OriginalClass::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
     public function definition(): array
     {
         return [
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
+            'original_class_name' => fake()->word,
         ];
     }
 }
