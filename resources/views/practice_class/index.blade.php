@@ -11,7 +11,7 @@
         <div class="top-nav nav mb-3 d-flex align-items-center">
             <!-- Action Buttons (Add new, etc.) -->
             <div class="action-buttons">
-                <a href="#" id="add-class-new" class="btn btn-primary btn-sm" type="button">
+                <a href="{{route('practice-classes.create')}}" id="add-class-new" class="btn btn-primary btn-sm" type="button">
                     <i class="lni lni-circle-plus align-middle"></i> Add new
                 </a>
             </div>

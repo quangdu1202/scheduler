@@ -22,11 +22,8 @@
     <link rel="stylesheet" href="{{ asset('/css/style.css') }}">
 
     <!-- DataTables -->
+    <link rel="stylesheet" href="{{ asset('/css/datatables.min.css') }}">
 
-    <link href="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/b-html5-3.0.1/b-print-3.0.1/fh-4.0.1/r-3.0.0/sc-2.4.1/datatables.min.css" rel="stylesheet">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/b-html5-3.0.1/b-print-3.0.1/fh-4.0.1/r-3.0.0/sc-2.4.1/datatables.min.js"></script>
 
     <!-- Icons -->
@@ -51,6 +48,12 @@
 
 <script type="text/javascript"  src="{{ asset('/js/script.js') }}"></script>
 <script type="text/javascript"  src="{{ asset('/js/rooms.js') }}"></script>
+<script type="text/javascript" src="{{ asset('/js/pdfmake.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('/js/vfs_fonts.js') }}"></script>
+
+<!-- DataTables -->
+<script type="text/javascript" src="{{ asset('/js/datatables.min.js') }}"></script>
+
 </body>
 
 </html>

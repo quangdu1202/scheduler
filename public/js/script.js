@@ -45,7 +45,7 @@ $(document).ready(function() {
     // Info modal popup
 
     $(document).ready(function() {
-        const modal = new bootstrap.Modal(document.getElementById('cell-popup-modal'));
+        const modal = bootstrap.Modal.getOrCreateInstance('#cell-popup-modal');
 
         scheduleTable.on('click', '.cell-item', function() {
             const date = $(this).data('date');

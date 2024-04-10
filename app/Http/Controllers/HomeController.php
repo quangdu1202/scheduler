@@ -206,25 +206,17 @@ class HomeController extends Controller
     private function getMonthDays(Carbon $date)
     {
         $firstDayOfMonth = $date->copy()->startOfMonth();
-        $lastDayOfMonth = $date->copy()->endOfMonth();
+        $lastDayOfMonth  = $date->copy()->endOfMonth();
 
-        // Determine the start padding based on the day of the week (0 = Monday, 6 = Sunday)
-        $startPadding = $firstDayOfMonth->dayOfWeek === 0 ? 6 : $firstDayOfMonth->dayOfWeek - 1;
-
-        // Add days from the previous month
-        $prevMonthLastDay = $firstDayOfMonth->copy()->subDays($startPadding);
-
-        // Determine the end padding based on the day of the week (0 = Monday, 6 = Sunday)
-        $endPadding = $lastDayOfMonth->dayOfWeek === 6 ? 0 : 7 - $lastDayOfMonth->dayOfWeek;
-
-        // Determine the first day of next month
-        $nextMonthFirstDay = $lastDayOfMonth->copy()->addDays();
+        // Determine the start/end padding based on the day of the week (1 = Monday, 7 = Sunday)
+        $startPadding = $firstDayOfMonth->dayOfWeekIso === 1 ? 0 : $firstDayOfMonth->dayOfWeekIso - 1;
+        $endPadding   = $lastDayOfMonth->dayOfWeekIso === 7 ? 0 : 7 - $lastDayOfMonth->dayOfWeekIso;
 
         $monthDays = [];
 
         // Add days from the previous month
-        for ($i = 0; $i < $startPadding; $i++) {
-            $monthDays[] = $prevMonthLastDay->copy()->addDays($i);
+        for ($i = $startPadding; $i >= 1 ; $i--) {
+            $monthDays[] = $firstDayOfMonth->copy()->subDays($i);
         }
 
         // Add days from the current month
@@ -233,8 +225,8 @@ class HomeController extends Controller
         }
 
         // Add days from the next month
-        for ($i = 0; $i < $endPadding; $i++) {
-            $monthDays[] = $nextMonthFirstDay->copy()->addDays($i);
+        for ($i = 1; $i <= $endPadding; $i++) {
+            $monthDays[] = $lastDayOfMonth->copy()->addDays($i);
         }
 
         return $monthDays;
