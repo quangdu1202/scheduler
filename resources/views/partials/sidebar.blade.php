@@ -35,7 +35,7 @@
         </ul>
     </li>
     <li class="sidebar-item">
-        <a href="{{route('practice-classes.index')}}" class="sidebar-link">
+        <a href="{{route('modules.index')}}" class="sidebar-link">
             <i class="lni lni-book"></i>
             <span>Practice Classes</span>
         </a>

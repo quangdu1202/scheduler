@@ -187,7 +187,7 @@ class HomeController extends Controller
         $highlight_day = $selectedDate->format('Y-m-d');
 
         return view('components.calendar', [
-            'filter',
+            'filter' => $filter,
             'today' => $today,
             'weekday_names' => $weekday_names,
             'highlight_day' => $highlight_day,

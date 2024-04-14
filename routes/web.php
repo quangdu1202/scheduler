@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MarkController;
-use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\Module\ModuleController;
 use App\Http\Controllers\PracticeClass\PracticeClassController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
@@ -30,17 +30,9 @@ Route::get('mark-by-module', [MarkController::class, 'markByModule'])->name('mar
 Route::get('mark-by-practice', [MarkController::class, 'markByPractice'])->name('mark-by-practice');
 //Route::get('practice-class', [PracticeClassController::class, 'index'])->name('practice-class.index');
 
-Route::resource('practice-classes', PracticeClassController::class, [
-    'names' => [
-        'index' => 'practice-classes.index',
-        'show' => 'practice-classes.show',
-        'create' => 'practice-classes.create',
-        'edit' => 'practice-classes.edit',
-        'update' => 'practice-classes.update',
-        'store' => 'practice-classes.save',
-        'destroy' => 'practice-classes.delete',
-    ]
-]);
+Route::resource('practice-classes', PracticeClassController::class);
+Route::resource('modules', ModuleController::class);
+
 //Auth::routes();
 //
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

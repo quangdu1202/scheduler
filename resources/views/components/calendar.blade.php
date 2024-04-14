@@ -46,9 +46,9 @@
                     <label for="calendar-class-select" class="me-2 text-nowrap fw-bold">Practice Class:</label>
                     <select name="class" id="calendar-class-select" class="form-select">
                         <option value="0">--- Select module ---</option>
-                        @foreach($modules as $module)
-                            <option value="{{$module->id}}" {{$module->id == $filter['module']}}>{{$module->module_name}}</option>
-                        @endforeach
+                        {{--@foreach($modules as $module)
+                            <option value="{{$module->id}}" {{$module->id == $filter['module'] ? 'selected' : ''}}>{{$module->module_name}}</option>
+                        @endforeach--}}
                     </select>
                 </div>
 
@@ -56,9 +56,9 @@
                     <label for="calendar-room-select" class="me-2 text-nowrap fw-bold">Room:</label>
                     <select name="room" id="calendar-room-select" class="form-select">
                         <option value="0">--- Select room ---</option>
-                        @foreach($rooms as $room)
-                            <option value="{{$room->id}}" {{$room->id == $filter['room']}}>{{$room->name}}</option>
-                        @endforeach
+                        {{--@foreach($rooms as $room)
+                            <option value="{{$room->id}}" {{$room->id == $filter['room'] ? 'selected' : ''}}>{{$room->name}}</option>
+                        @endforeach--}}
                     </select>
                 </div>
             </form>
