@@ -8,10 +8,20 @@
             <h1 class="h2">Practice Class Management</h1>
         </div>
 
+        @if ($success && $success == true)
+            <div class="alert alert-success" role="alert">
+                {{ $message }}
+            </div>
+        @elseif ($success && $success == false)
+            <div class="alert alert-danger" role="alert">
+                {{ $message }}
+            </div>
+        @endif
+
         <div class="top-nav nav mb-3 d-flex align-items-center">
             <!-- Action Buttons (Add new, etc.) -->
             <div class="action-buttons">
-                <a href="{{route('practice-classes.create')}}" id="add-class-new" class="btn btn-primary btn-sm" type="button">
+                <a href="{{ route('modules.create') }}" id="add-class-new" class="btn btn-primary btn-sm" type="button">
                     <i class="lni lni-circle-plus align-middle"></i> Add new
                 </a>
             </div>
@@ -32,49 +42,55 @@
         <div class="table-responsive">
             <table id="module-management-table" class="table table-bordered table-hover w-100">
                 <thead class="thead-light">
-                <tr>
-                    <th class="text-center">#</th>
-                    <th class="text-start ps-3">Module ID</th>
-                    <th class="text-start ps-3">Module Name</th>
-                    <th class="text-center">Practice Class QTY</th>
-                    <th class="text-center">Action</th>
-                </tr>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th class="text-start ps-3">Module Code</th>
+                        <th class="text-start ps-3">Module Name</th>
+                        <th class="text-center">Practice Class QTY</th>
+                        <th class="text-center">Action</th>
+                    </tr>
                 </thead>
                 <tbody>
-                @foreach($modules as $key => $module)
-                    <tr data-pclass-id="{{ $module->id }}">
-                        <td class="text-center">{{ $key+1 }}</td>
-                        <td class="text-start ps-3">{{ $module->id }}</td>
-                        <td class="text-start ps-3">{{ $module->module_name }}</td>
-                        <td class="text-center">{{ count($module->practiceClasses) }}</td>
-                        <td class="text-center">
-                            <a href="{{ route('modules.show', $module) }}" class="table-row-btn module-btn-info btn btn-success btn-sm" title="Module Info">
-                                <i class="fa-solid fa-magnifying-glass align-middle"></i>
-                            </a>
-                            <a href="{{ route('modules.edit', $module) }}" class="table-row-btn module-btn-edit btn btn-primary btn-sm" title="Edit Module Info" style="padding-right: 0.45rem">
-                                <i style="padding-left: 0.05rem" class="lni lni-pencil-alt align-middle"></i>
-                            </a>
-                            <form action="{{ route('modules.destroy', $module) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="table-row-btn module-btn-delete btn btn-danger btn-sm" title="Delete Module" onclick="return confirm('Are you sure you want to delete this module?')">
-                                    <i class="lni lni-trash-can align-middle"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
+                    @foreach ($modules as $key => $module)
+                        <tr data-pclass-id="{{ $module->id }}">
+                            <td class="text-center">{{ $key + 1 }}</td>
+                            <td class="text-start ps-3">{{ $module->module_code }}</td>
+                            <td class="text-start ps-3">{{ $module->module_name }}</td>
+                            <td class="text-center">{{ count($module->practiceClasses) }}</td>
+                            <td class="text-center">
+                                <a href="{{ route('modules.show-practice-classes', $module) }}"
+                                    class="table-row-btn module-btn-info btn btn-success btn-sm" title="Module Info">
+                                    <i class="fa-solid fa-magnifying-glass align-middle"></i>
+                                </a>
+                                <a href="{{ route('modules.edit', $module) }}"
+                                    class="table-row-btn module-btn-edit btn btn-primary btn-sm" title="Edit Module Info">
+                                    <i class="lni lni-pencil-alt align-middle"></i>
+                                </a>
+                                <form action="{{ route('modules.destroy', $module) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="table-row-btn module-btn-delete btn btn-danger btn-sm"
+                                        title="Delete Module"
+                                        onclick="return confirm('Are you sure you want to delete this module?')">
+                                        <i class="lni lni-trash-can align-middle"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#module-management-table').DataTable({
                 layout: {
                     topEnd: {
-                        search: {placeholder: 'Search'},
+                        search: {
+                            placeholder: 'Search'
+                        },
                         buttons: [
                             'length',
                             {
@@ -99,10 +115,21 @@
                     },
                 },
                 pageLength: -1,
-                columnDefs: [
-                    {"className": "dt-center", "targets": 0}
-                ],
-                columns: [{ width: '5%' }, { width: '15%',  }, { width: '50%' }, { width: '15%' }, { width: '15%' }],
+                columnDefs: [{
+                    "className": "dt-center",
+                    "targets": 0
+                }],
+                columns: [{
+                    width: '5%'
+                }, {
+                    width: '15%',
+                }, {
+                    width: '50%'
+                }, {
+                    width: '15%'
+                }, {
+                    width: '15%'
+                }],
                 language: {
                     "info": "Showing _START_ to _END_ of _TOTAL_ modules",
                     //customize pagination prev and next buttons: use arrows instead of words
@@ -113,13 +140,13 @@
                         'last': '<span class="fa-solid fa-forward-step"></span>'
                     },
                     //customize number of elements to be displayed
-                    "lengthMenu": '<select class="form-control input-sm">'+
-                        '<option value="-1">All</option>'+
-                        '<option value="10">10</option>'+
-                        '<option value="20">20</option>'+
-                        '<option value="30">30</option>'+
-                        '<option value="40">40</option>'+
-                        '<option value="50">50</option>'+
+                    "lengthMenu": '<select class="form-control input-sm">' +
+                        '<option value="-1">All</option>' +
+                        '<option value="10">10</option>' +
+                        '<option value="20">20</option>' +
+                        '<option value="30">30</option>' +
+                        '<option value="40">40</option>' +
+                        '<option value="50">50</option>' +
                         '</select> modules per page'
                 }
             });

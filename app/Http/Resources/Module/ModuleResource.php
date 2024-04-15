@@ -39,6 +39,7 @@ class ModuleResource extends JsonResource
 	{
 		return [
 			'id' => $this->id,
+			'module_code' => $this->module_code,
 			'module_name' => $this->module_name,
 			'created_at' => $this->created_at,
 			'updated_at' => $this->updated_at,

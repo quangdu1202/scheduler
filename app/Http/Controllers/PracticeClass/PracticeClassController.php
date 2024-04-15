@@ -33,10 +33,10 @@ class PracticeClassController extends Controller
     /**
      * @param PracticeClassServiceInterface $practiceClassService
      */
-    public function __construct(PracticeClassServiceInterface $practiceClassService,
-                                ModuleServiceInterface        $moduleService
-    )
-    {
+    public function __construct(
+        PracticeClassServiceInterface $practiceClassService,
+        ModuleServiceInterface        $moduleService
+    ) {
         $this->practiceClassService = $practiceClassService;
         $this->moduleService = $moduleService;
     }
@@ -69,36 +69,29 @@ class PracticeClassController extends Controller
     /**
      * @param Request $request
      *
-     * @return RedirectResponse
+     * @return
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $data = $request->all();
 
-//        $validatedData = $request->validate([
-//            'module' => 'required',
-//            'className' => 'required',
-//            'practiceRoom' => 'required',
-//            'startDate' => 'required',
-//            'session' => 'required',
-//            'recurring' => 'required',
-//            'teacher' => 'required',
-//        ]);
+        //        $validatedData = $request->validate([
+        //            'module' => 'required',
+        //            'className' => 'required',
+        //            'practiceRoom' => 'required',
+        //            'startDate' => 'required',
+        //            'session' => 'required',
+        //            'recurring' => 'required',
+        //            'teacher' => 'required',
+        //        ]);
 
-        $newClass = [
-            'practice_class_name' => $data['className'],
-            'schedule_date' => $data['startDate'],
-            'session' => $data['session'],
-            'module_id' => $data['module'],
-            'practice_room_id' => $data['practiceRoom'],
-            'teacher_id' => $data['teacher'],
-            'recurring_id' => $data['recurring'],
-            'registered_qty' => 'registerQty',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
+        $newPracticeClass = $this->practiceClassService->create($data);
 
-        return PracticeClassResource::make($this->practiceClassService->create($newClass), ResponseStatus::HTTP_CREATED);
+        if ($newPracticeClass) {
+            return redirect()->route('practice-classes.index');
+        }
+
+        // return PracticeClassResource::make($this->practiceClassService->create($data), ResponseStatus::HTTP_CREATED);
     }
 
     public function create()

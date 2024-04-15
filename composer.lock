@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0cba861f285935e9bef918e3d7a77aeb",
+    "content-hash": "b66918a78bb9b1b616bb91df0922722d",
     "packages": [
         {
             "name": "adobrovolsky97/laravel-repository-service-pattern",
@@ -9345,6 +9345,65 @@
                 }
             ],
             "time": "2024-03-03T12:36:25+00:00"
+        },
+        {
+            "name": "tyghaykal/laravel-seed-generator",
+            "version": "v2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tyghaykal/laravel-seeder-generator.git",
+                "reference": "8a81e0f4dbd25b7d812e23e3bd3e235370fae3f2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tyghaykal/laravel-seeder-generator/zipball/8a81e0f4dbd25b7d812e23e3bd3e235370fae3f2",
+                "reference": "8a81e0f4dbd25b7d812e23e3bd3e235370fae3f2",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "5.8.*|6.*|7.*|8.*|9.*|10.*|11.*",
+                "php": ">=7.3"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^3.0|^4.0|^5.0|^6.0|^7.0|^8.0|^9.0",
+                "phpunit/phpunit": "^11.0|^10.0|^9.0|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "TYGHaykal\\LaravelSeedGenerator\\SeedGeneratorServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "TYGHaykal\\LaravelSeedGenerator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andre Haykal Rachman",
+                    "email": "andrecsd9@gmail.com"
+                }
+            ],
+            "description": "Laravel Seed Generator",
+            "keywords": [
+                "artisan",
+                "generator",
+                "laravel",
+                "seed",
+                "seeders"
+            ],
+            "support": {
+                "issues": "https://github.com/tyghaykal/laravel-seeder-generator/issues",
+                "source": "https://github.com/tyghaykal/laravel-seeder-generator/tree/v2.0.2"
+            },
+            "time": "2024-03-22T07:03:43+00:00"
         }
     ],
     "aliases": [],

@@ -32,6 +32,7 @@ Route::get('mark-by-practice', [MarkController::class, 'markByPractice'])->name(
 
 Route::resource('practice-classes', PracticeClassController::class);
 Route::resource('modules', ModuleController::class);
+Route::get('modules/{id}/practice-classes', [ModuleController::class, 'showPracticeClasses'])->name('modules.show-practice-classes');
 
 //Auth::routes();
 //

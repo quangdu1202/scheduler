@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Class Module
  *
  * @property integer $id
+ * @property string $module_code
  * @property string $module_name
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -26,7 +27,7 @@ class Module extends BaseModel
     /**
      * @var array
      */
-    protected $fillable = ['module_name', 'created_at', 'updated_at'];
+    protected $fillable = ['module_code', 'module_name', 'created_at', 'updated_at'];
 
     /**
      * @return HasMany

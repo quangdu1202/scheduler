@@ -41,7 +41,12 @@ class ModuleController extends Controller
         $modules = $this->moduleService->getAll();
         return view('module.index', [
             'modules' => $modules,
-        ]);
+        ])->with(
+            [
+                'success' => null,
+                'message' => null
+            ]
+        );
     }
 
     /**
@@ -57,22 +62,56 @@ class ModuleController extends Controller
     /**
      * @param Request $request
      *
-     * @return ModuleResource
+     * @return
      */
-    public function store(Request $request): ModuleResource
+    public function store(Request $request)
     {
-        return ModuleResource::make($this->moduleService->create($request->all(), ResponseStatus::HTTP_CREATED));
+        $data = $request->all();
+
+        try {
+            $newModule = $this->moduleService->create($data);
+
+            return redirect()->route('modules.index');
+        } catch (Exception $e) {
+            $oldData = $data;
+
+            return view(
+                'module.create',
+                [
+                    'hasError' => true,
+                    'oldData' => $oldData
+                ]
+            );
+        }
     }
 
     /**
      * @param Module $module
      * @param Request $request
      *
-     * @return ModuleResource
+     * @return
      */
-    public function update(Module $module, Request $request): ModuleResource
+    public function update(Module $module, Request $request)
     {
-        return ModuleResource::make($this->moduleService->update($module, $request->all()));
+        $data = $request->all();
+
+        try {
+            $editedModule = $this->moduleService->update($module, $data);
+
+            return redirect()->route('modules.index');
+        } catch (Exception $e) {
+            $oldData = $data;
+
+            return view(
+                'module.create',
+                [
+                    'hasError' => true,
+                    'oldData' => $oldData
+                ]
+            );
+        }
+
+        // return ModuleResource::make($this->moduleService->update($module, $request->all()));
     }
 
     /**
@@ -89,13 +128,55 @@ class ModuleController extends Controller
     /**
      * @param Module $module
      *
-     * @return JsonResponse
+     * @return
      * @throws Exception
      */
-    public function destroy(Module $module): JsonResponse
+    public function destroy(Module $module)
     {
-        $this->moduleService->delete($module);
+        try {
+            $this->moduleService->delete($module);
 
-        return Response::json(null, ResponseStatus::HTTP_NO_CONTENT);
+            return redirect()->route('modules.index')->with(
+                [
+                    'success' => true,
+                    'message' => "Module deleted successfully!"
+                ]
+            );
+        } catch (Exception $e) {
+            return redirect()->route('modules.index')->with(
+                [
+                    'success' => false,
+                    'message' => "Failed to delete module, please try again later!"
+                ]
+            );
+        }
+
+        // return Response::json(null, ResponseStatus::HTTP_NO_CONTENT);
+    }
+
+    public function create()
+    {
+        return view(
+            'module.create',
+            [
+                'hasError' => false,
+                'oldData' => null
+            ]
+        );
+    }
+
+    public function showPracticeClasses(int $id)
+    {
+        $module = $this->moduleService->findOrFail($id);
+
+        $practiceClasses = $module->practiceClasses;
+
+        return view(
+            'module.practice-classes',
+            [
+                'module' => $module,
+                'practiceClasses' => $practiceClasses
+            ]
+        );
     }
 }
