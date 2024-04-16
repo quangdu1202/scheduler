@@ -8,20 +8,10 @@
             <h1 class="h2">Practice Class Management</h1>
         </div>
 
-{{--        @if ($success == true)--}}
-{{--            <div class="alert alert-success" role="alert">--}}
-{{--                {{ $message }}--}}
-{{--            </div>--}}
-{{--        @elseif ($success == false)--}}
-{{--            <div class="alert alert-danger" role="alert">--}}
-{{--                {{ $message }}--}}
-{{--            </div>--}}
-{{--        @endif--}}
-
         <div class="top-nav nav mb-3 d-flex align-items-center">
             <!-- Action Buttons (Add new, etc.) -->
             <div class="action-buttons">
-                <button href="{{ route('modules.create') }}" id="add-module-new" class="btn btn-primary btn-sm" type="button">
+                <button href="{{ route('modules.create') }}" id="add-module-form-toggle" class="btn btn-primary btn-sm" type="button">
                     <i class="lni lni-circle-plus align-middle"></i> Add new
                 </button>
             </div>
@@ -38,33 +28,37 @@
             </form>
         </div>
 
+        @php
+            if (isset($oldData)) {
+                dd($oldData);
+            }
+        @endphp
+
         <!-- Create form -->
-        <div id="new-module-form" class="new-form border border-primary">
-            <form action="{{ route('modules.store') }}" method="post" class="p-3">
+        <div id="new-module-form-wrapper" class="new-form border border-primary col-6">
+            <form id="new-module-form" class="p-3">
                 @csrf
                 <fieldset class="">
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" name="module_code" id="moduleCode"
-                                       value="{{ isset($oldData) ? $oldData['module_code'] : '' }}"
-                                       placeholder="Module Code" required>
+                                    value="{{ old('module_code') }}" placeholder="Module Code" required>
                                 <label for="moduleCode" class="form-label">Module Code</label>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-8">
                             <div class="form-floating mb-3">
                                 <input type="text" class="form-control" name="module_name" id="moduleName"
-                                       value="{{ isset($oldData) ? $oldData['module_name'] : '' }}"
-                                       placeholder="Module Name" required>
+                                    value="{{ old('module_code') }}" placeholder="Module Name" required>
                                 <label for="moduleName" class="form-label">Module Name</label>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-12">
-                            <button class="btn btn-sm btn-dark" type="submit">Create</button>
-                            <a href="{{ route('modules.index') }}" class="btn btn-sm btn-secondary">Cancel</a>
+                            <button class="btn btn-sm btn-dark" id="create-module-btn">Create</button>
+                            {{-- <a href="{{ route('modules.index') }}" class="btn btn-sm btn-secondary">Cancel</a> --}}
                         </div>
                     </div>
                 </fieldset>
@@ -83,46 +77,102 @@
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach ($modules as $key => $module)
-                        <tr data-pclass-id="{{ $module->id }}">
-                            <td class="text-center">{{ $key + 1 }}</td>
-                            <td class="text-start ps-3">{{ $module->module_code }}</td>
-                            <td class="text-start ps-3">{{ $module->module_name }}</td>
-                            <td class="text-center">{{ count($module->practiceClasses) }}</td>
-                            <td class="text-center">
-                                <a href="{{ route('modules.show-practice-classes', $module) }}"
-                                    class="table-row-btn module-btn-info btn btn-success btn-sm" title="Module Info">
-                                    <i class="fa-solid fa-magnifying-glass align-middle"></i>
-                                </a>
-                                <a href="{{ route('modules.edit', $module) }}"
-                                    class="table-row-btn module-btn-edit btn btn-primary btn-sm" title="Edit Module Info">
-                                    <i class="lni lni-pencil-alt align-middle"></i>
-                                </a>
-                                <form action="{{ route('modules.destroy', $module) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="table-row-btn module-btn-delete btn btn-danger btn-sm"
-                                        title="Delete Module"
-                                        onclick="return confirm('Are you sure you want to delete this module?')">
-                                        <i class="lni lni-trash-can align-middle"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
             </table>
         </div>
-    </div>
 
+        <!-- Edit modal -->
+        <div class="modal fade" id="edit-module-modal" tabindex="-1" aria-labelledby="edit-module-modal" bis_skin_checked="1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" bis_skin_checked="1">
+                <div class="modal-content" bis_skin_checked="1">
+                    <div class="modal-header" bis_skin_checked="1">
+                        <h1 class="modal-title fs-5" id="edit-modal-title">
+                            Edit module: <span id="edit-modal-module-name"></span>
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" bis_skin_checked="1">
+                        <form id="edit-module-form" class="p-3">
+                            @csrf
+                            @method('PUT')
+                            <fieldset class="">
+                                <input type="hidden" name="id" id="input-module-id">
+                                <div class="row">
+                                    <div class="col-4">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" name="module_code" id="editModuleCode" placeholder="Module Code" required>
+                                            <label for="editModuleCode" class="form-label">Module Code</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" name="module_name" id="editModuleName" placeholder="Module Name" required>
+                                            <label for="editModuleName" class="form-label">Module Name</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div class="modal-footer" bis_skin_checked="1">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" form="edit-module-form" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete modal -->
+        <div class="modal fade" id="delete-module-modal" tabindex="-1" aria-labelledby="edit-module-modal" bis_skin_checked="1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" bis_skin_checked="1">
+                <div class="modal-content" bis_skin_checked="1">
+                    <div class="modal-header" bis_skin_checked="1">
+                        <h1 class="modal-title fs-5" id="edit-modal-title">
+                            Delete module: <span id="delete-modal-module-name"></span>
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" bis_skin_checked="1">
+                        <form id="delete-module-form" class="p-3">
+                            @csrf
+                            <fieldset class="">
+                                <input type="hidden" name="id" id="input-module-id">
+                                <div class="row">
+                                    <p>Delete this module?</p>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div class="modal-footer" bis_skin_checked="1">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" form="delete-module-form" class="btn btn-primary">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         $(document).ready(function() {
-            $('#module-management-table').DataTable({
+            //Data table initiate
+            const moduleTable = $('#module-management-table').DataTable({
+                ajax: {
+                    url: '{{route('modules.get-json-data')}}',
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: 'index',  width: '5%'},
+                    { data: 'module_code', type: 'string', width: '15%' },
+                    { data: 'module_name', type: 'string', width: '50%' },
+                    { data: 'practice_class_qty', width: '15%' },
+                    { data: 'actions', type: 'html', width: '15%' },
+                ],
+                columnDefs: [{
+                    "className": "dt-center",
+                    "targets": [0, 4]
+                }],
                 layout: {
                     topEnd: {
                         search: {
-                            placeholder: 'Search'
+                            placeholder: 'Search anything'
                         },
                         buttons: [
                             'length',
@@ -148,21 +198,6 @@
                     },
                 },
                 pageLength: -1,
-                columnDefs: [{
-                    "className": "dt-center",
-                    "targets": 0
-                }],
-                columns: [{
-                    width: '5%'
-                }, {
-                    width: '15%',
-                }, {
-                    width: '50%'
-                }, {
-                    width: '15%'
-                }, {
-                    width: '15%'
-                }],
                 language: {
                     "info": "Showing _START_ to _END_ of _TOTAL_ modules",
                     //customize pagination prev and next buttons: use arrows instead of words
@@ -184,8 +219,129 @@
                 }
             });
 
-            $('#add-module-new').click(function () {
-                $('#new-module-form').slideToggle(400, 'linear');
+            // New module form
+            $('#add-module-form-toggle').click(function() {
+                $('#new-module-form-wrapper').slideToggle(400, 'linear');
+            });
+
+            const newModuleForm = $('#new-module-form');
+
+            newModuleForm.submit(function(event) {
+                event.preventDefault();
+
+                const formData = $(this).serialize();
+
+                $.ajax({
+                    url: "{{ route('modules.store') }}",
+                    type: "POST",
+                    data: formData,
+                    success: function(response) {
+                        console.log(response);
+                        switch (response.status) {
+                            case 200:
+                                toastr.success(response.message, response.title);
+                                newModuleForm.trigger('reset');
+                                moduleTable.ajax.reload();
+                                break;
+                            case 422:
+                                toastr.error(response.message, response.title);
+                                break;
+                            default:
+                                toastr.error("Unknown error occured", response.title);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
+
+            // Edit module modal
+            const editModuleModal = new bootstrap.Modal('#edit-module-modal')
+            const editModuleForm = $('#edit-module-form');
+            moduleTable.on('click', '.module-edit-btn', function () {
+                const data = moduleTable.row($(this).parents('tr')).data();
+                $('#edit-modal-module-name').text(data.module_name);
+                $('#input-module-id').val(data.DT_RowId);
+                $('#editModuleCode').val(data.module_code);
+                $('#editModuleName').val(data.module_name);
+                editModuleModal.show();
+            })
+
+            editModuleForm.submit(function (event) {
+                event.preventDefault();
+
+                const formData = $(this).serialize();
+
+                const moduleId = $('#input-module-id').val();
+                let updateURL = "{{ route('modules.update', ['module' => ':id'])}}";
+                updateURL = updateURL.replace(':id', moduleId);
+
+                $.ajax({
+                    url: updateURL,
+                    type: "POST",
+                    data: formData,
+                    success: function(response) {
+                        console.log(response);
+                        switch (response.status) {
+                            case 200:
+                                toastr.success(response.message, response.title);
+                                moduleTable.ajax.reload();
+                                editModuleModal.hide();
+                                break;
+                            case 422:
+                                toastr.error(response.message, response.title);
+                                break;
+                            default:
+                                toastr.error("Unknown error occured", response.title);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            })
+
+            // Delete module modal
+            const deleteModuleModal = new bootstrap.Modal('#delete-module-modal')
+            const deleteModuleForm = $('#delete-module-form');
+            moduleTable.on('click', '.module-delete-btn', function () {
+                const data = moduleTable.row($(this).parents('tr')).data();
+                $('#delete-modal-module-name').text(data.module_name);
+                $('#input-module-id').val(data.DT_RowId);
+                deleteModuleModal.show();
+            })
+
+            deleteModuleForm.submit(function (event) {
+                event.preventDefault();
+
+                const moduleId = $('#input-module-id').val();
+                let deleteURL = "{{ route('modules.destroy', ['module' => ':id'])}}";
+                deleteURL = deleteURL.replace(':id', moduleId);
+
+                $.ajax({
+                    url: deleteURL,
+                    type: "DELETE",
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    success: function(response) {
+                        console.log(response);
+                        switch (response.status) {
+                            case 200:
+                                toastr.success(response.message, response.title);
+                                moduleTable.ajax.reload();
+                                deleteModuleModal.hide();
+                                break;
+                            case 422:
+                                toastr.error(response.message, response.title);
+                                break;
+                            default:
+                                toastr.error("Unknown error occured", response.title);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
             })
         });
     </script>

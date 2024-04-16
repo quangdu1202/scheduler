@@ -8,6 +8,9 @@ use App\Services\Module\Contracts\ModuleServiceInterface;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Client\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
@@ -59,7 +62,7 @@ class ModuleController extends Controller
     /**
      * @param Request $request
      *
-     * @return
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
@@ -67,17 +70,17 @@ class ModuleController extends Controller
 
         try {
             $newModule = $this->moduleService->create($data);
-
-            toastr()->success('New module added successfully!');
-            return redirect()->route('modules.index');
+            return response()->json([
+                'status' => 200,
+                'title' => 'Success!',
+                'message' => 'New module created successfully!',
+            ]);
         } catch (Exception $e) {
-            $oldData = $data;
-            toastr()->error('Duplicate module code or unknown error occurred.');
-            return back()->with(
-                [
-                    'oldData' => $oldData
-                ]
-            );
+            return response()->json([
+                'status' => 422,
+                'title' => 'Error!',
+                'message' => 'Duplicate module code or unknown error occurred!',
+            ]);
         }
     }
 
@@ -96,7 +99,7 @@ class ModuleController extends Controller
      * @param Module $module
      * @param Request $request
      *
-     * @return
+     * @return JsonResponse
      */
     public function update(Module $module, Request $request)
     {
@@ -105,17 +108,18 @@ class ModuleController extends Controller
         try {
             $editedModule = $this->moduleService->update($module, $data);
 
-            return redirect()->route('modules.index');
+            return response()->json([
+                'status' => 200,
+                'title' => 'Success!',
+                'message' => 'Module updated successfully!',
+            ]);
         } catch (Exception $e) {
-            $oldData = $data;
 
-            return view(
-                'module.create',
-                [
-                    'hasError' => true,
-                    'oldData' => $oldData
-                ]
-            );
+            return response()->json([
+                'status' => 422,
+                'title' => 'Error!',
+                'message' => 'Duplicate module code or unknown error occurred!',
+            ]);
         }
 
         // return ModuleResource::make($this->moduleService->update($module, $request->all()));
@@ -135,8 +139,7 @@ class ModuleController extends Controller
     /**
      * @param Module $module
      *
-     * @return
-     * @throws Exception
+     * @return RedirectResponse
      */
     public function destroy(Module $module)
     {
@@ -161,6 +164,10 @@ class ModuleController extends Controller
         // return Response::json(null, ResponseStatus::HTTP_NO_CONTENT);
     }
 
+    /**
+     * @param int $id
+     * @return \Illuminate\Contracts\Foundation\Application|Factory|\Illuminate\Contracts\View\View|Application|View
+     */
     public function showPracticeClasses(int $id)
     {
         $module = $this->moduleService->findOrFail($id);
@@ -174,5 +181,38 @@ class ModuleController extends Controller
                 'practiceClasses' => $practiceClasses
             ]
         );
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function getJsonData()
+    {
+        $modules = $this->moduleService->getAll();
+//        <a href="'. route('modules.edit', $module) .'" class="table-row-btn module-btn-edit btn btn-primary btn-sm" title="Edit Module Info">
+//                            <i class="lni lni-pencil-alt align-middle"></i>
+//                        </a>
+        $responseData = $modules->map(function ($module, $index) {
+            $actions = '<a href="'. route('modules.show-practice-classes', $module) .'" class="table-row-btn module-btn-info btn btn-success btn-sm" title="Module Info">
+                            <i class="fa-solid fa-magnifying-glass align-middle"></i>
+                        </a>
+                        <button type="button" class="btn btn-primary btn-sm module-edit-btn">
+                          <i class="lni lni-pencil-alt align-middle"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm module-delete-btn">
+                          <i class="lni lni-trash-can align-middle"></i>
+                        </button>';
+            return [
+                'DT_RowId' => $module->id,
+                'DT_RowData' => $module,
+                'index' => $index + 1,
+                'module_code' => $module->module_code,
+                'module_name' => $module->module_name,
+                'practice_class_qty' => count($module->practiceClasses),
+                'actions' => $actions
+            ];
+        });
+
+        return response()->json($responseData);
     }
 }

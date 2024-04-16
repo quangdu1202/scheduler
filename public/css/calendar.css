@@ -248,9 +248,10 @@
     text-align: center !important;
 }
 
-table.dataTable thead>tr>th.dt-orderable-asc,
-table.dataTable thead>tr>th.dt-orderable-desc {
-    padding-right: 18px !important;
+table.dataTable td,
+table.dataTable th {
+    padding-right: 16px !important;
+    padding-left: 16px !important;
 }
 
 table.dataTable thead>tr>th.dt-orderable-asc span.dt-column-order,
