@@ -8,22 +8,22 @@
             <h1 class="h2">Practice Class Management</h1>
         </div>
 
-        @if ($success && $success == true)
-            <div class="alert alert-success" role="alert">
-                {{ $message }}
-            </div>
-        @elseif ($success && $success == false)
-            <div class="alert alert-danger" role="alert">
-                {{ $message }}
-            </div>
-        @endif
+{{--        @if ($success == true)--}}
+{{--            <div class="alert alert-success" role="alert">--}}
+{{--                {{ $message }}--}}
+{{--            </div>--}}
+{{--        @elseif ($success == false)--}}
+{{--            <div class="alert alert-danger" role="alert">--}}
+{{--                {{ $message }}--}}
+{{--            </div>--}}
+{{--        @endif--}}
 
         <div class="top-nav nav mb-3 d-flex align-items-center">
             <!-- Action Buttons (Add new, etc.) -->
             <div class="action-buttons">
-                <a href="{{ route('modules.create') }}" id="add-class-new" class="btn btn-primary btn-sm" type="button">
+                <button href="{{ route('modules.create') }}" id="add-module-new" class="btn btn-primary btn-sm" type="button">
                     <i class="lni lni-circle-plus align-middle"></i> Add new
-                </a>
+                </button>
             </div>
             <div class="vr mx-5"></div>
             <form id="practice-class-filter" action="#" class="d-flex align-items-center">
@@ -35,6 +35,39 @@
                     <option value="3">Cơ sở dữ liệu</option>
                     <option value="4">Kiến trúc máy tính</option>
                 </select>
+            </form>
+        </div>
+
+        <!-- Create form -->
+        <div id="new-module-form" class="new-form border border-primary">
+            <form action="{{ route('modules.store') }}" method="post" class="p-3">
+                @csrf
+                <fieldset class="">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" name="module_code" id="moduleCode"
+                                       value="{{ isset($oldData) ? $oldData['module_code'] : '' }}"
+                                       placeholder="Module Code" required>
+                                <label for="moduleCode" class="form-label">Module Code</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" name="module_name" id="moduleName"
+                                       value="{{ isset($oldData) ? $oldData['module_name'] : '' }}"
+                                       placeholder="Module Name" required>
+                                <label for="moduleName" class="form-label">Module Name</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button class="btn btn-sm btn-dark" type="submit">Create</button>
+                            <a href="{{ route('modules.index') }}" class="btn btn-sm btn-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </fieldset>
             </form>
         </div>
 
@@ -150,6 +183,10 @@
                         '</select> modules per page'
                 }
             });
+
+            $('#add-module-new').click(function () {
+                $('#new-module-form').slideToggle(400, 'linear');
+            })
         });
     </script>
 @endsection

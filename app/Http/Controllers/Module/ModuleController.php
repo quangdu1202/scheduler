@@ -8,12 +8,9 @@ use App\Services\Module\Contracts\ModuleServiceInterface;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Application;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Response;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\Response as ResponseStatus;
 
 /**
  * Class ModuleController
@@ -71,18 +68,28 @@ class ModuleController extends Controller
         try {
             $newModule = $this->moduleService->create($data);
 
+            toastr()->success('New module added successfully!');
             return redirect()->route('modules.index');
         } catch (Exception $e) {
             $oldData = $data;
-
-            return view(
-                'module.create',
+            toastr()->error('Duplicate module code or unknown error occurred.');
+            return back()->with(
                 [
-                    'hasError' => true,
                     'oldData' => $oldData
                 ]
             );
         }
+    }
+
+    public function create()
+    {
+        return view(
+            'module.create',
+            [
+                'hasError' => false,
+                'oldData' => null
+            ]
+        );
     }
 
     /**
@@ -152,17 +159,6 @@ class ModuleController extends Controller
         }
 
         // return Response::json(null, ResponseStatus::HTTP_NO_CONTENT);
-    }
-
-    public function create()
-    {
-        return view(
-            'module.create',
-            [
-                'hasError' => false,
-                'oldData' => null
-            ]
-        );
     }
 
     public function showPracticeClasses(int $id)

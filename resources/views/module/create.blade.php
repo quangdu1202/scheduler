@@ -39,7 +39,7 @@
                                     <div class="row">
                                         <div class="col-12">
                                             <div class="alert alert-danger" role="alert">
-                                                Module with the same code exists
+                                                Module with the same code exists or unknown error occurred
                                             </div>
                                         </div>
                                     </div>
