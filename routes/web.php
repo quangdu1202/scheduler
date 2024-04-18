@@ -29,7 +29,6 @@ Route::post('registerSchedule', [HomeController::class, 'registerSchedule']);
 
 Route::get('mark-by-module', [MarkController::class, 'markByModule'])->name('mark-by-module');
 Route::get('mark-by-practice', [MarkController::class, 'markByPractice'])->name('mark-by-practice');
-//Route::get('practice-class', [PracticeClassController::class, 'index'])->name('practice-class.index');
 
 Route::resource('practice-classes', PracticeClassController::class);
 

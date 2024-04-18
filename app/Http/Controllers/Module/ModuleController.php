@@ -122,7 +122,8 @@ class ModuleController extends Controller
                 'status' => 200,
                 'title' => 'Success!',
                 'message' => 'Module updated successfully!',
-                'reloadTarget' => '#module-management-table'
+                'reloadTarget' => '#module-management-table',
+                'hideTarget' => '#edit-module-modal'
             ]);
         } catch (Exception $e) {
             Log::error("Update failed: {$e->getMessage()}");
@@ -185,15 +186,25 @@ class ModuleController extends Controller
      */
     public function getJsonData()
     {
+//        <a href="' . route('modules.show-practice-classes', $module) . '" class="btn btn-success btn-sm" title="Practice Classes List">
+//                            <i class="lni lni-shift-right align-middle"></i>
+//                        </a>
         $modules = $this->moduleService->getAll();
         $responseData = $modules->map(function ($module, $index) {
-            $actions = '<a href="' . route('modules.show-practice-classes', $module) . '" class="table-row-btn module-btn-info btn btn-success btn-sm" title="Module Info">
-                            <i class="fa-solid fa-magnifying-glass align-middle"></i>
-                        </a>
-                        <button type="button" class="btn btn-primary btn-sm module-edit-btn">
+            $actions = '<div class="dropup d-inline-flex">
+                            <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="lni lni-angle-double-up align-middle"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="'. route('modules.show-practice-classes', $module) .'" class="btn btn-sm dropdown-item">Module Classes</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a href="'. route('modules.show-practice-classes', $module) .'" class="btn btn-sm dropdown-item">Practice Classes</a></li>
+                            </ul>
+                        </div>
+                        <button type="button" title="Edit module" class="btn btn-primary btn-sm module-edit-btn">
                             <i class="lni lni-pencil-alt align-middle"></i>
                         </button>
-                        <button type="button" class="btn btn-danger btn-sm module-delete-btn">
+                        <button type="button" title="Delete module" class="btn btn-danger btn-sm module-delete-btn">
                             <i class="lni lni-trash-can align-middle"></i>
                         </button>';
             return [

@@ -5,7 +5,7 @@
 
         <!-- Page Header -->
         <div class="py-3 mb-3 border-bottom">
-            <h1 class="h2">Practice Room Management</h1>
+            <h1 class="h2">Practice Rooms Management</h1>
         </div>
 
         <div class="top-nav nav mb-3 d-flex align-items-center">
@@ -40,27 +40,27 @@
                     <div class="row">
                         <div class="col-4">
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="module_code" id="moduleCode" placeholder="Module Code" required>
-                                <label for="moduleCode" class="form-label">Module Code</label>
+                                <input type="text" class="form-control" name="name" id="room-name" placeholder="Room Name" required>
+                                <label for="room-name" class="form-label">Room Name</label>
                             </div>
                         </div>
                         <div class="col-3">
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="module_name" id="moduleName" placeholder="Module Name" required>
-                                <label for="moduleName" class="form-label">Location</label>
+                                <input type="text" class="form-control" name="location" id="room-location" placeholder="Room Location" required>
+                                <label for="room-location" class="form-label">Room Location</label>
                             </div>
                         </div>
                         <div class="col-3">
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="module_name" id="moduleName" placeholder="Module Name" required>
-                                <label for="moduleName" class="form-label">PC Qty</label>
+                                <input type="text" class="form-control" name="pc_qty" id="room-pc-qty" placeholder="PC Qty" required>
+                                <label for="room-pc-qty" class="form-label">PC Qty</label>
                             </div>
                         </div>
                         <div class="col-2">
                             <div class="form-floating mb-3">
                                 <select name="status"
                                         id="room-status-select"
-                                        class="form-select"
+                                        class="form-select text-bg-success"
                                         onchange="this.className='form-select' + ' ' + this.options[this.selectedIndex].getAttribute('data-bg-color')"
                                         required>
                                     <option value="1" class="text-bg-light" data-bg-color="text-bg-success"><span class="badge text-bg-success">Available</span></option>
@@ -73,7 +73,7 @@
                     </div>
                     <div class="row">
                         <div class="col-12">
-                            <button type="submit" class="btn btn-sm btn-dark" id="create-module-btn">Create</button>
+                            <button type="submit" class="btn btn-sm btn-dark" id="create-room-btn">Create</button>
                         </div>
                     </div>
                 </fieldset>
@@ -82,12 +82,12 @@
 
         <!-- Practice Room Table -->
         <div class="table-responsive">
-            <table id="practice-room-management-table" class="table table-bordered table-hover w-100">
+            <table id="room-management-table" class="table table-bordered table-hover w-100">
                 <thead class="thead-light">
                     <tr>
                         <th class="text-center">#</th>
                         <th class="text-start ps-3">Room Name</th>
-                        <th class="text-start ps-3">Location</th>
+                        <th class="text-center ps-3">Location</th>
                         <th class="text-center">PC Qty</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Action</th>
@@ -97,17 +97,17 @@
         </div>
 
         <!-- Edit modal -->
-        <div class="modal fade" id="edit-module-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal fade" id="edit-room-modal" tabindex="-1" style="display: none;" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="edit-modal-title">
-                            Edit module: <span id="edit-modal-module-name"></span>
+                            Edit Room:
                         </h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="edit-module-form"
+                        <form id="edit-room-form"
                               class="p-3"
                               data-action=""
                               data-action-type="update"
@@ -116,16 +116,40 @@
                             @method('PUT')
                             <fieldset class="">
                                 <div class="row">
-                                    <div class="col-4">
+                                    <div class="col-12">
                                         <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" name="module_code" id="editModuleCode" placeholder="Module Code" required>
-                                            <label for="editModuleCode" class="form-label">Module Code</label>
+                                            <input type="text" class="form-control" name="name" id="edit-room-name" placeholder="Room Name" required>
+                                            <label for="edit-room-name" class="form-label">Room Name</label>
                                         </div>
                                     </div>
-                                    <div class="col-8">
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
                                         <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" name="module_name" id="editModuleName" placeholder="Module Name" required>
-                                            <label for="editModuleName" class="form-label">Module Name</label>
+                                            <input type="text" class="form-control" name="location" id="edit-room-location" placeholder="Room Location" required>
+                                            <label for="edit-room-location" class="form-label">Room Location</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" name="pc_qty" id="edit-room-pc-qty" placeholder="PC Qty" required>
+                                            <label for="edit-room-pc-qty" class="form-label">PC Qty</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-floating mb-3">
+                                            <select name="status"
+                                                    id="edit-room-status"
+                                                    class="form-select"
+                                                    onchange="this.className='form-select' + ' ' + this.options[this.selectedIndex].getAttribute('data-bg-color')"
+                                                    required>
+                                                <option value="1" class="text-bg-light" data-bg-color="text-bg-success"><span class="badge text-bg-success">Available</span></option>
+                                                <option value="2" class="text-bg-light" data-bg-color="text-bg-warning"><span class="badge text-bg-warning">In use</span></option>
+                                                <option value="3" class="text-bg-light" data-bg-color="text-bg-secondary"><span class="badge text-bg-secondary">Not available</span></option>
+                                            </select>
+                                            <label for="edit-room-status" class="form-label">Status</label>
                                         </div>
                                     </div>
                                 </div>
@@ -134,24 +158,24 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" form="edit-module-form" class="btn btn-primary">Save changes</button>
+                        <button type="submit" form="edit-room-form" class="btn btn-primary">Save changes</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Delete modal -->
-        <div class="modal fade" id="delete-module-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal fade" id="delete-room-modal" tabindex="-1" style="display: none;" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="edit-modal-title">
-                            Delete module: <span id="delete-modal-module-name"></span>
+                            Delete room: <span id="delete-modal-room-name"></span>
                         </h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="delete-module-form"
+                        <form id="delete-room-form"
                               class="p-3"
                               data-action=""
                               data-action-type="delete"
@@ -160,14 +184,14 @@
                             <fieldset class="">
                                 <input type="hidden" name="_method" value="delete">
                                 <div class="row">
-                                    <p>Delete this module?</p>
+                                    <p>Delete this practice room?</p>
                                 </div>
                             </fieldset>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" form="delete-module-form" class="btn btn-primary">Delete</button>
+                        <button type="submit" form="delete-room-form" class="btn btn-primary">Delete</button>
                     </div>
                 </div>
             </div>
@@ -176,7 +200,7 @@
     <script>
         $(document).ready(function() {
             //Data table initiate
-            const moduleTable = $('#practice-room-management-table').DataTable({
+            const roomTable = $('#room-management-table').DataTable({
                 ajax: {
                     url: '{{route('practice-rooms.get-json-data')}}',
                     dataSrc: ''
@@ -186,12 +210,12 @@
                     { data: 'name', type: 'string', width: '30%' },
                     { data: 'location', type: 'string', width: '20%' },
                     { data: 'pc_qty', width: '15%' },
-                    { data: 'status', width: '15%' },
+                    { data: 'status', type: 'html', width: '15%' },
                     { data: 'actions', type: 'html', width: '15%' },
                 ],
                 columnDefs: [{
                     "className": "dt-center",
-                    "targets": [0, 4]
+                    "targets": [0, 2, 3, 4, 5]
                 }],
                 layout: {
                     topEnd: {
@@ -203,19 +227,19 @@
                             {
                                 extend: 'csv',
                                 exportOptions: {
-                                    columns: [0, 1, 2, 3]
+                                    columns: [0, 1, 2, 3, 4]
                                 }
                             },
                             {
                                 extend: 'excel',
                                 exportOptions: {
-                                    columns: [0, 1, 2, 3]
+                                    columns: [0, 1, 2, 3, 4]
                                 }
                             },
                             {
                                 extend: 'print',
                                 exportOptions: {
-                                    columns: [0, 1, 2, 3]
+                                    columns: [0, 1, 2, 3, 4]
                                 }
                             }
                         ]
@@ -223,7 +247,7 @@
                 },
                 pageLength: -1,
                 language: {
-                    "info": "Showing _START_ to _END_ of _TOTAL_ modules",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ rooms",
                     //customize pagination prev and next buttons: use arrows instead of words
                     'paginate': {
                         'first': '<span class="fa-solid fa-backward-step"></span>',
@@ -239,7 +263,7 @@
                         '<option value="30">30</option>' +
                         '<option value="40">40</option>' +
                         '<option value="50">50</option>' +
-                        '</select> modules per page'
+                        '</select> rooms per page'
                 }
             });
 
@@ -247,6 +271,47 @@
             $('#add-room-form-toggle').click(function() {
                 $('#new-room-form-wrapper').slideToggle(400, 'linear');
             });
+
+            const newRoomForm = $('#new-room-form');
+            setupAjaxForm(newRoomForm);
+            //
+
+            // Edit room modal
+            const editRoomModal = new bootstrap.Modal('#edit-room-modal')
+            const editRoomForm = $('#edit-room-form');
+            const roomStatusSelect = $('#edit-room-status');
+            roomTable.on('click', '.room-edit-btn', function () {
+                const data = roomTable.row($(this).parents('tr')).data();
+                $('#edit-room-name').val(data.name);
+                $('#edit-room-location').val(data.location);
+                $('#edit-room-pc-qty').val(data.pc_qty);
+                roomStatusSelect.val(data.raw_status);
+                roomStatusSelect.removeClass().addClass('form-select').addClass(roomStatusSelect.find('option:selected').data('bg-color'));
+
+                let updateURL = "{{ route('practice-rooms.update', ['practice_room' => ':id'])}}";
+                updateURL = updateURL.replace(':id', data.DT_RowId);
+                editRoomForm.data('action', updateURL);
+
+                editRoomModal.show();
+            });
+            setupAjaxForm(editRoomForm);
+            //
+
+            // Delete room modal
+            const deleteRoomModal = new bootstrap.Modal('#delete-room-modal')
+            const deleteRoomForm = $('#delete-room-form');
+            roomTable.on('click', '.room-delete-btn', function () {
+                const data = roomTable.row($(this).parents('tr')).data();
+                $('#delete-modal-room-name').text(data.name);
+
+                let deleteURL = "{{ route('practice-rooms.destroy', ['practice_room' => ':id'])}}";
+                deleteURL = deleteURL.replace(':id', data.DT_RowId);
+                deleteRoomForm.data('action', deleteURL);
+
+                deleteRoomModal.show();
+            });
+            setupAjaxForm(deleteRoomForm);
+            //
         });
     </script>
 @endsection

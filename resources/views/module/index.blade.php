@@ -5,7 +5,7 @@
 
         <!-- Page Header -->
         <div class="py-3 mb-3 border-bottom">
-            <h1 class="h2">Module Management</h1>
+            <h1 class="h2">Modules Management</h1>
         </div>
 
         <div class="top-nav nav mb-3 d-flex align-items-center">
