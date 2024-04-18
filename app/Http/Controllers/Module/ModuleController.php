@@ -8,11 +8,11 @@ use App\Services\Module\Contracts\ModuleServiceInterface;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Application;
-use Illuminate\Http\Client\Response;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 /**
@@ -39,14 +39,10 @@ class ModuleController extends Controller
     public function index(): \Illuminate\Contracts\Foundation\Application|Factory|\Illuminate\Contracts\View\View|Application|View
     {
         $modules = $this->moduleService->getAll();
+
         return view('module.index', [
             'modules' => $modules,
-        ])->with(
-            [
-                'success' => null,
-                'message' => null
-            ]
-        );
+        ]);
     }
 
     /**
@@ -61,107 +57,108 @@ class ModuleController extends Controller
 
     /**
      * @param Request $request
-     *
      * @return JsonResponse
      */
     public function store(Request $request)
     {
-        $data = $request->all();
+        $validator = Validator::make($request->all(), [
+            'module_code' => 'required|unique:modules,module_code', // Assuming 'modules' is your table and 'module_code' is a field
+            'module_name' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 422,
+                'title' => 'Validation Error',
+                'message' => $validator->errors()->first() // Sends back the first validation error
+            ]);
+        }
 
         try {
-            $newModule = $this->moduleService->create($data);
+            $newModule = $this->moduleService->create($request->all());
             return response()->json([
                 'status' => 200,
                 'title' => 'Success!',
-                'message' => 'New module created successfully!',
+                'message' => 'Module created successfully!',
+                'reloadTarget' => '#module-management-table',
+                'resetTarget' => '#new-module-form'
             ]);
         } catch (Exception $e) {
+            // Log the exception for internal review
+            Log::error("Module creation failed: {$e->getMessage()}");
+
+            // Return a generic error message to the client
             return response()->json([
-                'status' => 422,
+                'status' => 500,
                 'title' => 'Error!',
-                'message' => 'Duplicate module code or unknown error occurred!',
+                'message' => 'An error occurred while creating the module. Please try again.'
             ]);
         }
-    }
-
-    public function create()
-    {
-        return view(
-            'module.create',
-            [
-                'hasError' => false,
-                'oldData' => null
-            ]
-        );
     }
 
     /**
      * @param Module $module
      * @param Request $request
-     *
      * @return JsonResponse
      */
     public function update(Module $module, Request $request)
     {
-        $data = $request->all();
+        $validator = Validator::make($request->all(), [
+            'module_code' => 'required|unique:modules,module_code,' . $module->id,
+            'module_name' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 422,
+                'title' => 'Validation Error',
+                'message' => $validator->errors()->first() // Sends back the first validation error
+            ]);
+        }
 
         try {
-            $editedModule = $this->moduleService->update($module, $data);
-
+            $editedModule = $this->moduleService->update($module, $request->all());
             return response()->json([
                 'status' => 200,
                 'title' => 'Success!',
                 'message' => 'Module updated successfully!',
+                'reloadTarget' => '#module-management-table'
             ]);
         } catch (Exception $e) {
-
+            Log::error("Update failed: {$e->getMessage()}");
             return response()->json([
-                'status' => 422,
+                'status' => 500,
                 'title' => 'Error!',
-                'message' => 'Duplicate module code or unknown error occurred!',
+                'message' => 'An internal error occurred. Please try again.',
             ]);
         }
-
-        // return ModuleResource::make($this->moduleService->update($module, $request->all()));
     }
 
-    /**
-     * @param Module $module
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\View|Application|Factory|View
-     */
-    public function edit(Module $module): \Illuminate\Contracts\Foundation\Application|Factory|\Illuminate\Contracts\View\View|Application|View
-    {
-        return view('module.edit', [
-            'module' => $module,
-        ]);
-    }
 
     /**
      * @param Module $module
      *
-     * @return RedirectResponse
+     * @return JsonResponse
      */
     public function destroy(Module $module)
     {
         try {
             $this->moduleService->delete($module);
-
-            return redirect()->route('modules.index')->with(
-                [
-                    'success' => true,
-                    'message' => "Module deleted successfully!"
-                ]
-            );
+            return response()->json([
+                'status' => 200,
+                'title' => 'Success!',
+                'message' => 'Module deleted successfully!',
+                'reloadTarget' => '#module-management-table',
+                'hideTarget' => '#delete-module-modal'
+            ]);
         } catch (Exception $e) {
-            return redirect()->route('modules.index')->with(
-                [
-                    'success' => false,
-                    'message' => "Failed to delete module, please try again later!"
-                ]
-            );
+            Log::error("Failed to delete module: {$e->getMessage()}");
+            return response()->json([
+                'status' => 500,
+                'title' => 'Error!',
+                'message' => 'Unknown error occurred, try again later!',
+            ]);
         }
-
-        // return Response::json(null, ResponseStatus::HTTP_NO_CONTENT);
     }
 
     /**
@@ -189,18 +186,15 @@ class ModuleController extends Controller
     public function getJsonData()
     {
         $modules = $this->moduleService->getAll();
-//        <a href="'. route('modules.edit', $module) .'" class="table-row-btn module-btn-edit btn btn-primary btn-sm" title="Edit Module Info">
-//                            <i class="lni lni-pencil-alt align-middle"></i>
-//                        </a>
         $responseData = $modules->map(function ($module, $index) {
-            $actions = '<a href="'. route('modules.show-practice-classes', $module) .'" class="table-row-btn module-btn-info btn btn-success btn-sm" title="Module Info">
+            $actions = '<a href="' . route('modules.show-practice-classes', $module) . '" class="table-row-btn module-btn-info btn btn-success btn-sm" title="Module Info">
                             <i class="fa-solid fa-magnifying-glass align-middle"></i>
                         </a>
                         <button type="button" class="btn btn-primary btn-sm module-edit-btn">
-                          <i class="lni lni-pencil-alt align-middle"></i>
+                            <i class="lni lni-pencil-alt align-middle"></i>
                         </button>
                         <button type="button" class="btn btn-danger btn-sm module-delete-btn">
-                          <i class="lni lni-trash-can align-middle"></i>
+                            <i class="lni lni-trash-can align-middle"></i>
                         </button>';
             return [
                 'DT_RowId' => $module->id,

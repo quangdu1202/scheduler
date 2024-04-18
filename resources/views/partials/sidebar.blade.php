@@ -14,7 +14,13 @@
         </a>
     </li>
     <li class="sidebar-item">
-        <a href="{{route('rooms')}}" class="sidebar-link">
+        <a href="{{route('modules.index')}}" class="sidebar-link">
+            <i class="lni lni-book"></i>
+            <span>Modules</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="{{route('practice-rooms.index')}}" class="sidebar-link">
             <i class="lni lni-apartment"></i>
             <span>Rooms Management</span>
         </a>
@@ -33,12 +39,6 @@
                 <a href="{{route('mark-by-practice')}}" class="sidebar-link">By practice class</a>
             </li>
         </ul>
-    </li>
-    <li class="sidebar-item">
-        <a href="{{route('modules.index')}}" class="sidebar-link">
-            <i class="lni lni-book"></i>
-            <span>Practice Classes</span>
-        </a>
     </li>
     <li class="sidebar-item">
         <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"

@@ -52,7 +52,7 @@
     </div>
 
     <script type="text/javascript" src="{{ asset('/js/script.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('/js/rooms.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('/js/form-utils.js') }}"></script>
     <script type="text/javascript" src="{{ asset('/js/pdfmake.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('/js/vfs_fonts.js') }}"></script>
 
@@ -60,8 +60,6 @@
     <script type="text/javascript" src="{{ asset('/js/datatables.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-
-
             toastr.options = {
                 "closeButton": false,
                 "debug": false,

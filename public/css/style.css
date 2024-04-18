@@ -144,6 +144,6 @@ a.sidebar-link:hover {
     transition: all .2s ease-out;
 }
 
-#new-module-form-wrapper {
+.new-form-hidden {
     display: none;
 }

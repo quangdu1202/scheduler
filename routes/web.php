@@ -4,6 +4,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MarkController;
 use App\Http\Controllers\Module\ModuleController;
 use App\Http\Controllers\PracticeClass\PracticeClassController;
+use App\Http\Controllers\PracticeRoom\PracticeRoomController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,9 +32,13 @@ Route::get('mark-by-practice', [MarkController::class, 'markByPractice'])->name(
 //Route::get('practice-class', [PracticeClassController::class, 'index'])->name('practice-class.index');
 
 Route::resource('practice-classes', PracticeClassController::class);
+
 Route::resource('modules', ModuleController::class);
 Route::get('modules/{id}/practice-classes', [ModuleController::class, 'showPracticeClasses'])->name('modules.show-practice-classes');
 Route::get('/getModulesJsonData', [ModuleController::class, 'getJsonData'])->name('modules.get-json-data');
+
+Route::resource('practice-rooms', PracticeRoomController::class);
+Route::get('/getPracticeRoomsJsonData', [PracticeRoomController::class, 'getJsonData'])->name('practice-rooms.get-json-data');
 
 //Auth::routes();
 //
