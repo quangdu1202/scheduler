@@ -2,12 +2,12 @@
 
 namespace App\Models\PracticeClass;
 
+use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
 use App\Models\Module\Module;
 use App\Models\PracticeRoom\PracticeRoom;
 use App\Models\Registration\Registration;
 use App\Models\Teacher\Teacher;
 use Carbon\Carbon;
-use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property integer $practice_room_id
  * @property integer $teacher_id
  * @property integer $recurring_id
+ * @property integer $recurring_interval
+ * @property integer $recurring_order
  * @property integer $registered_qty
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -36,20 +38,22 @@ class PracticeClass extends BaseModel
     use HasFactory;
 
     /**
-	 * @var array
-	 */
-	protected $fillable = [
-		'practice_class_name',
-		'schedule_date',
-		'session',
-		'module_id',
-		'practice_room_id',
-		'teacher_id',
-		'recurring_id',
-		'registered_qty',
-		'created_at',
-		'updated_at'
-	];
+     * @var array
+     */
+    protected $fillable = [
+        'practice_class_name',
+        'schedule_date',
+        'session',
+        'module_id',
+        'practice_room_id',
+        'teacher_id',
+        'recurring_order',
+        'recurring_id',
+        'recurring_interval',
+        'registered_qty',
+        'created_at',
+        'updated_at'
+    ];
 
     /**
      * @return BelongsTo

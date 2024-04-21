@@ -22,7 +22,9 @@ return new class extends Migration
             $table->foreignIdFor(Module::class);
             $table->foreignIdFor(PracticeRoom::class);
             $table->foreignIdFor(Teacher::class)->nullable();
-            $table->integer('recurring_id')->nullable();
+            $table->string('recurring_id');
+            $table->integer('recurring_interval')->default(0);
+            $table->integer('recurring_order')->default(1);
             $table->integer('registered_qty')->default(0);
             $table->timestamps();
         });

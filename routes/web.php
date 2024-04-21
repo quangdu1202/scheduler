@@ -39,6 +39,9 @@ Route::get('/getModulesJsonData', [ModuleController::class, 'getJsonData'])->nam
 Route::resource('practice-rooms', PracticeRoomController::class);
 Route::get('/getPracticeRoomsJsonData', [PracticeRoomController::class, 'getJsonData'])->name('practice-rooms.get-json-data');
 
+Route::resource('practice-classes', PracticeClassController::class);
+Route::get('/getPracticeClassesJsonData', [PracticeClassController::class, 'getJsonData'])->name('practice-classes.get-json-data');
+
 //Auth::routes();
 //
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
