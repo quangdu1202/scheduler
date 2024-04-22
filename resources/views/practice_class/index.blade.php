@@ -67,12 +67,6 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-1">
-                            <div class="form-floating mb-3">
-                                <input name="pclass_qty" id="pclass-qty" class="form-control" type="number" min="1">
-                                <label for="pclass-qty" class="form-label">Multiple</label>
-                            </div>
-                        </div>
                         <div class="col-3">
                             <div class="form-floating mb-3">
                                 <select name="practice_room_id" id="roomSelect" class="form-select" required>
@@ -148,7 +142,7 @@
                 <tr>
                     <th>#</th>
                     <th>Class Name</th>
-                    <th>Schedule Date</th>
+                    <th>Start Date</th>
                     <th>Session</th>
                     <th>Room</th>
                     <th>Teacher</th>
@@ -162,12 +156,44 @@
             </table>
         </div>
 
+        <!-- All schedules Info modal -->
+        <div class="modal fade" id="all-schedule-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="edit-modal-title">
+                            All schedules for:
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table id="pclass-all-schedule-table" class="table table-bordered table-hover w-100">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Schedule Date</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         $(document).ready(function () {
             //Data table initiate
-            const roomTable = $('#pclass-management-table').DataTable({
+            const pclassTable = $('#pclass-management-table').DataTable({
                 ajax: {
                     url: '{{route('practice-classes.get-json-data')}}',
                     dataSrc: ''
@@ -271,6 +297,63 @@
 
             const newPracticeClassForm = $('#new-pclass-form');
             setupAjaxForm(newPracticeClassForm);
+
+            const infoModal = new bootstrap.Modal('#all-schedule-modal');
+            const pClassAllScheduleTable = $('#pclass-all-schedule-table');
+
+            pclassTable.on('click', '.schedule-info-btn', function () {
+                if ($.fn.DataTable.isDataTable(pClassAllScheduleTable)) {
+                    pClassAllScheduleTable.DataTable().destroy();
+                }
+                pClassAllScheduleTable.DataTable({
+                    ajax: {
+                        url: $(this).data('get-url'),
+                        dataSrc: ''
+                    },
+                    columns: [
+                        {data: 'index', width: '5%'},
+                        {data: 'schedule_date', type: 'string', width: '15%'},
+                        {data: 'actions', type: 'html', width: '10%'},
+                    ],
+                    columnDefs: [{
+                        "className": "dt-center",
+                        "targets": "_all"
+                    }],
+                    layout: {
+                        topStart: {
+                            search: {
+                                placeholder: 'Search anything'
+                            }
+                        },
+                        topEnd: {
+                            buttons: [
+                                'length',
+                                {
+                                    extend: 'csv',
+                                    exportOptions: {
+                                        columns: [0, 1, 2]
+                                    }
+                                },
+                                {
+                                    extend: 'excel',
+                                    exportOptions: {
+                                        columns: [0, 1, 2]
+                                    }
+                                },
+                                {
+                                    extend: 'print',
+                                    exportOptions: {
+                                        columns: [0, 1, 2]
+                                    }
+                                }
+                            ]
+                        },
+                        bottomStart: {},
+                        bottomEnd: {}
+                    }
+                });
+                infoModal.show();
+            });
         })
     </script>
 @endsection

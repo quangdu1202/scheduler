@@ -111,8 +111,18 @@ class PracticeClassController extends Controller
             $data['recurring_id'] = $this->helper->uniqidReal();
 
             switch ($data['recurring_interval']) {
+                // Case for recurring_interval = 0 (Once)
                 case 0:
-                    // Case for recurring_interval = 0 (Once)
+
+                    // Duplicate schedule
+                    if (!$this->isValidToSave($data)) {
+                        return response()->json([
+                            'status' => 422,
+                            'title' => 'Duplicate Schedule',
+                            'message' => 'Duplicate schedule on ' . $data['schedule_date']
+                        ]);
+                    }
+
                     // Create a single practice class
                     $newPracticeClass = $this->practiceClassService->create($data);
 
@@ -123,17 +133,39 @@ class PracticeClassController extends Controller
                         'reloadTarget' => '#pclass-management-table',
                         'resetTarget' => '#new-pclass-form'
                     ]);
+
+                // Cases for recurring_interval = 604800 (Weekly) or 1209600 (Biweekly)
                 case 604800:
                 case 1209600:
-                    // Cases for recurring_interval = 604800 (Weekly) or 1209600 (Biweekly)
-                    // Create multiple practice classes based on repeat_limit
                     $limitCount = $data['repeat_limit'];
                     $recurringInterval = $data['recurring_interval'];
 
+                    // Track created practice classes
+                    $createdPracticeClasses = [];
+
+                    // Create multiple practice classes based on repeat_limit
                     for ($i = 0; $i < $limitCount; $i++) {
                         $data['recurring_order'] = $i + 1;
+
+                        // Duplicate schedule
+                        if (!$this->isValidToSave($data)) {
+                            // Remove the already created practice classes
+                            foreach ($createdPracticeClasses as $practiceClass) {
+                                $this->practiceClassService->delete($practiceClass->id);
+                            }
+
+                            return response()->json([
+                                'status' => 422,
+                                'title' => 'Error',
+                                'message' => 'Duplicate schedule on ' . $data['schedule_date']
+                            ]);
+                        }
+
                         $newPracticeClass = $this->practiceClassService->create($data);
-                        $data['schedule_date'] = date('Y-m-d',strtotime($data['schedule_date'] . "+$recurringInterval seconds"));
+                        // Track the created practice class
+                        $createdPracticeClasses[] = $newPracticeClass;
+                        // Set Schedule date for next schedule
+                        $data['schedule_date'] = date('Y-m-d', strtotime($data['schedule_date'] . "+$recurringInterval seconds"));
                     }
 
                     return response()->json([
@@ -143,6 +175,7 @@ class PracticeClassController extends Controller
                         'reloadTarget' => '#pclass-management-table',
                         'resetTarget' => '#new-pclass-form'
                     ]);
+
                 default:
                     return response()->json([
                         'status' => 422,
@@ -201,9 +234,9 @@ class PracticeClassController extends Controller
      */
     public function getJsonData()
     {
-        $practiceClass = $this->practiceClassService->getAll();
+        $practiceClasses = $this->practiceClassService->getAll(['recurring_order' => 1]);
 
-        $responseData = $practiceClass->map(function ($pclass, $index) {
+        $responseData = $practiceClasses->map(function ($pclass, $index) {
             $session = match ($pclass->session) {
                 1 => '<span class="badge rounded-pill text-bg-success">S</span>',
                 2 => '<span class="badge rounded-pill text-bg-primary">C</span>',
@@ -224,13 +257,13 @@ class PracticeClassController extends Controller
                             </button>
                             <div class="dropdown-menu">
                                 <div class="d-flex gap-3 justify-content-center">
-                                    <button type="button" class="btn btn-success btn-sm">
+                                    <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="'.route('practice-classes.get-json-data-for-schedule', ['recurring_id' => $pclass->recurring_id]).'">
                                         <i class="fa-solid fa-magnifying-glass align-middle"></i>
                                     </button>
-                                    <button type="button" class="btn btn-primary btn-sm room-edit-btn">
+                                    <button type="button" class="btn btn-primary btn-sm schedule-edit-btn">
                                         <i class="lni lni-pencil-alt align-middle"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm room-delete-btn">
+                                    <button type="button" class="btn btn-danger btn-sm schedule-delete-btn">
                                         <i class="lni lni-trash-can align-middle"></i>
                                     </button>
                                 </div>
@@ -252,6 +285,52 @@ class PracticeClassController extends Controller
                 'recurring_interval' => $recurring_interval,
                 'recurring_order' => $pclass->recurring_order,
                 'registered_qty' => $pclass->registered_qty,
+                'actions' => $actions
+            ];
+        });
+
+        return response()->json($responseData);
+    }
+
+    protected function isValidToSave($data)
+    {
+        $module_id = $data['module_id'];
+        $schedule_date = $data['schedule_date'];
+        $session = $data['session'];
+        $practice_room_id = $data['practice_room_id'];
+
+        $filteredByModule = $this->practiceClassService->getAll(['module_id' => $module_id]);
+
+        $filterByDate = $filteredByModule->where('schedule_date', $schedule_date);
+
+        $filterBySession = $filterByDate->where('session', $session);
+
+        $filterByRoom = $filterBySession->where('practice_room_id', $practice_room_id);
+
+        if ($filterByRoom->count() > 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getJsonDataForSchedule(Request $request)
+    {
+        $recurringId = $request->input('recurring_id');
+        $practiceClasses = $this->practiceClassService->getAll(['recurring_id' => $recurringId]);
+
+        $responseData = $practiceClasses->map(function ($pclass, $index) {
+            $actions = '<button type="button" class="btn btn-primary btn-sm room-edit-btn">
+                            <i class="lni lni-pencil-alt align-middle"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm room-delete-btn">
+                            <i class="lni lni-trash-can align-middle"></i>
+                        </button>';
+            return [
+                'DT_RowId' => $pclass->id,
+                'DT_RowData' => $pclass,
+                'index' => $pclass->recurring_order,
+                'schedule_date' => $pclass->schedule_date,
                 'actions' => $actions
             ];
         });

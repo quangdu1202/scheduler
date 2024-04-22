@@ -277,7 +277,7 @@
             //
 
             // Edit room modal
-            const editRoomModal = new bootstrap.Modal('#edit-room-modal')
+            const editRoomModal = new bootstrap.Modal('#edit-room-modal');
             const editRoomForm = $('#edit-room-form');
             const roomStatusSelect = $('#edit-room-status');
             roomTable.on('click', '.room-edit-btn', function () {

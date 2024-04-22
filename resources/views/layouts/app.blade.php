@@ -64,6 +64,7 @@
     <script>
         $(document).ready(function() {
             toastr.options = {
+                "enableHtml": true,
                 "closeButton": false,
                 "debug": false,
                 "positionClass": "toast-bottom-right",
