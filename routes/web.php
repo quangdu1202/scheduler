@@ -41,7 +41,8 @@ Route::get('/getPracticeRoomsJsonData', [PracticeRoomController::class, 'getJson
 
 Route::resource('practice-classes', PracticeClassController::class);
 Route::get('/getPracticeClassesJsonData', [PracticeClassController::class, 'getJsonData'])->name('practice-classes.get-json-data');
-Route::get('/getPracticeClassesScheduleJsonData', [PracticeClassController::class, 'getJsonDataForSchedule'])->name('practice-classes.get-json-data-for-schedule');
+Route::get('/getJsonDataForSchedule', [PracticeClassController::class, 'getJsonDataForSchedule'])->name('practice-classes.get-json-data-for-schedule');
+Route::get('/getJsonDataForStudentsOfPracticeClass', [PracticeClassController::class, 'getJsonDataForStudentsOfPracticeClass'])->name('practice-classes.get-student-data-for-schedule');
 
 //Auth::routes();
 //

@@ -1,157 +1,156 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container h-100 right-content">
+    <!-- Page Header -->
+    <div class="py-3 mb-3 border-bottom">
+        <h1 class="h2">Modules Management</h1>
+    </div>
 
-        <!-- Page Header -->
-        <div class="py-3 mb-3 border-bottom">
-            <h1 class="h2">Modules Management</h1>
+    <div class="top-nav nav mb-3 d-flex align-items-center">
+        <!-- Action Buttons (Add new, etc.) -->
+        <div class="action-buttons">
+            <button id="add-module-form-toggle" class="btn btn-primary btn-sm" type="button">
+                <i class="lni lni-circle-plus align-middle"></i> Add new
+            </button>
         </div>
+        <div class="vr mx-5"></div>
+        <form id="practice-class-filter" action="#" class="d-flex align-items-center">
+            <label for="module-select" class="me-2 text-nowrap fw-bold">Module:</label>
+            <select name="module" id="module-select" class="form-select">
+                <option value="-1" selected>--- Select Module ---</option>
+                <option value="1">Nhập môn lập trình máy tính</option>
+                <option value="2">Kỹ thuật lập trình</option>
+                <option value="3">Cơ sở dữ liệu</option>
+                <option value="4">Kiến trúc máy tính</option>
+            </select>
+        </form>
+    </div>
 
-        <div class="top-nav nav mb-3 d-flex align-items-center">
-            <!-- Action Buttons (Add new, etc.) -->
-            <div class="action-buttons">
-                <button id="add-module-form-toggle" class="btn btn-primary btn-sm" type="button">
-                    <i class="lni lni-circle-plus align-middle"></i> Add new
-                </button>
-            </div>
-            <div class="vr mx-5"></div>
-            <form id="practice-class-filter" action="#" class="d-flex align-items-center">
-                <label for="module-select" class="me-2 text-nowrap fw-bold">Module:</label>
-                <select name="module" id="module-select" class="form-select">
-                    <option value="-1" selected>--- Select Module ---</option>
-                    <option value="1">Nhập môn lập trình máy tính</option>
-                    <option value="2">Kỹ thuật lập trình</option>
-                    <option value="3">Cơ sở dữ liệu</option>
-                    <option value="4">Kiến trúc máy tính</option>
-                </select>
-            </form>
-        </div>
-
-        <!-- Create form -->
-        <div id="new-module-form-wrapper" class="new-form-hidden border border-primary col-6">
-            <form id="new-module-form"
-                  class="p-3"
-                  data-action="{{route('modules.store')}}"
-                  data-action-type="create"
-                  data-action-method="post">
-                @csrf
-                <fieldset class="">
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="module_code" id="moduleCode" placeholder="Module Code" required>
-                                <label for="moduleCode" class="form-label">Module Code</label>
-                            </div>
-                        </div>
-                        <div class="col-8">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="module_name" id="moduleName" placeholder="Module Name" required>
-                                <label for="moduleName" class="form-label">Module Name</label>
-                            </div>
+    <!-- Create form -->
+    <div id="new-module-form-wrapper" class="new-form-hidden border border-primary col-6">
+        <form id="new-module-form"
+              class="p-3"
+              data-action="{{route('modules.store')}}"
+              data-action-type="create"
+              data-action-method="post">
+            @csrf
+            <fieldset class="">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="module_code" id="moduleCode" placeholder="Module Code" required>
+                            <label for="moduleCode" class="form-label">Module Code</label>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-sm btn-dark" id="create-module-btn">Create</button>
+                    <div class="col-8">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="module_name" id="moduleName" placeholder="Module Name" required>
+                            <label for="moduleName" class="form-label">Module Name</label>
                         </div>
-                    </div>
-                </fieldset>
-            </form>
-        </div>
-
-        <!-- Module Table -->
-        <div class="table-responsive">
-            <table id="module-management-table" class="table table-bordered table-hover w-100">
-                <thead class="thead-light">
-                    <tr>
-                        <th class="text-center">#</th>
-                        <th class="text-start ps-3">Module Code</th>
-                        <th class="text-start ps-3">Module Name</th>
-                        <th class="text-center">Practice Class QTY</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
-
-        <!-- Edit modal -->
-        <div class="modal fade" id="edit-module-modal" tabindex="-1" style="display: none;" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="edit-modal-title">
-                            Edit module: <span id="edit-modal-module-name"></span>
-                        </h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="edit-module-form"
-                              class="p-3"
-                              data-action=""
-                              data-action-type="update"
-                              data-action-method="post">
-                            @csrf
-                            @method('PUT')
-                            <fieldset class="">
-                                <div class="row">
-                                    <div class="col-4">
-                                        <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" name="module_code" id="editModuleCode" placeholder="Module Code" required>
-                                            <label for="editModuleCode" class="form-label">Module Code</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-8">
-                                        <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" name="module_name" id="editModuleName" placeholder="Module Name" required>
-                                            <label for="editModuleName" class="form-label">Module Name</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" form="edit-module-form" class="btn btn-primary">Save changes</button>
                     </div>
                 </div>
-            </div>
-        </div>
+                <div class="row">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-sm btn-dark" id="create-module-btn">Create</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
 
-        <!-- Delete modal -->
-        <div class="modal fade" id="delete-module-modal" tabindex="-1" style="display: none;" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="edit-modal-title">
-                            Delete module: <span id="delete-modal-module-name"></span>
-                        </h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="delete-module-form"
-                              class="p-3"
-                              data-action=""
-                              data-action-type="delete"
-                              data-action-method="post">
-                            @csrf
-                            <fieldset class="">
-                                <input type="hidden" name="_method" value="delete">
-                                <div class="row">
-                                    <p>Delete this module?</p>
+    <!-- Module Table -->
+    <div class="table-responsive">
+        <table id="module-management-table" class="table table-bordered table-hover w-100">
+            <thead class="thead-light">
+                <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-start ps-3">Module Code</th>
+                    <th class="text-start ps-3">Module Name</th>
+                    <th class="text-center">Practice Class QTY</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <!-- Edit modal -->
+    <div class="modal fade" id="edit-module-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="edit-modal-title">
+                        Edit module: <span id="edit-modal-module-name"></span>
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-module-form"
+                          class="p-3"
+                          data-action=""
+                          data-action-type="update"
+                          data-action-method="post">
+                        @csrf
+                        @method('PUT')
+                        <fieldset class="">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" name="module_code" id="editModuleCode" placeholder="Module Code" required>
+                                        <label for="editModuleCode" class="form-label">Module Code</label>
+                                    </div>
                                 </div>
-                            </fieldset>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" form="delete-module-form" class="btn btn-primary">Delete</button>
-                    </div>
+                                <div class="col-8">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" name="module_name" id="editModuleName" placeholder="Module Name" required>
+                                        <label for="editModuleName" class="form-label">Module Name</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" form="edit-module-form" class="btn btn-primary">Save changes</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Delete modal -->
+    <div class="modal fade" id="delete-module-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="edit-modal-title">
+                        Delete module: <span id="delete-modal-module-name"></span>
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="delete-module-form"
+                          class="p-3"
+                          data-action=""
+                          data-action-type="delete"
+                          data-action-method="post">
+                        @csrf
+                        <fieldset class="">
+                            <input type="hidden" name="_method" value="delete">
+                            <div class="row">
+                                <p>Delete this module?</p>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" form="delete-module-form" class="btn btn-primary">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script -->
     <script>
         $(document).ready(function() {
             //Data table initiate

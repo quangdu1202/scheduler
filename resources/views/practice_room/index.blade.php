@@ -1,202 +1,201 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container h-100 right-content">
+    <!-- Page Header -->
+    <div class="py-3 mb-3 border-bottom">
+        <h1 class="h2">Practice Rooms Management</h1>
+    </div>
 
-        <!-- Page Header -->
-        <div class="py-3 mb-3 border-bottom">
-            <h1 class="h2">Practice Rooms Management</h1>
+    <div class="top-nav nav mb-3 d-flex align-items-center">
+        <!-- Action Buttons (Add new, etc.) -->
+        <div class="action-buttons">
+            <button id="add-room-form-toggle" class="btn btn-primary btn-sm" type="button">
+                <i class="lni lni-circle-plus align-middle"></i> Add new
+            </button>
         </div>
+        <div class="vr mx-5"></div>
+        <form id="practice-class-filter" action="#" class="d-flex align-items-center">
+            <label for="practice-room-select" class="me-2 text-nowrap fw-bold">Module:</label>
+            <select name="practice-room" id="practice-room-select" class="form-select">
+                <option value="-1" selected>--- Select Module ---</option>
+                <option value="1">Nhập môn lập trình máy tính</option>
+                <option value="2">Kỹ thuật lập trình</option>
+                <option value="3">Cơ sở dữ liệu</option>
+                <option value="4">Kiến trúc máy tính</option>
+            </select>
+        </form>
+    </div>
 
-        <div class="top-nav nav mb-3 d-flex align-items-center">
-            <!-- Action Buttons (Add new, etc.) -->
-            <div class="action-buttons">
-                <button id="add-room-form-toggle" class="btn btn-primary btn-sm" type="button">
-                    <i class="lni lni-circle-plus align-middle"></i> Add new
-                </button>
-            </div>
-            <div class="vr mx-5"></div>
-            <form id="practice-class-filter" action="#" class="d-flex align-items-center">
-                <label for="practice-room-select" class="me-2 text-nowrap fw-bold">Module:</label>
-                <select name="practice-room" id="practice-room-select" class="form-select">
-                    <option value="-1" selected>--- Select Module ---</option>
-                    <option value="1">Nhập môn lập trình máy tính</option>
-                    <option value="2">Kỹ thuật lập trình</option>
-                    <option value="3">Cơ sở dữ liệu</option>
-                    <option value="4">Kiến trúc máy tính</option>
-                </select>
-            </form>
-        </div>
-
-        <!-- Create form -->
-        <div id="new-room-form-wrapper" class="new-form-hidden border border-primary col-12">
-            <form id="new-room-form"
-                  class="p-3"
-                  data-action="{{route('practice-rooms.store')}}"
-                  data-action-type="create"
-                  data-action-method="post">
-                @csrf
-                <fieldset class="">
-                    <div class="row">
-                        <div class="col-4">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="name" id="room-name" placeholder="Room Name" required>
-                                <label for="room-name" class="form-label">Room Name</label>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="location" id="room-location" placeholder="Room Location" required>
-                                <label for="room-location" class="form-label">Room Location</label>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="pc_qty" id="room-pc-qty" placeholder="PC Qty" required>
-                                <label for="room-pc-qty" class="form-label">PC Qty</label>
-                            </div>
-                        </div>
-                        <div class="col-2">
-                            <div class="form-floating mb-3">
-                                <select name="status"
-                                        id="room-status-select"
-                                        class="form-select text-bg-success"
-                                        onchange="this.className='form-select' + ' ' + this.options[this.selectedIndex].getAttribute('data-bg-color')"
-                                        required>
-                                    <option value="1" class="text-bg-light" data-bg-color="text-bg-success"><span class="badge text-bg-success">Available</span></option>
-                                    <option value="2" class="text-bg-light" data-bg-color="text-bg-warning"><span class="badge text-bg-warning">In use</span></option>
-                                    <option value="3" class="text-bg-light" data-bg-color="text-bg-secondary"><span class="badge text-bg-secondary">Not available</span></option>
-                                </select>
-                                <label for="room-status-select" class="form-label">Status</label>
-                            </div>
+    <!-- Create form -->
+    <div id="new-room-form-wrapper" class="new-form-hidden border border-primary col-12">
+        <form id="new-room-form"
+              class="p-3"
+              data-action="{{route('practice-rooms.store')}}"
+              data-action-type="create"
+              data-action-method="post">
+            @csrf
+            <fieldset class="">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="name" id="room-name" placeholder="Room Name" required>
+                            <label for="room-name" class="form-label">Room Name</label>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-sm btn-dark" id="create-room-btn">Create</button>
+                    <div class="col-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="location" id="room-location" placeholder="Room Location" required>
+                            <label for="room-location" class="form-label">Room Location</label>
                         </div>
                     </div>
-                </fieldset>
-            </form>
-        </div>
-
-        <!-- Practice Room Table -->
-        <div class="table-responsive">
-            <table id="room-management-table" class="table table-bordered table-hover w-100">
-                <thead class="thead-light">
-                    <tr>
-                        <th class="text-center">#</th>
-                        <th class="text-start ps-3">Room Name</th>
-                        <th class="text-center ps-3">Location</th>
-                        <th class="text-center">PC Qty</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
-
-        <!-- Edit modal -->
-        <div class="modal fade" id="edit-room-modal" tabindex="-1" style="display: none;" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="edit-modal-title">
-                            Edit Room:
-                        </h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="col-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="pc_qty" id="room-pc-qty" placeholder="PC Qty" required>
+                            <label for="room-pc-qty" class="form-label">PC Qty</label>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <form id="edit-room-form"
-                              class="p-3"
-                              data-action=""
-                              data-action-type="update"
-                              data-action-method="post">
-                            @csrf
-                            @method('PUT')
-                            <fieldset class="">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" name="name" id="edit-room-name" placeholder="Room Name" required>
-                                            <label for="edit-room-name" class="form-label">Room Name</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" name="location" id="edit-room-location" placeholder="Room Location" required>
-                                            <label for="edit-room-location" class="form-label">Room Location</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <div class="form-floating mb-3">
-                                            <input type="text" class="form-control" name="pc_qty" id="edit-room-pc-qty" placeholder="PC Qty" required>
-                                            <label for="edit-room-pc-qty" class="form-label">PC Qty</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-floating mb-3">
-                                            <select name="status"
-                                                    id="edit-room-status"
-                                                    class="form-select"
-                                                    onchange="this.className='form-select' + ' ' + this.options[this.selectedIndex].getAttribute('data-bg-color')"
-                                                    required>
-                                                <option value="1" class="text-bg-light" data-bg-color="text-bg-success"><span class="badge text-bg-success">Available</span></option>
-                                                <option value="2" class="text-bg-light" data-bg-color="text-bg-warning"><span class="badge text-bg-warning">In use</span></option>
-                                                <option value="3" class="text-bg-light" data-bg-color="text-bg-secondary"><span class="badge text-bg-secondary">Not available</span></option>
-                                            </select>
-                                            <label for="edit-room-status" class="form-label">Status</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" form="edit-room-form" class="btn btn-primary">Save changes</button>
+                    <div class="col-2">
+                        <div class="form-floating mb-3">
+                            <select name="status"
+                                    id="room-status-select"
+                                    class="form-select text-bg-success"
+                                    onchange="this.className='form-select' + ' ' + this.options[this.selectedIndex].getAttribute('data-bg-color')"
+                                    required>
+                                <option value="1" class="text-bg-light" data-bg-color="text-bg-success"><span class="badge text-bg-success">Available</span></option>
+                                <option value="2" class="text-bg-light" data-bg-color="text-bg-warning"><span class="badge text-bg-warning">In use</span></option>
+                                <option value="3" class="text-bg-light" data-bg-color="text-bg-secondary"><span class="badge text-bg-secondary">Not available</span></option>
+                            </select>
+                            <label for="room-status-select" class="form-label">Status</label>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+                <div class="row">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-sm btn-dark" id="create-room-btn">Create</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
 
-        <!-- Delete modal -->
-        <div class="modal fade" id="delete-room-modal" tabindex="-1" style="display: none;" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="edit-modal-title">
-                            Delete room: <span id="delete-modal-room-name"></span>
-                        </h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="delete-room-form"
-                              class="p-3"
-                              data-action=""
-                              data-action-type="delete"
-                              data-action-method="post">
-                            @csrf
-                            <fieldset class="">
-                                <input type="hidden" name="_method" value="delete">
-                                <div class="row">
-                                    <p>Delete this practice room?</p>
+    <!-- Practice Room Table -->
+    <div class="table-responsive">
+        <table id="room-management-table" class="table table-bordered table-hover w-100">
+            <thead class="thead-light">
+                <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-start ps-3">Room Name</th>
+                    <th class="text-center ps-3">Location</th>
+                    <th class="text-center">PC Qty</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <!-- Edit modal -->
+    <div class="modal fade" id="edit-room-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="edit-modal-title">
+                        Edit Room:
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-room-form"
+                          class="p-3"
+                          data-action=""
+                          data-action-type="update"
+                          data-action-method="post">
+                        @csrf
+                        @method('PUT')
+                        <fieldset class="">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" name="name" id="edit-room-name" placeholder="Room Name" required>
+                                        <label for="edit-room-name" class="form-label">Room Name</label>
+                                    </div>
                                 </div>
-                            </fieldset>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" form="delete-room-form" class="btn btn-primary">Delete</button>
-                    </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" name="location" id="edit-room-location" placeholder="Room Location" required>
+                                        <label for="edit-room-location" class="form-label">Room Location</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" name="pc_qty" id="edit-room-pc-qty" placeholder="PC Qty" required>
+                                        <label for="edit-room-pc-qty" class="form-label">PC Qty</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating mb-3">
+                                        <select name="status"
+                                                id="edit-room-status"
+                                                class="form-select"
+                                                onchange="this.className='form-select' + ' ' + this.options[this.selectedIndex].getAttribute('data-bg-color')"
+                                                required>
+                                            <option value="1" class="text-bg-light" data-bg-color="text-bg-success"><span class="badge text-bg-success">Available</span></option>
+                                            <option value="2" class="text-bg-light" data-bg-color="text-bg-warning"><span class="badge text-bg-warning">In use</span></option>
+                                            <option value="3" class="text-bg-light" data-bg-color="text-bg-secondary"><span class="badge text-bg-secondary">Not available</span></option>
+                                        </select>
+                                        <label for="edit-room-status" class="form-label">Status</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" form="edit-room-form" class="btn btn-primary">Save changes</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Delete modal -->
+    <div class="modal fade" id="delete-room-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="edit-modal-title">
+                        Delete room: <span id="delete-modal-room-name"></span>
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="delete-room-form"
+                          class="p-3"
+                          data-action=""
+                          data-action-type="delete"
+                          data-action-method="post">
+                        @csrf
+                        <fieldset class="">
+                            <input type="hidden" name="_method" value="delete">
+                            <div class="row">
+                                <p>Delete this practice room?</p>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" form="delete-room-form" class="btn btn-primary">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script -->
     <script>
         $(document).ready(function() {
             //Data table initiate

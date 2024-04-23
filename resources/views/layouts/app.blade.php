@@ -1,3 +1,4 @@
+{{--@php(date_default_timezone_set('Asia/Ho_Chi_Minh'))--}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -48,8 +49,10 @@
         </aside>
 
         {{-- Main content --}}
-        <div id="app" class="main px-3">
-            @yield('content')
+        <div id="app" class="main px-5">
+            <div class="h-100 right-content">
+                @yield('content')
+            </div>
         </div>
     </div>
 
