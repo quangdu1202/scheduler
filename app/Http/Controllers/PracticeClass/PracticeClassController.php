@@ -208,6 +208,10 @@ class PracticeClassController extends Controller
         }
     }
 
+    /**
+     * @param $data
+     * @return bool
+     */
     protected function isValidToSave($data)
     {
         $module_id = $data['module_id'];
@@ -239,15 +243,15 @@ class PracticeClassController extends Controller
      * @param PracticeClass $practiceClass
      * @param Request $request
      *
-     * @return PracticeClassResource
+     * @return JsonResponse
      */
-    public function update(PracticeClass $practiceClass, Request $request): PracticeClassResource
+    public function update(PracticeClass $practiceClass, Request $request)
     {
-        $request->validate([
-            ''
+        return response()->json([
+            'status' => 200,
+            'title' => 'Success!',
+            'message' => 'Practice Class updated successfully!',
         ]);
-
-        return PracticeClassResource::make($this->practiceClassService->update($practiceClass, $request->all()));
     }
 
     /**
@@ -347,9 +351,6 @@ class PracticeClassController extends Controller
                                     <button type="button" class="btn btn-success btn-sm pclass-student-info-btn" data-get-url="' . route('practice-classes.get-student-data-for-schedule', ['recurring_id' => $pclass->recurring_id]) . '">
                                         <i class="fa-solid fa-user-graduate"></i>
                                     </button>
-                                    <button type="button" class="btn btn-primary btn-sm pclass-edit-btn">
-                                        <i class="lni lni-pencil-alt align-middle"></i>
-                                    </button>
                                     <button type="button" class="btn btn-danger btn-sm pclass-delete-btn">
                                         <i class="lni lni-trash-can align-middle"></i>
                                     </button>
@@ -390,10 +391,10 @@ class PracticeClassController extends Controller
         $practiceClasses = $this->practiceClassService->getAll(['recurring_id' => $recurringId]);
 
         $responseData = $practiceClasses->map(function ($pclass, $index) {
-            $actions = '<button type="button" class="btn btn-primary btn-sm room-edit-btn">
+            $actions = '<button type="button" class="btn btn-primary btn-sm pclass-single-edit-btn">
                             <i class="lni lni-pencil-alt align-middle"></i>
                         </button>
-                        <button type="button" class="btn btn-danger btn-sm room-delete-btn">
+                        <button type="button" class="btn btn-danger btn-sm pclass-single-delete-btn">
                             <i class="lni lni-trash-can align-middle"></i>
                         </button>';
             return [

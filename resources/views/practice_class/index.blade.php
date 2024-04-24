@@ -2,7 +2,7 @@
 
 @section('content')
     <!-- Page Header -->
-    <div class="py-3 mb-3 border-bottom">
+    <div class="py-3 mb-3 border-bottom sticky-top bg-body">
         <h1 class="h2">Practice Classes Management</h1>
     </div>
 
@@ -38,7 +38,7 @@
                 <div class="row">
                     <div class="col-4">
                         <div class="form-floating mb-3">
-                            <select name="module_id" id="moduleSelect" class="form-select" data-place required>
+                            <select name="module_id" id="moduleSelect" class="form-select" required>
                                 <option></option>
                                 <option value="1">Nhập môn lập trình máy tính (202320503197)</option>
                                 <option value="2">Kỹ thuật lập trình (202320595295)</option>
@@ -188,6 +188,95 @@
     </div>
 
     <!-- Edit modal -->
+    <div class="modal fade" id="edit-single-pclass-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="edit-modal-title">
+                        Edit Practice Class Schedule:
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-single-pclass-form"
+                          data-action=""
+                          data-action-type="update"
+                          data-action-method="post">
+                        @csrf
+                        @method('PUT')
+                        <fieldset class="">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-floating mb-3">
+                                        <select name="teacher_id" id="edit-teacherSelect" class="form-select">
+                                            <option></option>
+                                            <option value="1">Nguyen Van A</option>
+                                            <option value="2">Tran Thi B</option>
+                                            <option value="3">Ngo Trong C</option>
+                                        </select>
+                                        <label for="edit-teacherSelect" class="form-label">Teacher</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-floating mb-3">
+                                        <select name="practice_room_id" id="edit-roomSelect" class="form-select" required>
+                                            <option></option>
+                                            <option value="1">601 A1nd kjs k skd ksd k dsk dksj kdj dkjd s</option>
+                                            <option value="2">702 A1</option>
+                                            <option value="3">802 A1</option>
+                                        </select>
+                                        <label for="edit-roomSelect" class="form-label">Practice Room</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-floating mb-3">
+                                        <input type="date" class="form-control" name="schedule_date" id="edit-startDate" min="{{ date('Y-m-d') }}" required>
+                                        <label for="edit-startDate" class="form-label">Start Date</label>
+                                    </div>
+                                </div>
+                                <div class="col-5">
+                                    <div class="form-floating mb-3">
+                                        <div class="form-control d-flex justify-content-between" id="edit-sessionSelect">
+                                            <div class="form-check form-check-inline me-1">
+                                                <input class="form-check-input" type="radio" name="session" id="edit-session-1" value="1" required>
+                                                <label class="form-check-label" for="edit-session-1"><span class="badge rounded-pill text-bg-success">S</span></label>
+                                            </div>
+                                            <div class="form-check form-check-inline me-1">
+                                                <input class="form-check-input" type="radio" name="session" id="edit-session-2" value="2" required>
+                                                <label class="form-check-label" for="edit-session-2"><span class="badge rounded-pill text-bg-primary">C</span></label>
+                                            </div>
+                                            <div class="form-check form-check-inline me-1">
+                                                <input class="form-check-input" type="radio" name="session" id="edit-session-3" value="3" required>
+                                                <label class="form-check-label" for="edit-session-3"><span class="badge rounded-pill text-bg-danger">T</span></label>
+                                            </div>
+                                        </div>
+                                        <label for="edit-sessionSelect" class="form-label">Session</label>
+                                    </div>
+                                    <style>
+                                        #sessionSelect .form-check-inline {
+                                            margin-right: 0.6rem;
+                                        }
+                                    </style>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-floating mb-3">
+                                        <input type="number" id="edit-repeatLimit" class="form-control" name="repeat_limit" min="1" max="20" disabled>
+                                        <label for="edit-repeatLimit" class="form-label">Repeat</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" form="edit-single-pclass-form" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Delete modal -->
     <div class="modal fade" id="delete-pclass-modal" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -264,19 +353,19 @@
                             {
                                 extend: 'csv',
                                 exportOptions: {
-                                    columns: [0, 1, 2, 3, 4]
+                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
                                 }
                             },
                             {
                                 extend: 'excel',
                                 exportOptions: {
-                                    columns: [0, 1, 2, 3, 4]
+                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
                                 }
                             },
                             {
                                 extend: 'print',
                                 exportOptions: {
-                                    columns: [0, 1, 2, 3, 4]
+                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
                                 }
                             }
                         ]
@@ -307,23 +396,6 @@
             // Create p-class form
             $('#add-pclass-form-toggle').click(function() {
                 $('#new-pclass-form-wrapper').slideToggle(400, 'linear');
-            });
-
-            $('#moduleSelect').select2({
-                theme: "bootstrap-5",
-                placeholder: "Select a module",
-            });
-            $('#teacherSelect').select2({
-                theme: "bootstrap-5",
-                placeholder: "Select a teacher (not required)",
-            });
-            $('#roomSelect').select2({
-                theme: "bootstrap-5",
-                placeholder: "Select a practice room",
-            });
-            $('#recurringSelect').select2({
-                theme: "bootstrap-5",
-                placeholder: "Repeat interval",
             });
 
             $('#recurringSelect').change(function () {
@@ -393,9 +465,24 @@
                 });
                 infoModal.show();
             });
+
+            // Edit practice class schedule modal
+            const editSinglePclassModal = new bootstrap.Modal('#edit-single-pclass-modal');
+            const editSinglePclassForm = $('#edit-single-pclass-form');
+
+            $(document).on('click', '.pclass-single-edit-btn', function () {
+                const data = pClassAllScheduleTable.DataTable().row($(this).parents('tr')).data();
+
+                let updateURL = "{{ route('practice-classes.update', ['practice_class' => ':id'])}}";
+                updateURL = updateURL.replace(':id', data.DT_RowId);
+                editSinglePclassForm.data('action', updateURL);
+
+                editSinglePclassModal.show();
+            });
+            setupAjaxForm(editSinglePclassForm);
             //
 
-            // Delete room modal
+            // Delete practice class schedule modal
             const deletePclassModal = new bootstrap.Modal('#delete-pclass-modal')
             const deletePclassForm = $('#delete-pclass-form');
             pclassTable.on('click', '.pclass-delete-btn', function () {
