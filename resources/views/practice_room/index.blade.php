@@ -281,6 +281,7 @@
             const roomStatusSelect = $('#edit-room-status');
             roomTable.on('click', '.room-edit-btn', function () {
                 const data = roomTable.row($(this).parents('tr')).data();
+
                 $('#edit-room-name').val(data.name);
                 $('#edit-room-location').val(data.location);
                 $('#edit-room-pc-qty').val(data.pc_qty);

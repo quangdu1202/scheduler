@@ -105,22 +105,22 @@ class PracticeRoomController extends Controller
      */
     public function update(PracticeRoom $practiceRoom, Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'pc_qty' => 'required|int',
-            'status' => 'required|int',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 422,
-                'title' => 'Validation Error',
-                'message' => $validator->errors()->first() // Sends back the first validation error
-            ]);
-        }
-
         try {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'location' => 'required|string|max:255',
+                'pc_qty' => 'required|int',
+                'status' => 'required|int',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 422,
+                    'title' => 'Validation Error',
+                    'message' => $validator->errors()->first() // Sends back the first validation error
+                ]);
+            }
+
             $editedRoom = $this->practiceRoomService->update($practiceRoom, $request->all());
             return response()->json([
                 'status' => 200,

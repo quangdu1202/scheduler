@@ -205,6 +205,8 @@
                         @csrf
                         @method('PUT')
                         <fieldset class="">
+                            <input type="hidden" name="id" id="edit-id">
+                            <input type="hidden" name="module_id" id="edit-module">
                             <div class="row">
                                 <div class="col-6">
                                     <div class="form-floating mb-3">
@@ -472,6 +474,19 @@
 
             $(document).on('click', '.pclass-single-edit-btn', function () {
                 const data = pClassAllScheduleTable.DataTable().row($(this).parents('tr')).data();
+                $('#edit-session-'+ data.DT_RowData.session).prop('checked', true);
+
+                $('#edit-id').val(data.DT_RowId);
+
+                $('#edit-module').val(data.DT_RowData.module_id);
+
+                $('#edit-roomSelect').val(data.DT_RowData.practice_room_id).change();
+
+                $('#edit-teacherSelect').val(data.DT_RowData.teacher_id).change();
+
+                $('#edit-startDate').val(data.schedule_date);
+
+                $('#edit-session-'+ data.DT_RowData.session).prop('checked', true);
 
                 let updateURL = "{{ route('practice-classes.update', ['practice_class' => ':id'])}}";
                 updateURL = updateURL.replace(':id', data.DT_RowId);

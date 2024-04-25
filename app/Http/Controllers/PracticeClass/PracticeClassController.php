@@ -97,23 +97,23 @@ class PracticeClassController extends Controller
         // Begin a database transaction
         DB::beginTransaction();
 
-        try {
-            $data = $request->all();
+        $data = $request->all();
 
-            $validator = Validator::make($data, [
-                // Validation rules
+        $validator = Validator::make($data, [
+            // Validation rules
+        ]);
+
+        if ($validator->fails()) {
+            // Rollback the transaction and return a validation error response
+            DB::rollBack();
+            return response()->json([
+                'status' => 422,
+                'title' => 'Validation Error',
+                'message' => $validator->errors()->first() // Sends back the first validation error
             ]);
+        }
 
-            if ($validator->fails()) {
-                // Rollback the transaction and return a validation error response
-                DB::rollBack();
-                return response()->json([
-                    'status' => 422,
-                    'title' => 'Validation Error',
-                    'message' => $validator->errors()->first() // Sends back the first validation error
-                ]);
-            }
-
+        try {
             $data['recurring_id'] = $this->helper->uniqidReal();
 
             switch ($data['recurring_interval']) {
@@ -141,9 +141,6 @@ class PracticeClassController extends Controller
                     $limitCount = $data['repeat_limit'];
                     $recurringInterval = $data['recurring_interval'];
 
-                    // Track created practice classes
-                    $createdPracticeClasses = [];
-
                     // Create multiple practice classes based on repeat_limit
                     for ($i = 0; $i < $limitCount; $i++) {
                         $data['recurring_order'] = $i + 1;
@@ -152,9 +149,6 @@ class PracticeClassController extends Controller
                         if (!$this->isValidToSave($data)) {
                             // Rollback the transaction and delete the already created practice classes
                             DB::rollBack();
-                            foreach ($createdPracticeClasses as $practiceClass) {
-                                $this->practiceClassService->delete($practiceClass->id);
-                            }
 
                             return response()->json([
                                 'status' => 422,
@@ -164,8 +158,7 @@ class PracticeClassController extends Controller
                         }
 
                         $newPracticeClass = $this->practiceClassService->create($data);
-                        // Track the created practice class
-                        $createdPracticeClasses[] = $newPracticeClass;
+
                         // Set Schedule date for the next schedule
                         $data['schedule_date'] = date('Y-m-d', strtotime($data['schedule_date'] . "+$recurringInterval seconds"));
                     }
@@ -208,32 +201,6 @@ class PracticeClassController extends Controller
         }
     }
 
-    /**
-     * @param $data
-     * @return bool
-     */
-    protected function isValidToSave($data)
-    {
-        $module_id = $data['module_id'];
-        $schedule_date = $data['schedule_date'];
-        $session = $data['session'];
-        $practice_room_id = $data['practice_room_id'];
-
-        $filteredByModule = $this->practiceClassService->getAll(['module_id' => $module_id]);
-
-        $filterByDate = $filteredByModule->where('schedule_date', $schedule_date);
-
-        $filterBySession = $filterByDate->where('session', $session);
-
-        $filterByRoom = $filterBySession->where('practice_room_id', $practice_room_id);
-
-        if ($filterByRoom->count() > 0) {
-            return false;
-        }
-
-        return true;
-    }
-
     public function create()
     {
         return view('practice_class.create');
@@ -247,11 +214,48 @@ class PracticeClassController extends Controller
      */
     public function update(PracticeClass $practiceClass, Request $request)
     {
-        return response()->json([
-            'status' => 200,
-            'title' => 'Success!',
-            'message' => 'Practice Class updated successfully!',
+        $data = $request->all();
+
+        $validator = Validator::make($data, [
+            // Validation rules
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 422,
+                'title' => 'Validation Error',
+                'message' => $validator->errors()->first() // Sends back the first validation error
+            ]);
+        }
+
+        if (!$this->isValidToSave($data)) {
+            return response()->json([
+                'status' => 422,
+                'title' => 'Duplicate Schedule',
+                'message' => 'Duplicate schedule on ' . $data['schedule_date']
+            ]);
+        }
+
+        try {
+            $editedPclass = $this->practiceClassService->update($practiceClass, $data);
+            // Return a successful JSON response
+            return response()->json([
+                'status' => 200,
+                'title' => 'Success!',
+                'message' => 'Practice Class updated successfully!',
+                'reloadTarget' => '#pclass-management-table, #pclass-all-schedule-table',
+                'hideTarget' => '#edit-single-pclass-modal'
+            ]);
+        } catch (Exception $e) {
+            // Log the exception for internal review
+            Log::error("Practice Class creation failed: {$e->getMessage()}");
+
+            return response()->json([
+                'status' => 500,
+                'title' => 'Error!',
+                'message' => 'Unknown error occurred, try again later!'
+            ]);
+        }
     }
 
     /**
@@ -309,6 +313,47 @@ class PracticeClassController extends Controller
                 'message' => 'Unknown error occurred, try again later!',
             ]);
         }
+    }
+
+
+    // Need update
+    /**
+     * @param $data
+     * @return bool
+     */
+    protected function isValidToSave($data)
+    {
+        $class_id = $data['id'] ?? null;
+
+        $module_id = $data['module_id'] ?? null;
+
+        $schedule_date = $data['schedule_date'] ?? null;
+
+        $session = $data['session'] ?? null;
+
+        $practice_room_id = $data['practice_room_id'] ?? null;
+
+        if (!$module_id || !$schedule_date || !$session || !$practice_room_id) {
+            return false;
+        }
+
+        $practiceClasses =  $this->practiceClassService->getAll();
+
+        // Filter $practiceClasses based on all conditions
+        $filteredPracticeClasses = $practiceClasses->filter(function ($class) use ($class_id, $module_id, $schedule_date, $session, $practice_room_id) {
+            return
+                $class->module_id == $module_id &&
+                $class->schedule_date == $schedule_date &&
+                $class->session == $session &&
+                $class->practice_room_id == $practice_room_id &&
+                (!$class_id || $class->id != $class_id);
+        });
+
+        if ($filteredPracticeClasses->count() > 0) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
