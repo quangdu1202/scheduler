@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\PracticeRoom\PracticeRoom;
+use App\Models\Teacher\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
 /**
- * @extends Factory<PracticeRoom>
+ * @extends Factory<Teacher>
  */
-final class PracticeRoomFactory extends Factory
+final class TeacherFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = PracticeRoom::class;
+    protected $model = Teacher::class;
 
     /**
      * Define the model's default state.
@@ -27,10 +28,10 @@ final class PracticeRoomFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name,
-            'location' => fake()->word,
-            'pc_qty' => fake()->randomNumber(),
-            'status' => fake()->boolean,
+            'teacher_name' => fake()->word,
+            'department' => fake()->word,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
         ];
     }
 }

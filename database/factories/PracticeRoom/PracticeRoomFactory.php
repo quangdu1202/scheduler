@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Module\Module;
+use App\Models\PracticeRoom\PracticeRoom;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Module>
+ * @extends Factory<PracticeRoom>
  */
-final class ModuleFactory extends Factory
+final class PracticeRoomFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Module::class;
+    protected $model = PracticeRoom::class;
 
     /**
      * Define the model's default state.
@@ -27,7 +27,10 @@ final class ModuleFactory extends Factory
     public function definition(): array
     {
         return [
-            'module_name' => fake()->word,
+            'name' => fake()->word,
+            'location' => fake()->word,
+            'pc_qty' => fake()->randomNumber(2),
+            'status' => fake()->boolean,
         ];
     }
 }

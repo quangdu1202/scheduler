@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Teacher\Teacher;
+use App\Models\Module\Module;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Teacher>
+ * @extends Factory<Module>
  */
-final class TeacherFactory extends Factory
+final class ModuleFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Teacher::class;
+    protected $model = Module::class;
 
     /**
      * Define the model's default state.
@@ -27,8 +27,8 @@ final class TeacherFactory extends Factory
     public function definition(): array
     {
         return [
-            'teacher_name' => fake()->word,
-            'department' => fake()->word,
+            'module_code' => fake()->word,
+            'module_name' => fake()->word,
         ];
     }
 }
