@@ -3,7 +3,10 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\PracticeClass\PracticeClass;
+use App\Models\Module\Module;
+use App\Models\OriginalClass\OriginalClass;
+use App\Models\PracticeRoom\PracticeRoom;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,8 +16,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        PracticeClass::factory()->count(5)->create();
-        // \App\Models\User::factory(10)->create();
+        User::factory(10)->create();
+        Module::factory(5)->create();
+        PracticeRoom::factory(15)->create();
 
         // \App\Models\User::factory()->create([
         //     'name' => 'Test User',

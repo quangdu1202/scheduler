@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Database\Factories\Student;
 
 use App\Models\OriginalClass\OriginalClass;
 use App\Models\Student\Student;
@@ -28,8 +28,7 @@ final class StudentFactory extends Factory
     public function definition(): array
     {
         return [
-            'student_id' => fake()->word,
-            'student_name' => fake()->word,
+            'student_code' => fake()->word,
             'original_class_id' => OriginalClass::factory(),
         ];
     }

@@ -7,7 +7,9 @@ use App\Http\Resources\PracticeClass\PracticeClassResource;
 use App\Models\PracticeClass\PracticeClass;
 use App\Services\Module\Contracts\ModuleServiceInterface;
 use App\Services\PracticeClass\Contracts\PracticeClassServiceInterface;
+use App\Services\PracticeRoom\PracticeRoomService;
 use App\Services\Registration\RegistrationService;
+use App\Services\Teacher\TeacherService;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -35,9 +37,16 @@ class PracticeClassController extends Controller
     protected ModuleServiceInterface $moduleService;
 
     /**
+     * @var TeacherService
+     */
+    protected TeacherService $teacherService;
+
+    /**
      * @var RegistrationService
      */
     protected RegistrationService $scheduleRegistrationService;
+
+    protected PracticeRoomService $practiceRoomService;
 
     /**
      * @var Helper
@@ -48,18 +57,24 @@ class PracticeClassController extends Controller
      * @param PracticeClassServiceInterface $practiceClassService
      * @param ModuleServiceInterface $moduleService
      * @param RegistrationService $scheduleRegistrationService
+     * @param TeacherService $teacherService
+     * @param PracticeRoomService $practiceRoomService
      * @param Helper $helper
      */
     public function __construct(
         PracticeClassServiceInterface $practiceClassService,
         ModuleServiceInterface        $moduleService,
         RegistrationService           $scheduleRegistrationService,
-        Helper                        $helper
+        TeacherService                $teacherService,
+        PracticeRoomService           $practiceRoomService,
+        Helper                        $helper,
     )
     {
         $this->practiceClassService = $practiceClassService;
         $this->moduleService = $moduleService;
         $this->scheduleRegistrationService = $scheduleRegistrationService;
+        $this->teacherService = $teacherService;
+        $this->practiceRoomService = $practiceRoomService;
         $this->helper = $helper;
     }
 
@@ -70,10 +85,14 @@ class PracticeClassController extends Controller
     {
         $modules = $this->moduleService->getAll();
         $practiceClasses = $this->practiceClassService->getAll();
+        $teachers = $this->teacherService->getAll();
+        $practiceRooms = $this->practiceRoomService->getAll();
 
         return view('practice_class.index', [
             'modules' => $modules,
-            'practiceClasses' => $practiceClasses
+            'practiceClasses' => $practiceClasses,
+            'teachers' => $teachers,
+            'practiceRooms' => $practiceRooms
         ]);
     }
 
@@ -196,14 +215,9 @@ class PracticeClassController extends Controller
             return response()->json([
                 'status' => 500,
                 'title' => 'Error!',
-                'message' => 'Unknown error occurred, try again later!'
+                'message' => $e
             ]);
         }
-    }
-
-    public function create()
-    {
-        return view('practice_class.create');
     }
 
     /**
@@ -266,7 +280,8 @@ class PracticeClassController extends Controller
     public function destroy(PracticeClass $practiceClass, Request $request): JsonResponse
     {
         $confirmDelete = $request->input('confirmDelete');
-        if ($confirmDelete != "delete") {
+
+        if ($confirmDelete !== "delete") {
             return response()->json([
                 'status' => 500,
                 'title' => 'Caution!',
@@ -274,24 +289,31 @@ class PracticeClassController extends Controller
             ]);
         }
 
+        // Guard clause to check delete mode
+        $deleteMode = $request->input('_deleteMode');
+        if (!in_array($deleteMode, ['all', 'single'])) {
+            return response()->json([
+                'status' => 500,
+                'title' => 'Error!',
+                'message' => 'Invalid delete mode!',
+            ]);
+        }
+
         // Begin a database transaction
         DB::beginTransaction();
 
         try {
-            $recurring_id = $practiceClass->recurring_id;
-            // Find practice classes based on the recurring ID
-            $practiceClasses = $this->practiceClassService->find(['recurring_id' => $recurring_id]);
+            // Delete practice classes based on delete mode
+            if ($deleteMode === 'all') {
+                $recurringId = $practiceClass->recurring_id;
+                $practiceClasses = $this->practiceClassService->find(['recurring_id' => $recurringId]);
 
-            // Iterate over each practice class
-            foreach ($practiceClasses as $practiceClass) {
-                try {
-                    // Delete the practice class using its ID
+                // Iterate over each practice class
+                foreach ($practiceClasses as $practiceClass) {
                     $this->practiceClassService->delete($practiceClass->id);
-                } catch (Exception $e) {
-                    // Rollback the transaction and throw the exception
-                    DB::rollBack();
-                    throw $e;
                 }
+            } else {
+                $this->practiceClassService->delete($practiceClass->id);
             }
 
             // Commit the transaction
@@ -302,10 +324,12 @@ class PracticeClassController extends Controller
                 'status' => 200,
                 'title' => 'Success!',
                 'message' => 'Practice class schedules deleted successfully!',
-                'reloadTarget' => '#pclass-management-table',
-                'hideTarget' => '#delete-pclass-modal'
+                'reloadTarget' => '#pclass-management-table, #pclass-all-schedule-table',
+                'hideTarget' => '#delete-pclass-modal',
+                'resetTarget' => '#delete-pclass-form'
             ]);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error("Failed to delete practice classes: {$e->getMessage()}");
             return response()->json([
                 'status' => 500,
@@ -384,6 +408,9 @@ class PracticeClassController extends Controller
                 default => '<span class="badge rounded-pill text-bg-dark">Unknown</span>',
             };
 
+            $registered_qty = $pclass->registered_qty;
+            $max_qty = $pclass->max_qty;
+
             $actions = '<div class="dropdown">
                             <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="lni lni-angle-double-down align-middle"></i>
@@ -396,7 +423,7 @@ class PracticeClassController extends Controller
                                     <button type="button" class="btn btn-success btn-sm pclass-student-info-btn" data-get-url="' . route('practice-classes.get-student-data-for-schedule', ['recurring_id' => $pclass->recurring_id]) . '">
                                         <i class="fa-solid fa-user-graduate"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm pclass-delete-btn">
+                                    <button type="button" class="btn btn-danger btn-sm pclass-delete-btn" data-delete-mode="all">
                                         <i class="lni lni-trash-can align-middle"></i>
                                     </button>
                                 </div>
@@ -411,14 +438,14 @@ class PracticeClassController extends Controller
                 'end_date' => $endDate,
                 'session' => $session,
                 'practice_room' => [
-                    'room_id' => $pclass->practice_room_id,
-                    'room_info' => '(' . $pclass->practiceRoom->location . ') ' . $pclass->practiceRoom->name
+                    'location' => $pclass->practiceRoom->location,
+                    'name' => $pclass->practiceRoom->name
                 ],
-                'teacher' => $pclass->teacher_id,
+                'teacher' => $pclass->teacher->user->name,
                 'recurring_id' => $pclass->recurring_id,
                 'recurring_interval' => $recurring_interval,
                 'recurring_order' => $pclass->recurring_order,
-                'registered_qty' => $pclass->registered_qty,
+                'registered_qty' => $registered_qty . '/' . $max_qty,
                 'actions' => $actions
             ];
         });
@@ -436,10 +463,17 @@ class PracticeClassController extends Controller
         $practiceClasses = $this->practiceClassService->getAll(['recurring_id' => $recurringId]);
 
         $responseData = $practiceClasses->map(function ($pclass, $index) {
+            $session = match ($pclass->session) {
+                1 => '<span class="badge rounded-pill text-bg-success">S</span>',
+                2 => '<span class="badge rounded-pill text-bg-primary">C</span>',
+                3 => '<span class="badge rounded-pill text-bg-danger">T</span>',
+                default => '<span class="badge rounded-pill text-bg-dark">Unknown</span>',
+            };
+
             $actions = '<button type="button" class="btn btn-primary btn-sm pclass-single-edit-btn">
                             <i class="lni lni-pencil-alt align-middle"></i>
                         </button>
-                        <button type="button" class="btn btn-danger btn-sm pclass-single-delete-btn">
+                        <button type="button" class="btn btn-danger btn-sm pclass-delete-btn" data-delete-mode="single">
                             <i class="lni lni-trash-can align-middle"></i>
                         </button>';
             return [
@@ -447,6 +481,9 @@ class PracticeClassController extends Controller
                 'DT_RowData' => $pclass,
                 'index' => $pclass->recurring_order,
                 'schedule_date' => $pclass->schedule_date,
+                'practice_room' => '<b>' . $pclass->practiceRoom->location . '</b>' . '<br>' . $pclass->practiceRoom->name,
+                'teacher' => $pclass->teacher->user->name,
+                'session' => $session,
                 'actions' => $actions
             ];
         });

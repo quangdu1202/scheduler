@@ -4,13 +4,16 @@ namespace App\Http\Controllers\Module;
 
 use App\Http\Resources\Module\ModuleResource;
 use App\Models\Module\Module;
+use App\Models\PracticeClass\PracticeClass;
 use App\Services\Module\Contracts\ModuleServiceInterface;
+use App\Services\PracticeClass\PracticeClassService;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
@@ -26,11 +29,20 @@ class ModuleController extends Controller
     protected ModuleServiceInterface $moduleService;
 
     /**
+     * @var PracticeClassService
+     */
+    protected PracticeClassService $practiceClassService;
+
+    /**
      * @param ModuleServiceInterface $service
      */
-    public function __construct(ModuleServiceInterface $service)
+    public function __construct(
+        ModuleServiceInterface $service,
+        PracticeClassService $practiceClassService
+    )
     {
         $this->moduleService = $service;
+        $this->practiceClassService = $practiceClassService;
     }
 
     /**
@@ -186,11 +198,11 @@ class ModuleController extends Controller
      */
     public function getJsonData()
     {
-//        <a href="' . route('modules.show-practice-classes', $module) . '" class="btn btn-success btn-sm" title="Practice Classes List">
-//                            <i class="lni lni-shift-right align-middle"></i>
-//                        </a>
-        $modules = $this->moduleService->getAll();
+        $modules = $this->moduleService->withCount(['practiceClasses as unique_practice_classes_count' => function ($query) {
+            $query->select(DB::raw('count(distinct recurring_id)'));
+        }])->getAll();
         $responseData = $modules->map(function ($module, $index) {
+
             $actions = '<div class="dropup d-inline-flex">
                             <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="lni lni-angle-double-up align-middle"></i>
@@ -213,7 +225,7 @@ class ModuleController extends Controller
                 'index' => $index + 1,
                 'module_code' => $module->module_code,
                 'module_name' => $module->module_name,
-                'practice_class_qty' => count($module->practiceClasses),
+                'practice_class_qty' => $module->unique_practice_classes_count,
                 'actions' => $actions
             ];
         });

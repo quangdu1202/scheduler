@@ -12,6 +12,10 @@ use App\Repositories\PracticeRoom\Contracts\PracticeRoomRepositoryInterface;
 use App\Repositories\PracticeRoom\PracticeRoomRepository;
 use App\Repositories\Registration\Contracts\RegistrationRepositoryInterface;
 use App\Repositories\Registration\RegistrationRepository;
+use App\Repositories\Student\Contracts\StudentRepositoryInterface;
+use App\Repositories\Student\StudentRepository;
+use App\Repositories\Teacher\Contracts\TeacherRepositoryInterface;
+use App\Repositories\Teacher\TeacherRepository;
 use App\Services\Module\Contracts\ModuleServiceInterface;
 use App\Services\Module\ModuleService;
 use App\Services\ModuleClass\Contracts\ModuleClassServiceInterface;
@@ -22,6 +26,10 @@ use App\Services\PracticeRoom\Contracts\PracticeRoomServiceInterface;
 use App\Services\PracticeRoom\PracticeRoomService;
 use App\Services\Registration\Contracts\RegistrationServiceInterface;
 use App\Services\Registration\RegistrationService;
+use App\Services\Student\Contracts\StudentServiceInterface;
+use App\Services\Student\StudentService;
+use App\Services\Teacher\Contracts\TeacherServiceInterface;
+use App\Services\Teacher\TeacherService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,8 +39,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-//        $this->app->singleton(PostRepositoryInterface::class, PostRepository::class);
-//        $this->app->singleton(PostServiceInterface::class, PostService::class);
         $this->app->singleton(ModuleRepositoryInterface::class, ModuleRepository::class);
         $this->app->singleton(ModuleServiceInterface::class, ModuleService::class);
         $this->app->singleton(PracticeRoomRepositoryInterface::class, PracticeRoomRepository::class);
@@ -43,6 +49,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(PracticeClassServiceInterface::class, PracticeClassService::class);
         $this->app->singleton(RegistrationRepositoryInterface::class, RegistrationRepository::class);
         $this->app->singleton(RegistrationServiceInterface::class, RegistrationService::class);
+        $this->app->singleton(TeacherRepositoryInterface::class, TeacherRepository::class);
+        $this->app->singleton(TeacherServiceInterface::class, TeacherService::class);
+        $this->app->singleton(StudentRepositoryInterface::class, StudentRepository::class);
+        $this->app->singleton(StudentServiceInterface::class, StudentService::class);
     }
 
     /**

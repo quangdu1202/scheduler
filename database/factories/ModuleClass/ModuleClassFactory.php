@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Database\Factories\ModuleClass;
 
 use App\Models\Module\Module;
 use App\Models\ModuleClass\ModuleClass;

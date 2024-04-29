@@ -63,7 +63,7 @@
                                     required>
                                 <option value="1" class="text-bg-light" data-bg-color="text-bg-success"><span class="badge text-bg-success">Available</span></option>
                                 <option value="2" class="text-bg-light" data-bg-color="text-bg-warning"><span class="badge text-bg-warning">In use</span></option>
-                                <option value="3" class="text-bg-light" data-bg-color="text-bg-secondary"><span class="badge text-bg-secondary">Not available</span></option>
+                                <option value="3" class="text-bg-light" data-bg-color="text-bg-dark"><span class="badge text-bg-dark">Not available</span></option>
                             </select>
                             <label for="room-status-select" class="form-label">Status</label>
                         </div>
@@ -145,7 +145,7 @@
                                                 required>
                                             <option value="1" class="text-bg-light" data-bg-color="text-bg-success"><span class="badge text-bg-success">Available</span></option>
                                             <option value="2" class="text-bg-light" data-bg-color="text-bg-warning"><span class="badge text-bg-warning">In use</span></option>
-                                            <option value="3" class="text-bg-light" data-bg-color="text-bg-secondary"><span class="badge text-bg-secondary">Not available</span></option>
+                                            <option value="3" class="text-bg-light" data-bg-color="text-bg-dark"><span class="badge text-bg-dark">Not available</span></option>
                                         </select>
                                         <label for="edit-room-status" class="form-label">Status</label>
                                     </div>

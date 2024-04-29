@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Database\Factories\Module;
 
 use App\Models\Module\Module;
 use Illuminate\Database\Eloquent\Factories\Factory;

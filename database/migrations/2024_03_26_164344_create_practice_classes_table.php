@@ -26,6 +26,7 @@ return new class extends Migration
             $table->integer('recurring_interval')->default(0);
             $table->integer('recurring_order')->default(1);
             $table->integer('registered_qty')->default(0);
+            $table->integer('max_qty');
             $table->timestamps();
         });
     }

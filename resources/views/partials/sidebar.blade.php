@@ -20,19 +20,16 @@
         </a>
     </li>
     <li class="sidebar-item">
-        <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-           data-bs-target="#classes" aria-expanded="false" aria-controls="multi">
-            <i class="lni lni-grid-alt"></i>
-            <span>Classes Management</span>
+        <a href="{{route('modules.index')}}" class="sidebar-link">
+            <i class="lni lni-library"></i>
+            <span>Module Classes</span>
         </a>
-        <ul id="classes" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-            <li class="sidebar-item">
-                <a href="{{route('modules.index')}}" class="sidebar-link">Module Classes</a>
-            </li>
-            <li class="sidebar-item">
-                <a href="{{route('practice-classes.index')}}" class="sidebar-link">Practice Classes</a>
-            </li>
-        </ul>
+    </li>
+    <li class="sidebar-item">
+        <a href="{{route('practice-classes.index')}}" class="sidebar-link">
+            <i class="lni lni-microsoft"></i>
+            <span>Practice Classes</span>
+        </a>
     </li>
     <li class="sidebar-item">
         <a href="{{route('practice-rooms.index')}}" class="sidebar-link">

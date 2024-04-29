@@ -162,3 +162,12 @@ a.sidebar-link:hover {
     margin-top: 0.6rem;
     margin-left: 0.25rem;
 }
+
+/*Datatable*/
+.cell-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

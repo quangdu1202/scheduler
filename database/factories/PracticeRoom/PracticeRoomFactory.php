@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Database\Factories\PracticeRoom;
 
 use App\Models\PracticeRoom\PracticeRoom;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -30,7 +30,9 @@ final class PracticeRoomFactory extends Factory
             'name' => fake()->word,
             'location' => fake()->word,
             'pc_qty' => fake()->randomNumber(2),
-            'status' => fake()->boolean,
+            'status' => function () {
+                return rand(1, 3);
+            },
         ];
     }
 }

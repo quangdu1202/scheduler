@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Database\Factories\Registration;
 
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\Registration\Registration;

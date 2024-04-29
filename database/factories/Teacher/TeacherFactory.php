@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Database\Factories\Teacher;
 
 use App\Models\Teacher\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -28,7 +28,6 @@ final class TeacherFactory extends Factory
     public function definition(): array
     {
         return [
-            'teacher_name' => fake()->word,
             'department' => fake()->word,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

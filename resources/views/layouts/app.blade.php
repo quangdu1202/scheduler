@@ -81,11 +81,6 @@
                 "hideMethod": "fadeOut",
                 "progressBar": true,
             };
-
-            $('form select').select2({
-                theme: "bootstrap-5",
-                placeholder: "Select an option",
-            });
         });
     </script>
 </body>

@@ -172,7 +172,7 @@ class PracticeRoomController extends Controller
     {
         $practiceRooms = $this->practiceRoomService->getAll();
         $responseData = $practiceRooms->map(function ($room, $index) {
-            $status = '<span class="badge rounded-pill text-bg-dark">Unknown</span>';
+            $status = '<span class="badge rounded-pill text-bg-danger">Unknown</span>';
             switch ($room->status) {
                 case 1:
                     $status = '<span class="badge rounded-pill text-bg-success">Available</span>';
@@ -181,7 +181,7 @@ class PracticeRoomController extends Controller
                     $status = '<span class="badge rounded-pill text-bg-warning">In use</span>';
                     break;
                 case 3:
-                    $status = '<span class="badge rounded-pill text-bg-secondary">Not Available</span>';
+                    $status = '<span class="badge rounded-pill text-bg-dark">Not Available</span>';
                     break;
             }
 
@@ -208,5 +208,16 @@ class PracticeRoomController extends Controller
         });
 
         return response()->json($responseData);
+    }
+
+    /**
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function getSinglePracticeRoomJsonData(int $id)
+    {
+        $practiceRoom = $this->practiceRoomService->findOrFail($id);
+
+        return response()->json($practiceRoom);
     }
 }

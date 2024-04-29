@@ -30,19 +30,23 @@ Route::post('registerSchedule', [HomeController::class, 'registerSchedule']);
 Route::get('mark-by-module', [MarkController::class, 'markByModule'])->name('mark-by-module');
 Route::get('mark-by-practice', [MarkController::class, 'markByPractice'])->name('mark-by-practice');
 
+// New
+
 Route::resource('practice-classes', PracticeClassController::class);
 
-Route::resource('modules', ModuleController::class);
 Route::get('modules/{id}/practice-classes', [ModuleController::class, 'showPracticeClasses'])->name('modules.show-practice-classes');
 Route::get('/getModulesJsonData', [ModuleController::class, 'getJsonData'])->name('modules.get-json-data');
+Route::resource('modules', ModuleController::class);
 
-Route::resource('practice-rooms', PracticeRoomController::class);
+Route::get('/getSinglePracticeRoomJsonData', [PracticeRoomController::class, 'getSinglePracticeRoomJsonData'])->name('practice-rooms.get-single-room-json-data');
 Route::get('/getPracticeRoomsJsonData', [PracticeRoomController::class, 'getJsonData'])->name('practice-rooms.get-json-data');
+Route::resource('practice-rooms', PracticeRoomController::class);
 
-Route::resource('practice-classes', PracticeClassController::class);
 Route::get('/getPracticeClassesJsonData', [PracticeClassController::class, 'getJsonData'])->name('practice-classes.get-json-data');
 Route::get('/getJsonDataForSchedule', [PracticeClassController::class, 'getJsonDataForSchedule'])->name('practice-classes.get-json-data-for-schedule');
 Route::get('/getJsonDataForStudentsOfPracticeClass', [PracticeClassController::class, 'getJsonDataForStudentsOfPracticeClass'])->name('practice-classes.get-student-data-for-schedule');
+Route::resource('practice-classes', PracticeClassController::class);
+
 
 //Auth::routes();
 //

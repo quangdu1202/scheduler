@@ -6,28 +6,28 @@
         <h1 class="h2">Practice Classes Management</h1>
     </div>
 
+    <!-- Action Buttons (Add new, etc.) -->
     <div class="top-nav nav mb-3 d-flex align-items-center">
-        <!-- Action Buttons (Add new, etc.) -->
         <div class="action-buttons">
             <button id="add-pclass-form-toggle" class="btn btn-primary btn-sm" type="button">
                 <i class="lni lni-circle-plus align-middle"></i> Add new
             </button>
         </div>
         <div class="vr mx-5"></div>
-        <form id="practice-class-filter" action="#" class="d-flex align-items-center">
-            <label for="practice-room-select" class="me-2 text-nowrap fw-bold">Module:</label>
-            <select name="practice-room" id="practice-room-select" class="form-select">
-                <option value="-1" selected>--- Showing All Modules ---</option>
-                <option value="1">Nhập môn lập trình máy tính</option>
-                <option value="2">Kỹ thuật lập trình</option>
-                <option value="3">Cơ sở dữ liệu</option>
-                <option value="4">Kiến trúc máy tính</option>
+        <!-- Filters -->
+        <form id="module-filter" action="#" class="d-flex align-items-center">
+            <label for="module-filter-select" class="me-2 text-nowrap fw-bold">Module:</label>
+            <select name="module" id="module-filter-select" class="form-select">
+                <option></option>
+                @foreach($modules as $module)
+                    <option value="{{$module->id}}">{{$module->module_name . ' (' . $module->module_code . ')'}}</option>
+                @endforeach
             </select>
         </form>
     </div>
 
     <!-- Create form -->
-    <div id="new-pclass-form-wrapper" class="border border-primary col-12">
+    <div id="new-pclass-form-wrapper" class="new-form-hidden border border-primary col-12">
         <form id="new-pclass-form"
               class="p-3"
               data-action="{{route('practice-classes.store')}}"
@@ -40,8 +40,9 @@
                         <div class="form-floating mb-3">
                             <select name="module_id" id="moduleSelect" class="form-select" required>
                                 <option></option>
-                                <option value="1">Nhập môn lập trình máy tính (202320503197)</option>
-                                <option value="2">Kỹ thuật lập trình (202320595295)</option>
+                                @foreach($modules as $module)
+                                    <option value="{{$module->id}}">{{$module->module_name . ' (' . $module->module_code . ')'}}</option>
+                                @endforeach
                             </select>
                             <label for="moduleSelect" class="form-label">Module</label>
                         </div>
@@ -50,9 +51,9 @@
                         <div class="form-floating mb-3">
                             <select name="teacher_id" id="teacherSelect" class="form-select">
                                 <option></option>
-                                <option value="1">Nguyen Van A</option>
-                                <option value="2">Tran Thi B</option>
-                                <option value="3">Ngo Trong C</option>
+                                @foreach($teachers as $teacher)
+                                    <option value="{{$teacher->id}}">{{$teacher->user->name}}</option>
+                                @endforeach
                             </select>
                             <label for="teacherSelect" class="form-label">Teacher</label>
                         </div>
@@ -65,15 +66,25 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3">
+                    <div class="col-2">
                         <div class="form-floating mb-3">
                             <select name="practice_room_id" id="roomSelect" class="form-select" required>
                                 <option></option>
-                                <option value="1">601 A1nd kjs k skd ksd k dsk dksj kdj dkjd s</option>
-                                <option value="2">702 A1</option>
-                                <option value="3">802 A1</option>
+                                @foreach($practiceRooms as $practiceRoom)
+                                    <option value="{{$practiceRoom->id}}" data-pc-qty="{{$practiceRoom->pc_qty}}">{{$practiceRoom->name . ' (' . $practiceRoom->location . ')'}}</option>
+                                @endforeach
                             </select>
                             <label for="roomSelect" class="form-label">Practice Room</label>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="form-floating mb-3 position-relative">
+                            <input type="number" name="max_qty" class="form-control" id="maxStudentQty" required disabled
+                                   data-bs-toggle="tooltip" data-bs-placement="right" aria-describedby="maxStudentQtyFeedback">
+                            <label for="maxStudentQty" class="form-label">Max Students</label>
+                            <div class="invalid-tooltip" id="maxStudentQtyFeedback">
+                                Exceeding the number of PCs.
+                            </div>
                         </div>
                     </div>
                     <div class="col-2">
@@ -146,7 +157,7 @@
                 <th>Room</th>
                 <th>Teacher</th>
                 <th>Recurring</th>
-                <th>Student QTY</th>
+                <th>Registration</th>
                 <th>Action</th>
             </tr>
             </thead>
@@ -156,7 +167,7 @@
     </div>
 
     <!-- All schedules Info modal -->
-    <div class="modal fade" id="all-schedule-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal modal-xl fade" id="all-schedule-modal" tabindex="-1" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -172,6 +183,9 @@
                             <tr>
                                 <th>#</th>
                                 <th>Schedule Date</th>
+                                <th>Practice Room</th>
+                                <th>Teacher</th>
+                                <th>Session</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
@@ -212,9 +226,9 @@
                                     <div class="form-floating mb-3">
                                         <select name="teacher_id" id="edit-teacherSelect" class="form-select">
                                             <option></option>
-                                            <option value="1">Nguyen Van A</option>
-                                            <option value="2">Tran Thi B</option>
-                                            <option value="3">Ngo Trong C</option>
+                                            @foreach($teachers as $teacher)
+                                                <option value="{{$teacher->id}}">{{$teacher->user->name}}</option>
+                                            @endforeach
                                         </select>
                                         <label for="edit-teacherSelect" class="form-label">Teacher</label>
                                     </div>
@@ -223,9 +237,9 @@
                                     <div class="form-floating mb-3">
                                         <select name="practice_room_id" id="edit-roomSelect" class="form-select" required>
                                             <option></option>
-                                            <option value="1">601 A1nd kjs k skd ksd k dsk dksj kdj dkjd s</option>
-                                            <option value="2">702 A1</option>
-                                            <option value="3">802 A1</option>
+                                            @foreach($practiceRooms as $practiceRoom)
+                                                <option value="{{$practiceRoom->id}}" data-pc-qty="{{$practiceRoom->pc_qty}}">{{$practiceRoom->name . ' (' . $practiceRoom->location . ')'}}</option>
+                                            @endforeach
                                         </select>
                                         <label for="edit-roomSelect" class="form-label">Practice Room</label>
                                     </div>
@@ -298,6 +312,7 @@
                         @csrf
                         <fieldset class="">
                             <input type="hidden" name="_method" value="delete">
+                            <input type="hidden" id="delete-mode" name="_deleteMode" value="">
                             <div class="row">
                                 <p>Any associated schedules and student registrations will also be deleted.</p>
                                 <div class="mb-3">
@@ -321,6 +336,11 @@
     <!-- Script -->
     <script>
         $(document).ready(function () {
+            $('form select').select2({
+                theme: "bootstrap-5",
+                placeholder: "Select an option",
+            });
+
             //Data table initiate
             const pclassTable = $('#pclass-management-table').DataTable({
                 ajax: {
@@ -329,22 +349,36 @@
                 },
                 columns: [
                     { data: 'index',  width: '5%'},
-                    { data: 'practice_class_name', type: 'string', width: '15%', orderable: false },
+                    { data: 'practice_class_name', type: 'html', width: '15%', orderable: false },
                     { data: 'start_date', type: 'string', width: '10%' },
                     { data: 'end_date', type: 'string', width: '10%' },
-                    { data: 'session', width: '5%', orderable: false },
-                    { data: 'practice_room.room_info',
-                        type: 'html', width: '10%', orderable: false
+                    { data: 'session', type: 'html', width: '5%', orderable: false },
+                    { data: 'practice_room', type: 'html', width: '10%', orderable: false,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="cell-clamp" title="${data.location + ' - ' + data.name}">
+                                    <b>${data.location}</b> <br> <span>${data.name}</span>
+                                </div>
+                            `;
+                        }
                     },
                     { data: 'teacher', type: 'html', width: '15%', orderable: false },
                     { data: 'recurring_interval', type: 'html', width: '10%', orderable: false },
                     { data: 'registered_qty', type: 'html', width: '10%' },
                     { data: 'actions', type: 'html', width: '5%', orderable: false },
                 ],
-                columnDefs: [{
-                    "className": "dt-center",
-                    "targets": [0, 2, 3, 4, 5, 6, 7, 8, 9]
-                }],
+                columnDefs: [
+                    {
+                        className: "dt-center",
+                        targets: [0, 2, 3, 4, 5, 6, 7, 8, 9]
+                    },
+                    {
+                        targets: [1, 2, 3, 6],  // This targets all columns
+                        render: function(data, type, row) {
+                            return `<div class="cell-clamp" title="${data}">${data}</div>`;
+                        }
+                    }
+                ],
                 layout: {
                     topEnd: {
                         search: {
@@ -400,6 +434,23 @@
                 $('#new-pclass-form-wrapper').slideToggle(400, 'linear');
             });
 
+            let pcQty = 0; // Variable to store pc quantity
+
+            $('#roomSelect').change(function() {
+                pcQty = $('option:selected', this).data('pc-qty');
+                $('#maxStudentQty').val(pcQty).change().attr('disabled', false); // Set and trigger change to validate immediately
+            });
+
+            $('#maxStudentQty').on('input', function() {
+                if (parseInt($(this).val()) > pcQty) {
+                    $(this).addClass('is-invalid'); // Add Bootstrap's is-invalid class to show tooltip
+                    $(this).removeClass('is-valid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $(this).addClass('is-valid'); // Optionally add is-valid class to indicate correct input
+                }
+            });
+
             $('#recurringSelect').change(function () {
                 if ($(this).val() !== '0') {
                     $('#repeatLimit').prop('disabled', false).val(1);
@@ -410,7 +461,9 @@
 
             const newPracticeClassForm = $('#new-pclass-form');
             setupAjaxForm(newPracticeClassForm);
+            //
 
+            // View all schedules of a practice class
             const infoModal = new bootstrap.Modal('#all-schedule-modal');
             const pClassAllScheduleTable = $('#pclass-all-schedule-table');
 
@@ -426,6 +479,9 @@
                     columns: [
                         {data: 'index', width: '5%'},
                         {data: 'schedule_date', type: 'string', width: '15%'},
+                        {data: 'practice_room', type: 'string', width: '15%'},
+                        {data: 'teacher', type: 'string', width: '15%'},
+                        {data: 'session', type: 'string', width: '15%'},
                         {data: 'actions', type: 'html', width: '10%'},
                     ],
                     columnDefs: [{
@@ -444,19 +500,19 @@
                                 {
                                     extend: 'csv',
                                     exportOptions: {
-                                        columns: [0, 1]
+                                        columns: [0, 1, 2, 3, 4]
                                     }
                                 },
                                 {
                                     extend: 'excel',
                                     exportOptions: {
-                                        columns: [0, 1]
+                                        columns: [0, 1, 2, 3, 4]
                                     }
                                 },
                                 {
                                     extend: 'print',
                                     exportOptions: {
-                                        columns: [0, 1]
+                                        columns: [0, 1, 2, 3, 4]
                                     }
                                 }
                             ]
@@ -467,6 +523,7 @@
                 });
                 infoModal.show();
             });
+            //
 
             // Edit practice class schedule modal
             const editSinglePclassModal = new bootstrap.Modal('#edit-single-pclass-modal');
@@ -474,7 +531,6 @@
 
             $(document).on('click', '.pclass-single-edit-btn', function () {
                 const data = pClassAllScheduleTable.DataTable().row($(this).parents('tr')).data();
-                $('#edit-session-'+ data.DT_RowData.session).prop('checked', true);
 
                 $('#edit-id').val(data.DT_RowId);
 
@@ -500,12 +556,15 @@
             // Delete practice class schedule modal
             const deletePclassModal = new bootstrap.Modal('#delete-pclass-modal')
             const deletePclassForm = $('#delete-pclass-form');
-            pclassTable.on('click', '.pclass-delete-btn', function () {
-                const data = pclassTable.row($(this).parents('tr')).data();
+            $(document).on('click', '.pclass-delete-btn', function () {
+                const data = $(this).parents('tr').data();
 
                 let deleteURL = "{{ route('practice-classes.destroy', ['practice_class' => ':id'])}}";
-                deleteURL = deleteURL.replace(':id', data.DT_RowId);
+
+                deleteURL = deleteURL.replace(':id', data.id);
                 deletePclassForm.data('action', deleteURL);
+
+                $('#delete-mode').val($(this).data('delete-mode'));
 
                 deletePclassModal.show();
             });

@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * Class Teacher
  *
  * @property integer $id
- * @property string $teacher_name
  * @property string $department
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -30,7 +29,11 @@ class Teacher extends BaseModel
 	/**
 	 * @var array
 	 */
-	protected $fillable = ['teacher_name', 'department', 'created_at', 'updated_at'];
+	protected $fillable = [
+        'department',
+        'created_at',
+        'updated_at'
+    ];
 
     /**
      * @return MorphOne

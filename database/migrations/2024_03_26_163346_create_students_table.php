@@ -16,8 +16,7 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('student_id');
-            $table->string('student_name');
+            $table->string('student_code');
             $table->foreignId('original_class_id')->constrained('original_classes');
             $table->timestamps();
         });
