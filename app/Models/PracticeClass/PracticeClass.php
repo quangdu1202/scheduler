@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property integer $recurring_order
  * @property integer $registered_qty
  * @property integer $max_qty
+ * @property integer $status
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Module $module
@@ -53,6 +54,7 @@ class PracticeClass extends BaseModel
         'recurring_interval',
         'registered_qty',
         'max_qty',
+        'status',
         'created_at',
         'updated_at'
     ];

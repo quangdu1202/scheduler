@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Class OriginalClass
  *
  * @property integer $id
+ * @property string $original_class_code
  * @property string $original_class_name
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -24,7 +25,12 @@ class OriginalClass extends BaseModel
 	/**
 	 * @var array
 	 */
-	protected $fillable = ['original_class_name', 'created_at', 'updated_at'];
+	protected $fillable = [
+        'original_class_code',
+        'original_class_name',
+        'created_at',
+        'updated_at'
+    ];
 
     /**
      * @return HasMany

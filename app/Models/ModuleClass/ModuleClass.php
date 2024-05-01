@@ -15,14 +15,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Class ModuleClass
  *
  * @property integer $id
+ * @property string $module_class_code
  * @property string $module_class_name
  * @property integer $module_id
  * @property integer $teacher_id
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property Carbon $start_date
+ * @property Carbon $end_date
+ * @property int $student_qty
+ * @property int $status
  * @property StudentModuleClass $studentModuleClasses
  * @property Module $module
  * @property Teacher $teacher
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class ModuleClass extends BaseModel
 {
@@ -31,7 +36,18 @@ class ModuleClass extends BaseModel
 	/**
 	 * @var array
 	 */
-	protected $fillable = ['module_class_name', 'module_id', 'teacher_id', 'created_at', 'updated_at'];
+	protected $fillable = [
+        'module_class_code',
+        'module_class_name',
+        'module_id',
+        'teacher_id',
+        'start_date',
+        'end_date',
+        'student_qty',
+        'status',
+        'created_at',
+        'updated_at'
+    ];
 
     /**
      * @return HasMany
