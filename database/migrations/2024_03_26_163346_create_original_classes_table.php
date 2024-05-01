@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('original_classes', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('original_class_code');
             $table->string('original_class_name');
             $table->timestamps();
         });

@@ -15,9 +15,14 @@ return new class extends Migration
     {
         Schema::create('module_classes', function (Blueprint $table) {
             $table->id();
+            $table->string('module_class_code');
             $table->string('module_class_name');
             $table->foreignIdFor(Module::class);
             $table->foreignIdFor(Teacher::class);
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->integer('student_qty');
+            $table->integer('status');
             $table->timestamps();
         });
     }
