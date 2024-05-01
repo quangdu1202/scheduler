@@ -21,9 +21,9 @@ class UserFactory extends Factory
             Student::factory()->create();
 
         return [
-            'name' => $this->faker->name,
-            'email' => $this->faker->unique()->safeEmail,
-            'password' => bcrypt('password'), // Consider using config or .env file for default password
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'password' => $this->faker->password(),
             'userable_id' => $userable->id,
             'userable_type' => get_class($userable),
             'created_at' => Carbon::now(),

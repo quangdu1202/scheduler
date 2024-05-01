@@ -28,7 +28,7 @@ final class TeacherFactory extends Factory
     public function definition(): array
     {
         return [
-            'department' => fake()->word,
+            'department' => $this->faker->word(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ];

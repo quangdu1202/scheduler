@@ -30,14 +30,15 @@ final class PracticeClassFactory extends Factory
     public function definition(): array
     {
         return [
-            'practice_class_name' => fake()->word,
-            'schedule_date' => fake()->optional()->date(),
-            'session' => fake()->randomNumber(),
-            'module_id' => Module::factory(),
-            'practice_room_id' => PracticeRoom::factory(),
-            'teacher_id' => Teacher::factory(),
-            'recurring_id' => fake()->optional()->randomNumber(),
-            'registered_qty' => fake()->randomNumber(),
+//            'practice_class_name' => fake()->word,
+//            'schedule_date' => fake()->optional()->date(),
+//            'session' => fake()->randomNumber(),
+//            'module_id' => Module::factory(),
+//            'practice_room_id' => PracticeRoom::factory(),
+//            'teacher_id' => Teacher::factory(),
+//            'recurring_id' => fake()->optional()->randomNumber(),
+//            'registered_qty' => fake()->randomNumber(),
+//            'status' => 0,
         ];
     }
 }

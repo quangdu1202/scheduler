@@ -28,8 +28,8 @@ final class StudentFactory extends Factory
     public function definition(): array
     {
         return [
-            'student_code' => fake()->word,
-            'original_class_id' => OriginalClass::factory(),
+            'student_code' => $this->faker->word(),
+            'original_class_id' => OriginalClass::inRandomOrder()->value('id'),
         ];
     }
 }
