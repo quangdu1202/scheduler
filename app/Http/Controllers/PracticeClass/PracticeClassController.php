@@ -306,14 +306,14 @@ class PracticeClassController extends Controller
             // Delete practice classes based on delete mode
             if ($deleteMode === 'all') {
                 $recurringId = $practiceClass->recurring_id;
-                $practiceClasses = $this->practiceClassService->find(['recurring_id' => $recurringId]);
-
-                // Iterate over each practice class
-                foreach ($practiceClasses as $practiceClass) {
-                    $this->practiceClassService->delete($practiceClass->id);
-                }
+                $this->practiceClassService->deleteByRecurringId($recurringId);
             } else {
-                $this->practiceClassService->delete($practiceClass->id);
+                $this->practiceClassService->update($practiceClass->id, [
+                    'schedule_date' => null,
+                    'session' => null,
+                    'practice_room_id' => null,
+                    'teacher_id' => null
+                ]);
             }
 
             // Commit the transaction
@@ -323,10 +323,10 @@ class PracticeClassController extends Controller
             return response()->json([
                 'status' => 200,
                 'title' => 'Success!',
-                'message' => 'Practice class schedules deleted successfully!',
-                'reloadTarget' => '#pclass-management-table, #pclass-all-schedule-table',
+                'message' => 'Practice class schedule(s) deleted successfully!',
+                'resetTarget' => '#delete-pclass-form',
                 'hideTarget' => '#delete-pclass-modal',
-                'resetTarget' => '#delete-pclass-form'
+                'reloadTarget' => $deleteMode === 'all' ? '#pclass-management-table' : '#pclass-management-table, #pclass-all-schedule-table',
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -338,7 +338,6 @@ class PracticeClassController extends Controller
             ]);
         }
     }
-
 
     // Need update
     /**
@@ -395,10 +394,22 @@ class PracticeClassController extends Controller
                 ->schedule_date;
 
             $session = match ($pclass->session) {
-                1 => '<span class="badge rounded-pill text-bg-success">S</span>',
-                2 => '<span class="badge rounded-pill text-bg-primary">C</span>',
-                3 => '<span class="badge rounded-pill text-bg-danger">T</span>',
-                default => '<span class="badge rounded-pill text-bg-dark">Unknown</span>',
+                1 => [
+                    'title' => 'Morning',
+                    'value' => '<span class="badge rounded-pill text-bg-success">S</span>'
+                ],
+                2 => [
+                    'title' => 'Afternoon',
+                    'value' => '<span class="badge rounded-pill text-bg-primary">C</span>'
+                ],
+                3 => [
+                    'title' => 'Evening',
+                    'value' => '<span class="badge rounded-pill text-bg-danger">T</span>'
+                ],
+                default => [
+                    'title' => 'Unknown',
+                    'value' => '<span class="badge rounded-pill text-bg-dark">Unknown</span>'
+                ],
             };
 
             $recurring_interval = match ($pclass->recurring_interval) {
@@ -410,6 +421,35 @@ class PracticeClassController extends Controller
 
             $registered_qty = $pclass->registered_qty;
             $max_qty = $pclass->max_qty;
+
+            $status = match ($pclass->status) {
+                0 => [
+                    'title' => 'Not available for registration',
+                    'value' => '<div class="form-check form-switch">
+                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $pclass->id . '" type="checkbox" id="'.$pclass->id.'-status">
+                                  <label for="'.$pclass->id.'-status" title="Not available for registration">Created</label>
+                                </div>'
+                ],
+                1 => [
+                    'title' => 'Ready for registration',
+                    'value' => '<div class="form-check form-switch">
+                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $pclass->id . '" type="checkbox" id="'.$pclass->id.'-status" checked>
+                                  <label for="'.$pclass->id.'-status" title="Ready for registration">Ready</label>
+                                </div>'
+                ],
+                2 => [
+                    'title' => 'Awaiting Approval',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-warning status-change-btn" data-status="2">Pending Approval</button>'
+                ],
+                3 => [
+                    'title' => 'Approved',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-success status-change-btn" data-status="3">Approved</button>'
+                ],
+                default => [
+                    'title' => 'Unknown',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-dark">Unknown</button>'
+                ],
+            };
 
             $actions = '<div class="dropdown">
                             <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -429,23 +469,25 @@ class PracticeClassController extends Controller
                                 </div>
                             </div>
                         </div>';
+
             return [
                 'DT_RowId' => $pclass->id,
                 'DT_RowData' => $pclass,
                 'index' => $index + 1,
                 'practice_class_name' => $pclass->practice_class_name,
-                'start_date' => $pclass->schedule_date,
+                'start_date' => $pclass->schedule_date != null ? $pclass->schedule_date : '<i>Not set</i>',
                 'end_date' => $endDate,
                 'session' => $session,
                 'practice_room' => [
-                    'location' => $pclass->practiceRoom->location,
-                    'name' => $pclass->practiceRoom->name
+                    'title' => $pclass->practiceRoom != null ? ($pclass->practiceRoom->location . ' - ' . $pclass->practiceRoom->name) : 'Not set',
+                    'value' => $pclass->practiceRoom != null ? ('<b>' . $pclass->practiceRoom->location . '</b><br>' . $pclass->practiceRoom->name) : '<i>Not set</i>'
                 ],
-                'teacher' => $pclass->teacher->user->name,
+                'teacher' => $pclass->teacher != null ? $pclass->teacher->user->name : '<i>Not set</i>' ,
                 'recurring_id' => $pclass->recurring_id,
                 'recurring_interval' => $recurring_interval,
                 'recurring_order' => $pclass->recurring_order,
                 'registered_qty' => $registered_qty . '/' . $max_qty,
+                'status' => $status,
                 'actions' => $actions
             ];
         });
@@ -464,10 +506,22 @@ class PracticeClassController extends Controller
 
         $responseData = $practiceClasses->map(function ($pclass, $index) {
             $session = match ($pclass->session) {
-                1 => '<span class="badge rounded-pill text-bg-success">S</span>',
-                2 => '<span class="badge rounded-pill text-bg-primary">C</span>',
-                3 => '<span class="badge rounded-pill text-bg-danger">T</span>',
-                default => '<span class="badge rounded-pill text-bg-dark">Unknown</span>',
+                1 => [
+                    'title' => 'Morning',
+                    'value' => '<span class="badge rounded-pill text-bg-success">S</span>'
+                ],
+                2 => [
+                    'title' => 'Afternoon',
+                    'value' => '<span class="badge rounded-pill text-bg-primary">C</span>'
+                ],
+                3 => [
+                    'title' => 'Evening',
+                    'value' => '<span class="badge rounded-pill text-bg-danger">T</span>'
+                ],
+                default => [
+                    'title' => 'Unknown',
+                    'value' => '<span class="badge rounded-pill text-bg-dark">Unknown</span>'
+                ],
             };
 
             $actions = '<button type="button" class="btn btn-primary btn-sm pclass-single-edit-btn">
@@ -480,15 +534,73 @@ class PracticeClassController extends Controller
                 'DT_RowId' => $pclass->id,
                 'DT_RowData' => $pclass,
                 'index' => $pclass->recurring_order,
-                'schedule_date' => $pclass->schedule_date,
-                'practice_room' => '<b>' . $pclass->practiceRoom->location . '</b>' . '<br>' . $pclass->practiceRoom->name,
-                'teacher' => $pclass->teacher->user->name,
-                'session' => $session,
+                'schedule_date' => $pclass->schedule_date != null ? $pclass->schedule_date : '<i>Not set</i>',
+                'practice_room' => [
+                    'title' => $pclass->practiceRoom != null ? ($pclass->practiceRoom->location . ' - ' . $pclass->practiceRoom->name) : 'Not set',
+                    'value' => $pclass->practiceRoom != null ? ('<b>' . $pclass->practiceRoom->location . '</b><br>' . $pclass->practiceRoom->name) : '<i>Not set</i>'
+                ],
+                'teacher' => $pclass->teacher != null ? $pclass->teacher->user->name : '<i>Not set</i>' ,
+                'session' => [
+                    'title' => $session['title'],
+                    'value' => $session['value']
+                ],
                 'actions' => $actions
             ];
         });
 
         return response()->json($responseData);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function updateScheduleStatus(Request $request)
+    {
+        $status = $request->input('status');
+        $classId = $request->input('pclassId');
+
+        try {
+            $editedPclass = $this->practiceClassService->update($classId, ['status' => $status]);
+
+            // Define message based on status
+            $message = $status == 0
+                ? '<b>Disabled</b> for registration!'
+                : '<b>Enabled</b> for registration!';
+
+            $newStatus = $status == 0
+                ? [
+                    'title' => 'Not available for registration',
+                    'value' => '<div class="form-check form-switch">
+                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $editedPclass->id . '" type="checkbox" id="'.$editedPclass->id.'-status">
+                                  <label for="'.$editedPclass->id.'-status" title="Not available for registration">Created</label>
+                                </div>'
+                ]
+                : [
+                    'title' => 'Ready for registration',
+                    'value' => '<div class="form-check form-switch">
+                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $editedPclass->id . '" type="checkbox" id="'.$editedPclass->id.'-status" checked>
+                                  <label for="'.$editedPclass->id.'-status" title="Ready for registration">Ready</label>
+                                </div>'
+                ];
+
+            // Return a unified successful JSON response
+            return response()->json([
+                'status' => 200,
+                'title' => 'Success!',
+                'message' => $message,
+                'newStatus' => $newStatus
+            ]);
+
+        } catch (Exception $e) {
+            Log::error("Practice Class updated failed: {$e->getMessage()}");
+
+            return response()->json([
+                'status' => 500,
+                'title' => 'Error!',
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     public function getJsonDataForStudentsOfPracticeClass()

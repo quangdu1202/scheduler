@@ -121,7 +121,7 @@
                         <div class="form-floating mb-3">
                             <select name="recurring_interval" id="recurringSelect" class="form-select" required>
                                 <option></option>
-                                <option value="0">Once (No repeat)</option>
+                                <option value="0">Once</option>
                                 <option value="604800">Weekly</option>
                                 <option value="1209600">Biweekly</option>
                             </select>
@@ -132,6 +132,17 @@
                         <div class="form-floating mb-3">
                             <input type="number" id="repeatLimit" class="form-control" name="repeat_limit" min="1" max="20" disabled>
                             <label for="repeatLimit" class="form-label">Repeat</label>
+                        </div>
+                    </div>
+                    <div class="col-1">
+                        <div class="form-floating mb-3">
+                            <select name="status" id="statusSelect" class="form-select">
+                                <option value="0"></option>
+                                <option value="1">Ready</option>
+                                <option value="2">Approval</option>
+                                <option value="3">Approved</option>
+                            </select>
+                            <label for="statusSelect" class="form-label">Status</label>
                         </div>
                     </div>
                 </div>
@@ -157,7 +168,8 @@
                 <th>Room</th>
                 <th>Teacher</th>
                 <th>Recurring</th>
-                <th>Registration</th>
+                <th>Reg.</th>
+                <th>Status</th>
                 <th>Action</th>
             </tr>
             </thead>
@@ -276,12 +288,6 @@
                                         }
                                     </style>
                                 </div>
-                                <div class="col-3">
-                                    <div class="form-floating mb-3">
-                                        <input type="number" id="edit-repeatLimit" class="form-control" name="repeat_limit" min="1" max="20" disabled>
-                                        <label for="edit-repeatLimit" class="form-label">Repeat</label>
-                                    </div>
-                                </div>
                             </div>
                         </fieldset>
                     </form>
@@ -336,7 +342,7 @@
     <!-- Script -->
     <script>
         $(document).ready(function () {
-            $('form select').select2({
+            $('form select').not('#recurringSelect, #statusSelect').select2({
                 theme: "bootstrap-5",
                 placeholder: "Select an option",
             });
@@ -347,36 +353,61 @@
                     url: '{{route('practice-classes.get-json-data')}}',
                     dataSrc: ''
                 },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching data: ", error);
+                    toastr.error("An error occurred while loading the data", "Error");
+                },
                 columns: [
                     { data: 'index',  width: '5%'},
-                    { data: 'practice_class_name', type: 'html', width: '15%', orderable: false },
+                    { data: 'practice_class_name', type: 'html', width: '15%' },
                     { data: 'start_date', type: 'string', width: '10%' },
                     { data: 'end_date', type: 'string', width: '10%' },
-                    { data: 'session', type: 'html', width: '5%', orderable: false },
-                    { data: 'practice_room', type: 'html', width: '10%', orderable: false,
+                    { data: 'session', type: 'html', width: '5%',
                         render: function(data, type, row) {
                             return `
-                                <div class="cell-clamp" title="${data.location + ' - ' + data.name}">
-                                    <b>${data.location}</b> <br> <span>${data.name}</span>
+                                <div class="cell-clamp" title="${data.title}">
+                                    ${data.value}
                                 </div>
                             `;
                         }
                     },
-                    { data: 'teacher', type: 'html', width: '15%', orderable: false },
-                    { data: 'recurring_interval', type: 'html', width: '10%', orderable: false },
-                    { data: 'registered_qty', type: 'html', width: '10%' },
-                    { data: 'actions', type: 'html', width: '5%', orderable: false },
+                    { data: 'practice_room', type: 'html', width: '10%',
+                        render: function(data, type, row) {
+                            return `
+                                <div class="cell-clamp" title="${data.title}">
+                                    ${data.value}
+                                </div>
+                            `;
+                        }
+                    },
+                    { data: 'teacher', type: 'html', width: '15%' },
+                    { data: 'recurring_interval', type: 'html', width: '10%' },
+                    { data: 'registered_qty', type: 'html', width: '5%' },
+                    { data: 'status', type: 'html', width: '10%',
+                        render: function(data, type, row) {
+                            return `
+                                <div class="cell-clamp" title="${data.title}">
+                                    ${data.value}
+                                </div>
+                            `;
+                        }
+                    },
+                    { data: 'actions', type: 'html', width: '5%' },
                 ],
                 columnDefs: [
                     {
                         className: "dt-center",
-                        targets: [0, 2, 3, 4, 5, 6, 7, 8, 9]
+                        targets: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
                     },
                     {
                         targets: [1, 2, 3, 6],  // This targets all columns
                         render: function(data, type, row) {
                             return `<div class="cell-clamp" title="${data}">${data}</div>`;
                         }
+                    },
+                    {
+                        orderable: false,
+                        targets: [1, 4, 5, 6, 7, 8, 9, 10]
                     }
                 ],
                 layout: {
@@ -389,19 +420,19 @@
                             {
                                 extend: 'csv',
                                 exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
                                 }
                             },
                             {
                                 extend: 'excel',
                                 exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
                                 }
                             },
                             {
                                 extend: 'print',
                                 exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
                                 }
                             }
                         ]
@@ -428,6 +459,50 @@
                         '</select> classes per page'
                 }
             });
+            //
+
+            // Update the practice class schedule status
+            pclassTable.on('change', '.status-change-btn', function(e) {
+                // e.preventDefault();
+                const status = $(this).is(':checked') ? 1 : 0;
+                const pclassId = $(this).data('pclass-id');
+                const $row = $(this).closest('tr'); // Get the closest row (<tr>) element
+                const rowData = pclassTable.row($row).data(); // Get the data for this row
+
+                // Show the loading overlay
+                showOverlay();
+
+                $.ajax({
+                    url: '{{route('practice-classes.update-schedule-status')}}',
+                    type: 'POST',
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    data: {
+                        status: status,
+                        pclassId: pclassId
+                    },
+                    success: function(response) {
+                        // Hide the loading overlay
+                        hideOverlay();
+
+                        console.log(response);
+                        switch (response.status) {
+                            case 200:
+                                toastr.success(response.message, response.title || "Success");
+                                // Update the row data here if needed
+                                rowData.status = response.newStatus; // Assume response contains new status
+                                pclassTable.row($row).data(rowData).invalidate().draw(false); // Invalidate the data cache
+                                break;
+                            default:
+                                toastr.error(response.message || "Unknown error occurred", response.title || "Error");
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                        toastr.error("A server error occurred. Please try again.", "Error");
+                    }
+                });
+            });
+            //
 
             // Create p-class form
             $('#add-pclass-form-toggle').click(function() {
@@ -479,15 +554,39 @@
                     columns: [
                         {data: 'index', width: '5%'},
                         {data: 'schedule_date', type: 'string', width: '15%'},
-                        {data: 'practice_room', type: 'string', width: '15%'},
+                        { data: 'practice_room', type: 'html', width: '15%', orderable: false,
+                            render: function(data, type, row) {
+                                return `
+                                <div class="cell-clamp" title="${data.title}">
+                                    ${data.value}
+                                </div>
+                            `;
+                            }
+                        },
                         {data: 'teacher', type: 'string', width: '15%'},
-                        {data: 'session', type: 'string', width: '15%'},
+                        { data: 'session', type: 'html', width: '15%', orderable: false,
+                            render: function(data, type, row) {
+                                return `
+                                <div class="cell-clamp" title="${data.title}">
+                                    ${data.value}
+                                </div>
+                            `;
+                            }
+                        },
                         {data: 'actions', type: 'html', width: '10%'},
                     ],
-                    columnDefs: [{
-                        "className": "dt-center",
-                        "targets": "_all"
-                    }],
+                    columnDefs: [
+                        {
+                            className: "dt-center",
+                            targets: "_all"
+                        },
+                        {
+                            targets: [1, 3],  // This targets all columns
+                            render: function(data, type, row) {
+                                return `<div class="cell-clamp" title="${data}">${data}</div>`;
+                            }
+                        }
+                    ],
                     layout: {
                         topStart: {
                             search: {
