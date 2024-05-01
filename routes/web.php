@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MarkController;
 use App\Http\Controllers\Module\ModuleController;
+use App\Http\Controllers\ModuleClass\ModuleClassController;
 use App\Http\Controllers\PracticeClass\PracticeClassController;
 use App\Http\Controllers\PracticeRoom\PracticeRoomController;
 use App\Http\Controllers\RoomController;
@@ -45,7 +46,13 @@ Route::resource('practice-rooms', PracticeRoomController::class);
 Route::get('/getPracticeClassesJsonData', [PracticeClassController::class, 'getJsonData'])->name('practice-classes.get-json-data');
 Route::get('/getJsonDataForSchedule', [PracticeClassController::class, 'getJsonDataForSchedule'])->name('practice-classes.get-json-data-for-schedule');
 Route::get('/getJsonDataForStudentsOfPracticeClass', [PracticeClassController::class, 'getJsonDataForStudentsOfPracticeClass'])->name('practice-classes.get-student-data-for-schedule');
+Route::post('/updateScheduleStatus', [PracticeClassController::class, 'updateScheduleStatus'])->name('practice-classes.update-schedule-status');
 Route::resource('practice-classes', PracticeClassController::class);
+
+Route::get('/getJsonDataForStudentsOfModuleClass', [ModuleClassController::class, 'getJsonDataForStudentsOfModuleClass'])->name('module-classes.get-student-data-for-mclass');
+Route::get('/getModuleClassJsonData', [ModuleClassController::class, 'getJsonData'])->name('module-classes.get-json-data');
+Route::post('/updateModuleClassStatus', [ModuleClassController::class, 'updateModuleClassStatus'])->name('module-classes.update-mclass-status');
+Route::resource('module-classes', ModuleClassController::class);
 
 
 //Auth::routes();
