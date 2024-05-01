@@ -14,16 +14,6 @@
             </button>
         </div>
         <div class="vr mx-5"></div>
-        <form id="practice-class-filter" action="#" class="d-flex align-items-center">
-            <label for="module-select" class="me-2 text-nowrap fw-bold">Module:</label>
-            <select name="module" id="module-select" class="form-select">
-                <option value="-1" selected>--- Select Module ---</option>
-                <option value="1">Nhập môn lập trình máy tính</option>
-                <option value="2">Kỹ thuật lập trình</option>
-                <option value="3">Cơ sở dữ liệu</option>
-                <option value="4">Kiến trúc máy tính</option>
-            </select>
-        </form>
     </div>
 
     <!-- Create form -->
@@ -66,6 +56,7 @@
                     <th class="text-center">#</th>
                     <th class="text-start ps-3">Module Code</th>
                     <th class="text-start ps-3">Module Name</th>
+                    <th class="text-center">Module Class QTY</th>
                     <th class="text-center">Practice Class QTY</th>
                     <th class="text-center">Action</th>
                 </tr>
@@ -145,6 +136,8 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" form="delete-module-form" class="btn btn-primary">Delete</button>
+                    <span class="mx-2">or</span>
+                    <button type="button" class="btn btn-dark">Archive</button>
                 </div>
             </div>
         </div>
@@ -162,14 +155,21 @@
                 columns: [
                     { data: 'index',  width: '5%'},
                     { data: 'module_code', type: 'string', width: '15%' },
-                    { data: 'module_name', type: 'string', width: '50%' },
+                    { data: 'module_name', type: 'string', width: '40%' },
+                    { data: 'module_class_qty', width: '15%' },
                     { data: 'practice_class_qty', width: '15%' },
                     { data: 'actions', type: 'html', width: '15%' },
                 ],
-                columnDefs: [{
-                    "className": "dt-center",
-                    "targets": [0, 4]
-                }],
+                columnDefs: [
+                    {
+                        className: "dt-center",
+                        targets: [0, 3, 4, 5]
+                    },
+                    {
+                        orderable: false,
+                        targets: [1, 2, 5]
+                    }
+                ],
                 layout: {
                     topEnd: {
                         search: {

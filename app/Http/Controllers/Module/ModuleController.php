@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Module;
 
+use Adobrovolsky97\LaravelRepositoryServicePattern\Exceptions\Repository\RepositoryException;
 use App\Http\Resources\Module\ModuleResource;
 use App\Models\Module\Module;
 use App\Models\PracticeClass\PracticeClass;
@@ -152,9 +153,18 @@ class ModuleController extends Controller
      * @param Module $module
      *
      * @return JsonResponse
+     * @throws RepositoryException
      */
     public function destroy(Module $module)
     {
+        if ($this->moduleService->count(['practiceClasses']) > 0 || $this->moduleService->count(['moduleClasses']) > 0) {
+            return response()->json([
+                'status' => 500,
+                'title' => 'Cannot delete!',
+                'message' => 'There is at least 1 active class for this module',
+            ]);
+        }
+
         try {
             $this->moduleService->delete($module);
             return response()->json([
@@ -198,11 +208,16 @@ class ModuleController extends Controller
      */
     public function getJsonData()
     {
-        $modules = $this->moduleService->withCount(['practiceClasses as unique_practice_classes_count' => function ($query) {
-            $query->select(DB::raw('count(distinct recurring_id)'));
-        }])->getAll();
-        $responseData = $modules->map(function ($module, $index) {
+        $modules = $this->moduleService
+            ->withCount([
+                'practiceClasses as unique_practice_classes_count' => function ($query) {
+                    $query->select(DB::raw('count(distinct recurring_id)'));
+                },
+                'moduleClasses as module_class_qty'
+            ])
+            ->getAll();
 
+        $responseData = $modules->map(function ($module, $index) {
             $actions = '<div class="dropup d-inline-flex">
                             <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="lni lni-angle-double-up align-middle"></i>
@@ -225,6 +240,7 @@ class ModuleController extends Controller
                 'index' => $index + 1,
                 'module_code' => $module->module_code,
                 'module_name' => $module->module_name,
+                'module_class_qty' => $module->module_class_qty,
                 'practice_class_qty' => $module->unique_practice_classes_count,
                 'actions' => $actions
             ];
