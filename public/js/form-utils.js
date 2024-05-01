@@ -5,12 +5,18 @@ function setupAjaxForm(formSelector) {
         const formData = form.serialize();
         const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
+        // Show the loading overlay
+        showOverlay();
+
         $.ajax({
             url: form.data('action'),
             type: form.data('action-method'),
             data: formData,
             headers: {'X-CSRF-TOKEN': csrfToken},
             success: function(response) {
+                // Hide the loading overlay
+                hideOverlay();
+
                 console.log(response);
                 switch (response.status) {
                     case 200:
@@ -34,6 +40,7 @@ function setupAjaxForm(formSelector) {
                 //Hide requested element (mostly confirm modal)
                 if (response.hideTarget) {
                     $(response.hideTarget).modal('hide');
+                    console.log(response.hideTarget);
                 }
             },
             error: function(xhr) {
