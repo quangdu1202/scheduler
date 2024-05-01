@@ -18,6 +18,7 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <script type="text/javascript" src="{{ asset('/js/jquery.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('/js/utility.js') }}"></script>
 
     <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('css/calendar.css') }}">
@@ -56,6 +57,16 @@
         </div>
     </div>
 
+    {{-- Spinner --}}
+    <div id="loadingOverlay">
+        <div class="overlay-spinner">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+
     <script type="text/javascript" src="{{ asset('/js/script.js') }}"></script>
     <script type="text/javascript" src="{{ asset('/js/form-utils.js') }}"></script>
     <script type="text/javascript" src="{{ asset('/js/pdfmake.min.js') }}"></script>
@@ -65,7 +76,10 @@
     <!-- DataTables -->
     <script type="text/javascript" src="{{ asset('/js/datatables.min.js') }}"></script>
     <script>
+        showOverlay();
         $(document).ready(function() {
+            hideOverlay();
+
             toastr.options = {
                 "enableHtml": true,
                 "closeButton": false,

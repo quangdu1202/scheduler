@@ -16,11 +16,11 @@
     <li class="sidebar-item">
         <a href="{{route('modules.index')}}" class="sidebar-link">
             <i class="lni lni-book"></i>
-            <span>Modules Management</span>
+            <span>Modules</span>
         </a>
     </li>
     <li class="sidebar-item">
-        <a href="{{route('modules.index')}}" class="sidebar-link">
+        <a href="{{route('module-classes.index')}}" class="sidebar-link">
             <i class="lni lni-library"></i>
             <span>Module Classes</span>
         </a>
@@ -34,7 +34,7 @@
     <li class="sidebar-item">
         <a href="{{route('practice-rooms.index')}}" class="sidebar-link">
             <i class="lni lni-apartment"></i>
-            <span>Rooms Management</span>
+            <span>Practice Rooms</span>
         </a>
     </li>
     <li class="sidebar-item">
