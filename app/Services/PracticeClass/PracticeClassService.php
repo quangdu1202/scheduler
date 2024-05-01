@@ -2,6 +2,7 @@
 
 namespace App\Services\PracticeClass;
 
+use App\Models\PracticeClass\PracticeClass;
 use App\Services\PracticeClass\Contracts\PracticeClassServiceInterface;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Services\BaseCrudService;
 use App\Repositories\PracticeClass\Contracts\PracticeClassRepositoryInterface;
@@ -18,4 +19,13 @@ class PracticeClassService extends BaseCrudService implements PracticeClassServi
 	{
 		return PracticeClassRepositoryInterface::class;
 	}
+
+    /**
+     * @param $recurringId
+     * @return void
+     */
+    public function deleteByRecurringId($recurringId): void
+    {
+        PracticeClass::where('recurring_id', $recurringId)->delete();
+    }
 }
