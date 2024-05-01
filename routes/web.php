@@ -7,6 +7,7 @@ use App\Http\Controllers\ModuleClass\ModuleClassController;
 use App\Http\Controllers\PracticeClass\PracticeClassController;
 use App\Http\Controllers\PracticeRoom\PracticeRoomController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\StudentMark\StudentMarkController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -53,6 +54,9 @@ Route::get('/getJsonDataForStudentsOfModuleClass', [ModuleClassController::class
 Route::get('/getModuleClassJsonData', [ModuleClassController::class, 'getJsonData'])->name('module-classes.get-json-data');
 Route::post('/updateModuleClassStatus', [ModuleClassController::class, 'updateModuleClassStatus'])->name('module-classes.update-mclass-status');
 Route::resource('module-classes', ModuleClassController::class);
+
+Route::get('/getJsonDataByPracticeClass/{practice_class_id}', [StudentMarkController::class, 'getJsonDataByPracticeClass'])->name('student-marks.get-json-data-by-pclass');
+Route::resource('student-marks', StudentMarkController::class);
 
 
 //Auth::routes();

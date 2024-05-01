@@ -20,7 +20,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
 
-            $table->unsignedInteger('userable_id');
+            $table->unsignedBigInteger('userable_id');
             $table->string('userable_type');
         });
     }

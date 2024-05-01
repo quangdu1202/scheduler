@@ -7,6 +7,7 @@ use App\Models\StudentModuleClass\StudentModuleClass;
 use App\Models\User;
 use Carbon\Carbon;
 use App\Models\OriginalClass\OriginalClass;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
@@ -23,8 +24,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property Carbon $updated_at
  * @property User $user
  * @property OriginalClass $originalClass
- * @property StudentModuleClass $studentModuleClasses
- * @property Registration $registrations
+ * @property StudentModuleClass[]|Collection $studentModuleClasses
+ * @property Registration[]|Collection $registrations
  */
 class Student extends BaseModel
 {

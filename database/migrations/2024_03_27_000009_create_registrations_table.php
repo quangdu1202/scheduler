@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\ModuleClass\ModuleClass;
+use App\Models\PracticeClass\PracticeClass;
 use App\Models\Student\Student;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('student_module_classes', function (Blueprint $table) {
+        Schema::create('registrations', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Student::class);
-            $table->foreignIdFor(ModuleClass::class);
+            $table->foreignId('student_id')->constrained('students');
+            $table->foreignId('practice_class_id')->constrained('practice_classes');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('student_module_classes');
+        Schema::dropIfExists('registrations');
     }
 };

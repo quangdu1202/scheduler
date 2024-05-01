@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('practice_class_name');
             $table->date('schedule_date')->nullable();
             $table->integer('session')->nullable();
-            $table->foreignIdFor(Module::class);
-            $table->foreignIdFor(PracticeRoom::class)->nullable();
-            $table->foreignIdFor(Teacher::class)->nullable();
+            $table->foreignId('module_id')->constrained('modules');
+            $table->foreignId('practice_room_id')->nullable()->constrained('practice_rooms');
+            $table->foreignId('teacher_id')->nullable()->constrained('teachers');
             $table->string('recurring_id');
             $table->integer('recurring_interval')->default(0);
             $table->integer('recurring_order')->default(1);
