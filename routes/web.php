@@ -55,7 +55,7 @@ Route::get('/getModuleClassJsonData', [ModuleClassController::class, 'getJsonDat
 Route::post('/updateModuleClassStatus', [ModuleClassController::class, 'updateModuleClassStatus'])->name('module-classes.update-mclass-status');
 Route::resource('module-classes', ModuleClassController::class);
 
-Route::get('/getJsonDataByPracticeClass/{practice_class_id}', [StudentMarkController::class, 'getJsonDataByPracticeClass'])->name('student-marks.get-json-data-by-pclass');
+Route::get('/getMarkJsonDataByPracticeClass/{practice_class_id}', [StudentMarkController::class, 'getMarkJsonDataByPracticeClass'])->name('student-marks.get-json-data-by-pclass');
 Route::resource('student-marks', StudentMarkController::class);
 
 

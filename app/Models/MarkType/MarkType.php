@@ -6,6 +6,7 @@ use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
 use App\Models\StudentMark\StudentMark;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class MarkType extends BaseModel
 {
+    use HasFactory;
+
     /**
      * @var array
      */

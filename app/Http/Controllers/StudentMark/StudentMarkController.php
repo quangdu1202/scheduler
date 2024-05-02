@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\StudentMark;
 
 use App\Helper\Helper;
+use App\Models\Registration\Registration;
 use App\Models\StudentMark\StudentMark;
 use App\Services\MarkType\MarkTypeService;
 use App\Services\ModuleClass\ModuleClassService;
@@ -155,32 +156,27 @@ class StudentMarkController extends Controller
      * @param int $practice_class_id
      * @return JsonResponse
      */
-    public function getJsonDataByPracticeClass(int $practice_class_id)
+    public function getMarkJsonDataByPracticeClass(int $practice_class_id)
     {
         $students = $this->helper->getStudentsByPracticeClass($practice_class_id);
 
-        $markTypes = $this->markTypeService->getAll()->whereIn('type', ['TX', 'GK', 'DT']);
-
+        $markTypes = $this->markTypeService->getAll()->whereIn('type', ['TX', 'GK', 'CK']);
 
         $responseData = $students->map(function ($student) use ($markTypes) {
 
             $marks = $this->studentMarkService->find(['student_id' => $student->id]);
 
-            $practiceClass = $student->registration->practiceClass;
-
-            $moduleClass = $this->studentModuleClassService
-                ->with(['moduleClass'])
-                ->getAll(['student_id' => $student->id])
-                ->where('moduleClass.module_id', $practiceClass->module_id)->moduleClass;
-
-            dd($moduleClass->toArray());
+            /** @var Registration $registration*/
+            $registration = $this->registrationService->findOrFail($student->id);
 
             if ($marks->count() == 0) {
-                $marks = $markTypes->map(function ($markType) use ($student, $practiceClass, $moduleClass) {
+
+                $marks = $markTypes->map(function ($markType) use ($registration) {
                     return [
-                        'module_class_id' => $moduleClass->id,
-                        'practice_class_id' => $practiceClass->id,
-                        'student_id' => $student->id,
+                        'module_id' => $registration->moduleClass->module_id . '___' . $registration->practiceClass->module_id,
+                        'module_class_id' => $registration->module_class_id,
+                        'practice_class_id' => $registration->practice_class_id,
+                        'student_id' => $registration->student_id,
                         'mark_type_id' => $markType->id,
                         'mark_value' => 0,
                     ];

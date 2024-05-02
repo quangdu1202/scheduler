@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories\PracticeClass;
 
+use App\Helper\Helper;
 use App\Models\Module\Module;
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\PracticeRoom\PracticeRoom;
 use App\Models\Teacher\Teacher;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,19 +28,23 @@ final class PracticeClassFactory extends Factory
      * Define the model's default state.
      *
      * @return array
+     * @throws Exception
      */
     public function definition(): array
     {
         return [
-//            'practice_class_name' => fake()->word,
-//            'schedule_date' => fake()->optional()->date(),
-//            'session' => fake()->randomNumber(),
-//            'module_id' => Module::factory(),
-//            'practice_room_id' => PracticeRoom::factory(),
-//            'teacher_id' => Teacher::factory(),
-//            'recurring_id' => fake()->optional()->randomNumber(),
-//            'registered_qty' => fake()->randomNumber(),
-//            'status' => 0,
+            'practice_class_name' => $this->faker->word(),
+            'schedule_date' => null,
+            'session' => $this->faker->numberBetween(1, 3),
+            'module_id' => Module::inRandomOrder()->value('id'),
+            'practice_room_id' => PracticeRoom::inRandomOrder()->value('id'),
+            'teacher_id' => Teacher::inRandomOrder()->value('id'),
+            'recurring_id' => Helper::uniqidReal(),
+            'recurring_interval' => 0,
+            'recurring_order' => 1,
+            'registered_qty' => $this->faker->numberBetween(20, 35),
+            'max_qty' => $this->faker->numberBetween(30, 35),
+            'status' => 0,
         ];
     }
 }

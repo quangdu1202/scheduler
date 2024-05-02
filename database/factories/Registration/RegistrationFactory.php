@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories\Registration;
 
+use App\Models\ModuleClass\ModuleClass;
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\Registration\Registration;
 use App\Models\Student\Student;
@@ -28,9 +29,16 @@ final class RegistrationFactory extends Factory
      */
     public function definition(): array
     {
+        // Get a random ModuleClass
+        $moduleClass = ModuleClass::inRandomOrder()->first();
+
+        // Get a random PracticeClass associated with the module of the ModuleClass
+        $practiceClass = PracticeClass::where('module_id', $moduleClass->module_id)->inRandomOrder()->first();
+
         return [
-            'student_id' => Student::factory(),
-            'practice_class_id' => PracticeClass::factory(),
+            'student_id' => Student::inRandomOrder()->first()->id,
+            'module_class_id' => $moduleClass->id,
+            'practice_class_id' => $practiceClass->id,
         ];
     }
 }

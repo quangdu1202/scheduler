@@ -27,7 +27,7 @@ final class OriginalClassFactory extends Factory
     public function definition(): array
     {
         return [
-            'original_class_code' => $this->faker->word(),
+            'original_class_code' => $this->faker->unique()->word(),
             'original_class_name' => $this->faker->word(),
         ];
     }

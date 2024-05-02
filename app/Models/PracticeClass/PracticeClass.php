@@ -9,6 +9,7 @@ use App\Models\StudentMark\StudentMark;
 use App\Models\PracticeRoom\PracticeRoom;
 use App\Models\Registration\Registration;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
@@ -39,6 +40,8 @@ use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
  */
 class PracticeClass extends BaseModel
 {
+    use HasFactory;
+
 	/**
 	 * @var array
 	 */

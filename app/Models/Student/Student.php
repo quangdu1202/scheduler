@@ -3,6 +3,7 @@
 namespace App\Models\Student;
 
 use App\Models\Registration\Registration;
+use App\Models\StudentMark\StudentMark;
 use App\Models\StudentModuleClass\StudentModuleClass;
 use App\Models\User;
 use Carbon\Carbon;
@@ -71,5 +72,13 @@ class Student extends BaseModel
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function studentMarks(): HasMany
+    {
+        return $this->hasMany(StudentMark::class, 'student_id', 'id');
     }
 }

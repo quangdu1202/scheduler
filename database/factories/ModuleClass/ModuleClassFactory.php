@@ -32,7 +32,7 @@ final class ModuleClassFactory extends Factory
     public function definition(): array
     {
         return [
-            'module_class_code' => $this->faker->word(),
+            'module_class_code' => $this->faker->unique()->word(),
             'module_class_name' => $this->faker->word(),
             'module_id' => Module::inRandomOrder()->value('id'),
             'teacher_id' => Teacher::inRandomOrder()->value('id'),

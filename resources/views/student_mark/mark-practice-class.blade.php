@@ -30,13 +30,13 @@
             <table id="student-mark-practice-table" class="table table-bordered table-hover w-100 text-center">
                 <thead class="thead-light">
                 <tr>
-                    <th style="width: 35px">#</th>
-                    <th style="width: 100px">MSV</th>
+                    <th>#</th>
+                    <th>MSV</th>
                     <th>Full Name</th>
-                    <th style="width: 95px;">TX1</th>
-                    <th style="width: 95px;">TX2</th>
-                    <th style="width: 95px;">GK</th>
-                    <th style="width: 95px;">CK</th>
+                    <th>TX1</th>
+                    <th>TX2</th>
+                    <th>GK</th>
+                    <th>CK</th>
                 </tr>
                 </thead>
                 <tbody>

@@ -42,7 +42,7 @@ class Helper
      * @return string
      * @throws Exception
      */
-    public function uniqidReal(int $length = 13): string
+    public static function uniqidReal(int $length = 13): string
     {
         // uniqid gives 13 chars, but you could adjust it to your needs.
         if (function_exists("random_bytes")) {
@@ -71,4 +71,6 @@ class Helper
             return $student;
         });
     }
+
+
 }

@@ -27,8 +27,8 @@ final class ModuleFactory extends Factory
     public function definition(): array
     {
         return [
-            'module_code' => fake()->word,
-            'module_name' => fake()->word,
+            'module_code' => $this->faker->unique()->word(),
+            'module_name' => $this->faker->word(),
         ];
     }
 }
