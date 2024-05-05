@@ -389,20 +389,26 @@ class PracticeClassController extends Controller
             $index++;
             $schedule_date = '<input type="date" name="schedule_date" class="form-control d-inline-block schedule-date-select" value="' . $schedules[0]->schedule_date . '">';
             $shifts = $practiceRooms = '<div class="cell-row-split">';
-            $loop = 0;
+            $shift = 0;
 
             foreach ($schedules as $schedule) {
-                $loop++;
+                $shift++;
 
-                if ($schedule->practice_room_id) {
-                    $practiceRoom = $this->practiceRoomService->find(['id', $schedule->practice_room_id])->first();
-                }
+                $practiceRoom = $this->practiceRoomService
+                    ->with(['schedules'])
+                    ->getAll()
+                    ->filter(function ($room) use ($schedule, $shift) {
+                        return $room->id === $schedule->practice_room_id
+                            && $room->schedules->contains(function ($s) use ($schedule, $shift) {
+                                return $s->id === $schedule->id && $s->shift == $shift;
+                            });
+                    })
+                    ->first();
 
-
-                $shifts .= "<div class=\"row-split\"><strong class='form-control fw-bold d-inline-block'>C$loop</strong></div>";
+                $shifts .= "<div class=\"row-split\"><strong class='form-control fw-bold d-inline-block'>C$shift</strong></div>";
 
                 $practiceRooms .= "<div class=\"row-split\">
-                                        <select name='practice_room_id' class='form-control d-inline-block practice-room-select' id='" . $sessionId . '-' . $schedule->shift . "' data-shift='". $schedule->shift ."'>
+                                        <select name='practice_room_id' class='form-control d-inline-block practice-room-select' id='" . $sessionId . '-' . $schedule->shift . "' data-shift='" . $schedule->shift . "'>
                                             <option value=''>Pick date and session first</option>";
 
                 if (isset($practiceRoom)) {
@@ -416,7 +422,7 @@ class PracticeClassController extends Controller
             $shifts .= '</div>';
 
             $sessionSelect = '
-                <select class="form-control text-center session-select">
+                <select class="form-control text-center session-select" id="session-' . $sessionId . '">
                     <option value=""></option>
             ';
 

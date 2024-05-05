@@ -30,19 +30,20 @@
                 url: '{{route('practice-classes.get-json-data')}}',
                 dataSrc: ''
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error("Error fetching data: ", error);
                 toastr.error("An error occurred while loading the data", "Error");
             },
             columns: [
-                { data: 'index',  width: '5%'},
-                { data: 'practice_class_code', type: 'html', width: '10%' },
-                { data: 'practice_class_name', type: 'html', width: '25%' },
-                { data: 'teacher', type: 'html', width: '15%' },
-                { data: 'registered_qty', type: 'html', width: '5%' },
-                { data: 'shift_qty', type: 'html', width: '10%' },
-                { data: 'status', type: 'html', width: '10%',
-                    render: function(data, type, row) {
+                {data: 'index', width: '5%'},
+                {data: 'practice_class_code', type: 'html', width: '10%'},
+                {data: 'practice_class_name', type: 'html', width: '25%'},
+                {data: 'teacher', type: 'html', width: '15%'},
+                {data: 'registered_qty', type: 'html', width: '5%'},
+                {data: 'shift_qty', type: 'html', width: '10%'},
+                {
+                    data: 'status', type: 'html', width: '10%',
+                    render: function (data, type, row) {
                         return `
                                 <div class="cell-clamp" title="${data.title}">
                                     ${data.value}
@@ -50,7 +51,7 @@
                             `;
                     }
                 },
-                { data: 'actions', type: 'html', width: '5%' },
+                {data: 'actions', type: 'html', width: '5%'},
             ],
             columnDefs: [
                 {
@@ -59,7 +60,7 @@
                 },
                 {
                     targets: [1, 2, 3, 6],
-                    render: function(data, type, row) {
+                    render: function (data, type, row) {
                         return `<div class="cell-clamp" title="${data}">${data}</div>`;
                     }
                 },
@@ -120,7 +121,7 @@
         // end
 
         // Update the practice class schedule status
-        pclassTable.on('change', '.status-change-btn', function(e) {
+        pclassTable.on('change', '.status-change-btn', function (e) {
             // e.preventDefault();
             const status = $(this).is(':checked') ? 1 : 0;
             const pclassId = $(this).data('pclass-id');
@@ -138,7 +139,7 @@
                     status: status,
                     pclassId: pclassId
                 },
-                success: function(response) {
+                success: function (response) {
                     // Hide the loading overlay
                     hideOverlay();
 
@@ -156,7 +157,7 @@
                             toastr.error(response.message || "Unknown error occurred", response.title || "Error");
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     console.log(xhr.responseText);
                     toastr.error("A server error occurred. Please try again.", "Error");
                 }
@@ -165,7 +166,7 @@
         // end
 
         // Create p-class form
-        $('#add-pclass-form-toggle').click(function() {
+        $('#add-pclass-form-toggle').click(function () {
             $('#new-pclass-form-wrapper').slideToggle(400, 'linear');
         });
 
@@ -315,24 +316,19 @@
                 paging: false,
                 initComplete: function () {
                     const $sessionSelects = $('.session-select');
-                    const AllProomSelects = $('.practice-room-select');
-                    AllProomSelects.select2({
-                        theme: "bootstrap-5",
-                        dropdownParent: $('#abc-x')
+                    const pRoomSelects = $('.practice-room-select');
+
+                    pRoomSelects.each(function () {
+                        const selectedValue = $(this).val();
+                        $(this).data('current-value', selectedValue);
+                        $(this).select2({
+                            theme: "bootstrap-5",
+                            dropdownParent: $('#all-schedule-modal-content')
+                        });
                     });
+
                     $sessionSelects.each(function () {
-                        const pRoomSelects = $(this).closest('tr').find('.practice-room-select');
-
-                        pRoomSelects.each(function() {
-                            $(this).data('current-value', $(this).val());
-                        });
-
                         refreshPracticeRooms($(this));
-
-                        pRoomSelects.each(function() {
-                            $(this).trigger('change');
-                            console.log($(this).val());
-                        });
                     });
                 }
             });
@@ -355,7 +351,7 @@
             const data = row.data();
             const datePicker = row.find('.schedule-date-select');
 
-            if(datePicker.val() === '') {
+            if (datePicker.val() === '') {
                 datePicker.addClass('is-invalid');
                 datePicker.closest('td').append(`<div class="invalid-feedback text-start">Choose a date</div>`);
                 hideOverlay();
@@ -366,9 +362,11 @@
 
             const pRoomIds = [];
 
-            pRoomSelects.each(function() {
-                pRoomIds.push($sessionSelect.data('current-value'));
+            pRoomSelects.each(function () {
+                pRoomIds.push($(this).data('current-value'));
             });
+
+            // console.log(pRoomIds);
 
             $.ajax({
                 url: '<?= route('schedules.get-available-rooms') ?>',
@@ -382,12 +380,12 @@
                     'schedule_ids[]': [data[0].id, data[1].id],
                     'session_id': data[0].session_id,
                 },
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 success: function (response) {
                     // Hide the loading overlay
                     hideOverlay();
 
-                    console.log(response);
+                    // console.log(response);
                     if (response.success === false) {
                         toastr.error(response.message || "Unknown error occurred", response.title || "Error");
                     } else {
@@ -405,7 +403,7 @@
         pClassAllScheduleTable.on('change', '.schedule-date-select', function () {
             $(this).removeClass('is-invalid');
             const sessionSelect = $(this).closest('tr').find('.session-select');
-            if(sessionSelect.val() !== '') {
+            if (sessionSelect.val() !== '') {
                 sessionSelect.change();
             }
         });
@@ -425,12 +423,12 @@
                 method: 'post',
                 data: formData,
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                success: function(response) {
+                success: function (response) {
                     // Hide the loading overlay
                     hideOverlay();
 
                     console.log(response);
-                    if(response.success === false) {
+                    if (response.success === false) {
                         toastr.error(response.message || "Unknown error occurred", response.title || "Error");
                     }
 
@@ -448,7 +446,7 @@
                         console.log(response.hideTarget);
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     console.log(xhr.responseText);
                     toastr.error("A server error occurred. Please try again.", "Error");
                 }
@@ -471,7 +469,7 @@
 
             const pRoomIds = [];
             const pRoomSelects = row.find('.practice-room-select');
-            pRoomSelects.each(function() {
+            pRoomSelects.each(function () {
                 const selectedValue = $(this).val();
                 pRoomIds.push(selectedValue);
             });
@@ -498,13 +496,13 @@
                 method: 'put',
                 data: data,
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                success: function(response) {
+                success: function (response) {
                     hideOverlay();
 
                     console.log(response);
-                    if(response.success === false) {
+                    if (response.success === false) {
                         toastr.error(response.message || "Unknown error occurred", response.title || "Error");
-                    }else {
+                    } else {
                         toastr.success(response.message, response.title || "Success");
                     }
 
@@ -513,7 +511,7 @@
                         $(response.reloadTarget).DataTable().ajax.reload();
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     console.log(xhr.responseText);
                     toastr.error("A server error occurred. Please try again.", "Error");
                 }
@@ -534,13 +532,13 @@
                     'session_id': sessionId
                 },
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                success: function(response) {
+                success: function (response) {
                     hideOverlay();
 
                     console.log(response);
-                    if(response.success === false) {
+                    if (response.success === false) {
                         toastr.error(response.message || "Unknown error occurred", response.title || "Error");
-                    }else {
+                    } else {
                         toastr.success(response.message, response.title || "Success");
                     }
 
@@ -549,7 +547,7 @@
                         $(response.reloadTarget).DataTable().ajax.reload();
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     console.log(xhr.responseText);
                     toastr.error("A server error occurred. Please try again.", "Error");
                 }

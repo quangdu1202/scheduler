@@ -138,7 +138,7 @@
     <!-- All schedules Info modal -->
     <div class="modal modal-xl fade" id="all-schedule-modal" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content" id="abc-x">
+            <div class="modal-content" id="all-schedule-modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="edit-modal-title">
                         All schedules for:
