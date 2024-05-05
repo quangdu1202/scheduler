@@ -7,6 +7,7 @@ use App\Http\Controllers\ModuleClass\ModuleClassController;
 use App\Http\Controllers\PracticeClass\PracticeClassController;
 use App\Http\Controllers\PracticeRoom\PracticeRoomController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\Schedule\ScheduleController;
 use App\Http\Controllers\StudentMark\StudentMarkController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,9 +46,9 @@ Route::get('/getPracticeRoomsJsonData', [PracticeRoomController::class, 'getJson
 Route::resource('practice-rooms', PracticeRoomController::class);
 
 Route::get('/getPracticeClassesJsonData', [PracticeClassController::class, 'getJsonData'])->name('practice-classes.get-json-data');
-Route::get('/getJsonDataForSchedule', [PracticeClassController::class, 'getJsonDataForSchedule'])->name('practice-classes.get-json-data-for-schedule');
+Route::get('/getJsonDataForSchedule/{practice_class_id}', [PracticeClassController::class, 'getJsonDataForSchedule'])->name('practice-classes.get-json-data-for-schedule');
 Route::get('/getJsonDataForStudentsOfPracticeClass', [PracticeClassController::class, 'getJsonDataForStudentsOfPracticeClass'])->name('practice-classes.get-student-data-for-schedule');
-Route::post('/updateScheduleStatus', [PracticeClassController::class, 'updateScheduleStatus'])->name('practice-classes.update-schedule-status');
+Route::post('/updatePracticeClassStatus', [PracticeClassController::class, 'updatePracticeClassStatus'])->name('practice-classes.update-practice-class-status');
 Route::resource('practice-classes', PracticeClassController::class);
 
 Route::get('/getJsonDataForStudentsOfModuleClass', [ModuleClassController::class, 'getJsonDataForStudentsOfModuleClass'])->name('module-classes.get-student-data-for-mclass');
@@ -57,6 +58,12 @@ Route::resource('module-classes', ModuleClassController::class);
 
 Route::get('/getMarkJsonDataByPracticeClass/{practice_class_id}', [StudentMarkController::class, 'getMarkJsonDataByPracticeClass'])->name('student-marks.get-json-data-by-pclass');
 Route::resource('student-marks', StudentMarkController::class);
+
+
+Route::get('getAvailableRooms', [ScheduleController::class, 'getAvailableRooms'])->name('schedules.get-available-rooms');
+Route::put('schedules', [ScheduleController::class, 'updateSingleSchedule'])->name('schedules.update-single-schedule');
+Route::delete('schedules', [ScheduleController::class, 'deleteSingleSchedule'])->name('schedules.delete-single-schedule');
+Route::resource('schedules', ScheduleController::class);
 
 
 //Auth::routes();

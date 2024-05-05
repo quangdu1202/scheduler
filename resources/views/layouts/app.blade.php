@@ -28,6 +28,7 @@
 
     <!-- DataTables -->
     <link rel="stylesheet" href="{{ asset('/css/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/select.dataTables.min.css') }}">
 
     <script
         src="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/b-html5-3.0.1/b-print-3.0.1/fh-4.0.1/r-3.0.0/sc-2.4.1/datatables.min.js">
@@ -75,6 +76,7 @@
 
     <!-- DataTables -->
     <script type="text/javascript" src="{{ asset('/js/datatables.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('/js/dataTables.select.min.js') }}"></script>
     <script>
         showOverlay();
         $(document).ready(function() {

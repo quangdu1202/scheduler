@@ -40,7 +40,6 @@ function setupAjaxForm(formSelector) {
                 //Hide requested element (mostly confirm modal)
                 if (response.hideTarget) {
                     $(response.hideTarget).modal('hide');
-                    console.log(response.hideTarget);
                 }
             },
             error: function(xhr) {

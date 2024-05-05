@@ -25,8 +25,8 @@ class DatabaseSeeder extends Seeder
         PracticeRoom::factory(15)->create();
         User::factory(50)->create();
         ModuleClass::factory(5)->create();
-        PracticeClass::factory(5)->create();
-        Registration::factory(50)->create();
+//        PracticeClass::factory(5)->create();
+//        Registration::factory(50)->create();
 
         foreach (['TX1', 'TX2', 'GK', 'CK'] as $type) {
             MarkType::factory()->create(['type' => $type]);

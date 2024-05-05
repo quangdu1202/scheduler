@@ -176,6 +176,30 @@ a.sidebar-link:hover {
     margin-left: -2em !important;
 }
 
+.cell-row-split {
+    display: flex;
+    flex-direction: column;
+    margin: -6% -16px;
+}
+
+.row-split {
+    display: block;
+    padding: 10px 16px;
+}
+
+.row-split:not(:last-child) {
+    border-bottom: 1px solid #dee2e6;
+}
+
+#all-schedule-modal .modal-body {
+    height: 80vh !important;
+    overflow-y: auto;
+}
+
+#pclass-all-schedule-table .dropdown-menu {
+    min-width: fit-content !important;
+}
+
 /*Full page spinner*/
 
 #loadingOverlay {

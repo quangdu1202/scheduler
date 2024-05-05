@@ -47,6 +47,20 @@
                             <label for="moduleSelect" class="form-label">Module</label>
                         </div>
                     </div>
+                    <div class="col-1">
+                        <div class="form-control form-switch py-3">
+                            <input class="form-check-input" name="multi_create" type="checkbox" role="switch" id="multi-switch">
+                            <label class="form-check-label ms-1" for="multi-switch">Multi</label>
+                        </div>
+                    </div>
+                    <div class="col-1 show-for-multi" style="display: none">
+                        <div class="form-floating mb-3">
+                            <input type="number" name="multi_qty" class="form-control" id="multi-qty" min="2" disabled required>
+                            <label for="multi-qty" class="form-label">Qty</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row hidden-for-multi">
                     <div class="col-3">
                         <div class="form-floating mb-3">
                             <select name="teacher_id" id="teacherSelect" class="form-select">
@@ -58,80 +72,28 @@
                             <label for="teacherSelect" class="form-label">Teacher</label>
                         </div>
                     </div>
-                    <div class="col-5">
+                    <div class="col-3">
+                        <div class="form-floating mb-3">
+                            <input type="text" name="practice_class_code" class="form-control" id="classCode" placeholder="Class Code" required>
+                            <label for="classCode" class="form-label">Class Code</label>
+                        </div>
+                    </div>
+                    <div class="col-3">
                         <div class="form-floating mb-3">
                             <input type="text" name="practice_class_name" class="form-control" id="className" placeholder="Class Name" required>
                             <label for="className" class="form-label">Class Name</label>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-2">
+                    <div class="col-1">
                         <div class="form-floating mb-3">
-                            <select name="practice_room_id" id="roomSelect" class="form-select" required>
-                                <option></option>
-                                @foreach($practiceRooms as $practiceRoom)
-                                    <option value="{{$practiceRoom->id}}" data-pc-qty="{{$practiceRoom->pc_qty}}">{{$practiceRoom->name . ' (' . $practiceRoom->location . ')'}}</option>
-                                @endforeach
-                            </select>
-                            <label for="roomSelect" class="form-label">Practice Room</label>
-                        </div>
-                    </div>
-                    <div class="col-2">
-                        <div class="form-floating mb-3 position-relative">
-                            <input type="number" name="max_qty" class="form-control" id="maxStudentQty" required disabled
-                                   data-bs-toggle="tooltip" data-bs-placement="right" aria-describedby="maxStudentQtyFeedback">
-                            <label for="maxStudentQty" class="form-label">Max Students</label>
-                            <div class="invalid-tooltip" id="maxStudentQtyFeedback">
-                                Exceeding the number of PCs.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-2">
-                        <div class="form-floating mb-3">
-                            <input type="date" class="form-control" name="schedule_date" id="startDate" min="{{ date('Y-m-d') }}" required>
-                            <label for="startDate" class="form-label">Start Date</label>
-                        </div>
-                    </div>
-                    <div class="col-2">
-                        <div class="form-floating mb-3">
-                            <div class="form-control" id="sessionSelect">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="session" id="session-1" value="1" required>
-                                    <label class="form-check-label" for="session-1"><span class="badge rounded-pill text-bg-success">S</span></label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="session" id="session-2" value="2" required>
-                                    <label class="form-check-label" for="session-2"><span class="badge rounded-pill text-bg-primary">C</span></label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="session" id="session-3" value="3" required>
-                                    <label class="form-check-label" for="session-3"><span class="badge rounded-pill text-bg-danger">T</span></label>
-                                </div>
-                            </div>
-                            <label for="sessionSelect" class="form-label">Session</label>
-                        </div>
-                        <style>
-                            #sessionSelect .form-check-inline {
-                                margin-right: 0.6rem;
-                            }
-                        </style>
-                    </div>
-                    <div class="col-2">
-                        <div class="form-floating mb-3">
-                            <select name="recurring_interval" id="recurringSelect" class="form-select" required>
-                                <option></option>
-                                <option value="0">Once</option>
-                                <option value="604800">Weekly</option>
-                                <option value="1209600">Biweekly</option>
-                            </select>
-                            <label for="recurringSelect" class="form-label">Recurring</label>
+                            <input type="number" name="max_qty" class="form-control" id="studentQty" min="0" required>
+                            <label for="studentQty" class="form-label">Max Student</label>
                         </div>
                     </div>
                     <div class="col-1">
                         <div class="form-floating mb-3">
-                            <input type="number" id="repeatLimit" class="form-control" name="repeat_limit" min="1" max="20" disabled>
-                            <label for="repeatLimit" class="form-label">Repeat</label>
+                            <input type="number" name="shift_qty" class="form-control" id="shiftQty" min="1" required>
+                            <label for="shiftQty" class="form-label">Shift QTY</label>
                         </div>
                     </div>
                     <div class="col-1">
@@ -161,27 +123,22 @@
             <thead class="thead-light">
             <tr>
                 <th>#</th>
+                <th>Class Code</th>
                 <th>Class Name</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Session</th>
-                <th>Room</th>
                 <th>Teacher</th>
-                <th>Recurring</th>
                 <th>Reg.</th>
+                <th>Shift Qty</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
             </thead>
-            <tbody>
-            </tbody>
         </table>
     </div>
 
     <!-- All schedules Info modal -->
-    <div class="modal modal-xl fade" id="all-schedule-modal" tabindex="-1" style="display: none;" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+    <div class="modal modal-xl fade" id="all-schedule-modal" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="abc-x">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="edit-modal-title">
                         All schedules for:
@@ -194,19 +151,35 @@
                             <thead class="thead-light">
                             <tr>
                                 <th>#</th>
-                                <th>Schedule Date</th>
-                                <th>Practice Room</th>
                                 <th>Teacher</th>
+                                <th>Schedule Date</th>
                                 <th>Session</th>
+                                <th>Shift</th>
+                                <th>Practice Room</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
-                            <tbody>
-                            </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer d-flex justify-content-between">
+                    <div class="actions d-flex gap-3">
+                        <button type="button" id="add-schedule-btn" class="btn btn-sm btn-success">Add Schedule</button>
+                        <button type="submit" form="multi-schedule-form" id="add-multi-schedule-btn" class="btn btn-sm btn-primary">Add Multi Schedules</button>
+                        <form data-action=""
+                              data-action-method="post"
+                              id="multi-schedule-form">
+                            <!-- Add multi schedules form -->
+                            @csrf
+                            <input type="hidden" name="practice_class_id" id="multi-schedule-pclass-id">
+                            <input type="hidden" name="add_mode" value="multi">
+                            <div class="input-group">
+                                <div class="input-group-text">QTY</div>
+                                <input type="number" name="multi_schedule_qty" class="form-control form-control-sm" id="multi-schedule-qty" min="2" max="10" required>
+                                <label for="multi-schedule-qty" class="visually-hidden">Qty</label>
+                            </div>
+                        </form>
+                    </div>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -214,7 +187,7 @@
     </div>
 
     <!-- Edit modal -->
-    <div class="modal fade" id="edit-single-pclass-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal modal-lg fade" id="edit-pclass-modal" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -224,69 +197,57 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="edit-single-pclass-form"
+                    <form id="edit-pclass-form"
                           data-action=""
                           data-action-type="update"
                           data-action-method="post">
                         @csrf
-                        @method('PUT')
+                        @method('put')
                         <fieldset class="">
                             <input type="hidden" name="id" id="edit-id">
-                            <input type="hidden" name="module_id" id="edit-module">
+                            <input type="hidden" name="module_id" id="editModuleId">
                             <div class="row">
                                 <div class="col-6">
                                     <div class="form-floating mb-3">
-                                        <select name="teacher_id" id="edit-teacherSelect" class="form-select">
-                                            <option></option>
-                                            @foreach($teachers as $teacher)
-                                                <option value="{{$teacher->id}}">{{$teacher->user->name}}</option>
-                                            @endforeach
-                                        </select>
-                                        <label for="edit-teacherSelect" class="form-label">Teacher</label>
+                                        <input type="text" name="practice_class_code" class="form-control" id="editClassCode" placeholder="Class Code" required>
+                                        <label for="editClassCode" class="form-label">Class Code</label>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-floating mb-3">
-                                        <select name="practice_room_id" id="edit-roomSelect" class="form-select" required>
-                                            <option></option>
-                                            @foreach($practiceRooms as $practiceRoom)
-                                                <option value="{{$practiceRoom->id}}" data-pc-qty="{{$practiceRoom->pc_qty}}">{{$practiceRoom->name . ' (' . $practiceRoom->location . ')'}}</option>
-                                            @endforeach
-                                        </select>
-                                        <label for="edit-roomSelect" class="form-label">Practice Room</label>
+                                        <input type="text" name="practice_class_name" class="form-control" id="editClassName" placeholder="Class Name" required>
+                                        <label for="editClassName" class="form-label">Class Name</label>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-4">
+                                <div class="col-6">
                                     <div class="form-floating mb-3">
-                                        <input type="date" class="form-control" name="schedule_date" id="edit-startDate" min="{{ date('Y-m-d') }}" required>
-                                        <label for="edit-startDate" class="form-label">Start Date</label>
+                                        <select name="teacher_id" id="editTeacherSelect" class="form-select">
+                                            <option value=""></option>
+                                            @foreach($teachers as $teacher)
+                                                <option value="{{$teacher->id}}">{{$teacher->user->name}}</option>
+                                            @endforeach
+                                        </select>
+                                        <label for="editTeacherSelect" class="form-label">Teacher</label>
                                     </div>
                                 </div>
-                                <div class="col-5">
+                                <div class="col-3">
                                     <div class="form-floating mb-3">
-                                        <div class="form-control d-flex justify-content-between" id="edit-sessionSelect">
-                                            <div class="form-check form-check-inline me-1">
-                                                <input class="form-check-input" type="radio" name="session" id="edit-session-1" value="1" required>
-                                                <label class="form-check-label" for="edit-session-1"><span class="badge rounded-pill text-bg-success">S</span></label>
-                                            </div>
-                                            <div class="form-check form-check-inline me-1">
-                                                <input class="form-check-input" type="radio" name="session" id="edit-session-2" value="2" required>
-                                                <label class="form-check-label" for="edit-session-2"><span class="badge rounded-pill text-bg-primary">C</span></label>
-                                            </div>
-                                            <div class="form-check form-check-inline me-1">
-                                                <input class="form-check-input" type="radio" name="session" id="edit-session-3" value="3" required>
-                                                <label class="form-check-label" for="edit-session-3"><span class="badge rounded-pill text-bg-danger">T</span></label>
-                                            </div>
-                                        </div>
-                                        <label for="edit-sessionSelect" class="form-label">Session</label>
+                                        <input type="number" name="max_qty" class="form-control" id="editStudentQty" min="0" required>
+                                        <label for="editStudentQty" class="form-label">Max Student</label>
                                     </div>
-                                    <style>
-                                        #sessionSelect .form-check-inline {
-                                            margin-right: 0.6rem;
-                                        }
-                                    </style>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-floating mb-3">
+                                        <select name="status" id="editStatusSelect" class="form-select" required>
+                                            <option value="0">Created</option>
+                                            <option value="1">Ready</option>
+                                            <option value="2">Approval</option>
+                                            <option value="3">Approved</option>
+                                        </select>
+                                        <label for="editStatusSelect" class="form-label">Status</label>
+                                    </div>
                                 </div>
                             </div>
                         </fieldset>
@@ -294,14 +255,14 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" form="edit-single-pclass-form" class="btn btn-primary">Save changes</button>
+                    <button type="submit" form="edit-pclass-form" class="btn btn-primary">Save changes</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Delete modal -->
-    <div class="modal fade" id="delete-pclass-modal" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal fade" id="delete-pclass-modal" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -340,335 +301,5 @@
     </div>
 
     <!-- Script -->
-    <script>
-        $(document).ready(function () {
-            $('form select').not('#recurringSelect, #statusSelect').select2({
-                theme: "bootstrap-5",
-                placeholder: "Select an option",
-            });
-
-            //Data table initiate
-            const pclassTable = $('#pclass-management-table').DataTable({
-                ajax: {
-                    url: '{{route('practice-classes.get-json-data')}}',
-                    dataSrc: ''
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error fetching data: ", error);
-                    toastr.error("An error occurred while loading the data", "Error");
-                },
-                columns: [
-                    { data: 'index',  width: '5%'},
-                    { data: 'practice_class_name', type: 'html', width: '15%' },
-                    { data: 'start_date', type: 'string', width: '10%' },
-                    { data: 'end_date', type: 'string', width: '10%' },
-                    { data: 'session', type: 'html', width: '5%',
-                        render: function(data, type, row) {
-                            return `
-                                <div class="cell-clamp" title="${data.title}">
-                                    ${data.value}
-                                </div>
-                            `;
-                        }
-                    },
-                    { data: 'practice_room', type: 'html', width: '10%',
-                        render: function(data, type, row) {
-                            return `
-                                <div class="cell-clamp" title="${data.title}">
-                                    ${data.value}
-                                </div>
-                            `;
-                        }
-                    },
-                    { data: 'teacher', type: 'html', width: '15%' },
-                    { data: 'recurring_interval', type: 'html', width: '10%' },
-                    { data: 'registered_qty', type: 'html', width: '5%' },
-                    { data: 'status', type: 'html', width: '10%',
-                        render: function(data, type, row) {
-                            return `
-                                <div class="cell-clamp" title="${data.title}">
-                                    ${data.value}
-                                </div>
-                            `;
-                        }
-                    },
-                    { data: 'actions', type: 'html', width: '5%' },
-                ],
-                columnDefs: [
-                    {
-                        className: "dt-center",
-                        targets: [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                    },
-                    {
-                        targets: [1, 2, 3, 6],  // This targets all columns
-                        render: function(data, type, row) {
-                            return `<div class="cell-clamp" title="${data}">${data}</div>`;
-                        }
-                    },
-                    {
-                        orderable: false,
-                        targets: [1, 4, 5, 6, 7, 8, 9, 10]
-                    }
-                ],
-                layout: {
-                    topEnd: {
-                        search: {
-                            placeholder: 'Search anything'
-                        },
-                        buttons: [
-                            'length',
-                            {
-                                extend: 'csv',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-                                }
-                            },
-                            {
-                                extend: 'excel',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-                                }
-                            },
-                            {
-                                extend: 'print',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-                                }
-                            }
-                        ]
-                    },
-                },
-                pageLength: -1,
-                language: {
-                    "info": "Showing _START_ to _END_ of _TOTAL_ classes",
-                    //customize pagination prev and next buttons: use arrows instead of words
-                    'paginate': {
-                        'first': '<span class="fa-solid fa-backward-step"></span>',
-                        'previous': '<span class="fa fa-chevron-left"></span>',
-                        'next': '<span class="fa fa-chevron-right"></span>',
-                        'last': '<span class="fa-solid fa-forward-step"></span>'
-                    },
-                    //customize number of elements to be displayed
-                    "lengthMenu": '<select class="form-control input-sm">' +
-                        '<option value="-1">All</option>' +
-                        '<option value="10">10</option>' +
-                        '<option value="20">20</option>' +
-                        '<option value="30">30</option>' +
-                        '<option value="40">40</option>' +
-                        '<option value="50">50</option>' +
-                        '</select> classes per page'
-                }
-            });
-            //
-
-            // Update the practice class schedule status
-            pclassTable.on('change', '.status-change-btn', function(e) {
-                // e.preventDefault();
-                const status = $(this).is(':checked') ? 1 : 0;
-                const pclassId = $(this).data('pclass-id');
-                const $row = $(this).closest('tr'); // Get the closest row (<tr>) element
-                const rowData = pclassTable.row($row).data(); // Get the data for this row
-
-                // Show the loading overlay
-                showOverlay();
-
-                $.ajax({
-                    url: '{{route('practice-classes.update-schedule-status')}}',
-                    type: 'POST',
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    data: {
-                        status: status,
-                        pclassId: pclassId
-                    },
-                    success: function(response) {
-                        // Hide the loading overlay
-                        hideOverlay();
-
-                        console.log(response);
-                        switch (response.status) {
-                            case 200:
-                                toastr.success(response.message, response.title || "Success");
-                                // Update the row data here if needed
-                                rowData.status = response.newStatus; // Assume response contains new status
-                                pclassTable.row($row).data(rowData).invalidate().draw(false); // Invalidate the data cache
-                                break;
-                            default:
-                                toastr.error(response.message || "Unknown error occurred", response.title || "Error");
-                        }
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                        toastr.error("A server error occurred. Please try again.", "Error");
-                    }
-                });
-            });
-            //
-
-            // Create p-class form
-            $('#add-pclass-form-toggle').click(function() {
-                $('#new-pclass-form-wrapper').slideToggle(400, 'linear');
-            });
-
-            let pcQty = 0; // Variable to store pc quantity
-
-            $('#roomSelect').change(function() {
-                pcQty = $('option:selected', this).data('pc-qty');
-                $('#maxStudentQty').val(pcQty).change().attr('disabled', false); // Set and trigger change to validate immediately
-            });
-
-            $('#maxStudentQty').on('input', function() {
-                if (parseInt($(this).val()) > pcQty) {
-                    $(this).addClass('is-invalid'); // Add Bootstrap's is-invalid class to show tooltip
-                    $(this).removeClass('is-valid');
-                } else {
-                    $(this).removeClass('is-invalid');
-                    $(this).addClass('is-valid'); // Optionally add is-valid class to indicate correct input
-                }
-            });
-
-            $('#recurringSelect').change(function () {
-                if ($(this).val() !== '0') {
-                    $('#repeatLimit').prop('disabled', false).val(1);
-                } else {
-                    $('#repeatLimit').prop('disabled', true);
-                }
-            });
-
-            const newPracticeClassForm = $('#new-pclass-form');
-            setupAjaxForm(newPracticeClassForm);
-            //
-
-            // View all schedules of a practice class
-            const infoModal = new bootstrap.Modal('#all-schedule-modal');
-            const pClassAllScheduleTable = $('#pclass-all-schedule-table');
-
-            pclassTable.on('click', '.schedule-info-btn', function () {
-                if ($.fn.DataTable.isDataTable(pClassAllScheduleTable)) {
-                    pClassAllScheduleTable.DataTable().destroy();
-                }
-                pClassAllScheduleTable.DataTable({
-                    ajax: {
-                        url: $(this).data('get-url'),
-                        dataSrc: ''
-                    },
-                    columns: [
-                        {data: 'index', width: '5%'},
-                        {data: 'schedule_date', type: 'string', width: '15%'},
-                        { data: 'practice_room', type: 'html', width: '15%', orderable: false,
-                            render: function(data, type, row) {
-                                return `
-                                <div class="cell-clamp" title="${data.title}">
-                                    ${data.value}
-                                </div>
-                            `;
-                            }
-                        },
-                        {data: 'teacher', type: 'string', width: '15%'},
-                        { data: 'session', type: 'html', width: '15%', orderable: false,
-                            render: function(data, type, row) {
-                                return `
-                                <div class="cell-clamp" title="${data.title}">
-                                    ${data.value}
-                                </div>
-                            `;
-                            }
-                        },
-                        {data: 'actions', type: 'html', width: '10%'},
-                    ],
-                    columnDefs: [
-                        {
-                            className: "dt-center",
-                            targets: "_all"
-                        },
-                        {
-                            targets: [1, 3],  // This targets all columns
-                            render: function(data, type, row) {
-                                return `<div class="cell-clamp" title="${data}">${data}</div>`;
-                            }
-                        }
-                    ],
-                    layout: {
-                        topStart: {
-                            search: {
-                                placeholder: 'Search anything'
-                            }
-                        },
-                        topEnd: {
-                            buttons: [
-                                'length',
-                                {
-                                    extend: 'csv',
-                                    exportOptions: {
-                                        columns: [0, 1, 2, 3, 4]
-                                    }
-                                },
-                                {
-                                    extend: 'excel',
-                                    exportOptions: {
-                                        columns: [0, 1, 2, 3, 4]
-                                    }
-                                },
-                                {
-                                    extend: 'print',
-                                    exportOptions: {
-                                        columns: [0, 1, 2, 3, 4]
-                                    }
-                                }
-                            ]
-                        },
-                        bottomStart: {},
-                        bottomEnd: {}
-                    }
-                });
-                infoModal.show();
-            });
-            //
-
-            // Edit practice class schedule modal
-            const editSinglePclassModal = new bootstrap.Modal('#edit-single-pclass-modal');
-            const editSinglePclassForm = $('#edit-single-pclass-form');
-
-            $(document).on('click', '.pclass-single-edit-btn', function () {
-                const data = pClassAllScheduleTable.DataTable().row($(this).parents('tr')).data();
-
-                $('#edit-id').val(data.DT_RowId);
-
-                $('#edit-module').val(data.DT_RowData.module_id);
-
-                $('#edit-roomSelect').val(data.DT_RowData.practice_room_id).change();
-
-                $('#edit-teacherSelect').val(data.DT_RowData.teacher_id).change();
-
-                $('#edit-startDate').val(data.schedule_date);
-
-                $('#edit-session-'+ data.DT_RowData.session).prop('checked', true);
-
-                let updateURL = "{{ route('practice-classes.update', ['practice_class' => ':id'])}}";
-                updateURL = updateURL.replace(':id', data.DT_RowId);
-                editSinglePclassForm.data('action', updateURL);
-
-                editSinglePclassModal.show();
-            });
-            setupAjaxForm(editSinglePclassForm);
-            //
-
-            // Delete practice class schedule modal
-            const deletePclassModal = new bootstrap.Modal('#delete-pclass-modal')
-            const deletePclassForm = $('#delete-pclass-form');
-            $(document).on('click', '.pclass-delete-btn', function () {
-                const data = $(this).parents('tr').data();
-
-                let deleteURL = "{{ route('practice-classes.destroy', ['practice_class' => ':id'])}}";
-
-                deleteURL = deleteURL.replace(':id', data.id);
-                deletePclassForm.data('action', deleteURL);
-
-                $('#delete-mode').val($(this).data('delete-mode'));
-
-                deletePclassModal.show();
-            });
-            setupAjaxForm(deletePclassForm);
-            //
-        })
-    </script>
+    @include('practice_class.scripts')
 @endsection

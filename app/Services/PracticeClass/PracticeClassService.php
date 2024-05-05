@@ -28,4 +28,9 @@ class PracticeClassService extends BaseCrudService implements PracticeClassServi
     {
         PracticeClass::where('recurring_id', $recurringId)->delete();
     }
+
+    public function findByCode(string $code): ?PracticeClass
+    {
+        return PracticeClass::where('practice_class_code', $code)->first();
+    }
 }

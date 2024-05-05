@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Resources\PracticeClass;
+namespace App\Http\Resources\Schedule;
 
 use Illuminate\Http\JsonResponse;
-use App\Models\PracticeClass\PracticeClass;
+use App\Models\Schedule\Schedule;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Class PracticeClassResource
+ * Class ScheduleResource
  * 
- * @mixin PracticeClass
+ * @mixin Schedule
  */
-class PracticeClassResource extends JsonResource
+class ScheduleResource extends JsonResource
 {
 	/**
 	 * @var integer
@@ -39,14 +39,12 @@ class PracticeClassResource extends JsonResource
 	{
 		return [
 			'id' => $this->id,
-			'module_id' => $this->module_id,
-			'teacher_id' => $this->teacher_id,
-			'practice_class_code' => $this->practice_class_code,
-			'practice_class_name' => $this->practice_class_name,
-			'registered_qty' => $this->registered_qty,
-			'shift_qty' => $this->shift_qty,
-			'max_qty' => $this->max_qty,
-			'status' => $this->status,
+			'practice_class_id' => $this->practice_class_id,
+			'practice_room_id' => $this->practice_room_id,
+			'schedule_date' => $this->schedule_date,
+			'session' => $this->session,
+			'session_id' => $this->session_id,
+			'shift' => $this->shift,
 			'created_at' => $this->created_at,
 			'updated_at' => $this->updated_at,
 		];

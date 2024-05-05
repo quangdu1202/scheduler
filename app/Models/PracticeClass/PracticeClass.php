@@ -5,8 +5,8 @@ namespace App\Models\PracticeClass;
 use Carbon\Carbon;
 use App\Models\Module\Module;
 use App\Models\Teacher\Teacher;
+use App\Models\Schedule\Schedule;
 use App\Models\StudentMark\StudentMark;
-use App\Models\PracticeRoom\PracticeRoom;
 use App\Models\Registration\Registration;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,43 +19,34 @@ use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
  * 
  * @property integer $id
  * @property integer $module_id
- * @property integer $practice_room_id
  * @property integer $teacher_id
+ * @property string $practice_class_code
  * @property string $practice_class_name
- * @property Carbon $schedule_date
- * @property integer $session
- * @property string $recurring_id
- * @property integer $recurring_interval
- * @property integer $recurring_order
  * @property integer $registered_qty
+ * @property integer $shift_qty
  * @property integer $max_qty
  * @property integer $status
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Module $module
- * @property PracticeRoom $practiceRoom
  * @property Teacher $teacher
  * @property Registration[]|Collection $registrations
+ * @property Schedule[]|Collection $schedules
  * @property StudentMark[]|Collection $studentMarks
  */
 class PracticeClass extends BaseModel
 {
     use HasFactory;
-
 	/**
 	 * @var array
 	 */
 	protected $fillable = [
 		'module_id',
-		'practice_room_id',
 		'teacher_id',
+		'practice_class_code',
 		'practice_class_name',
-		'schedule_date',
-		'session',
-		'recurring_id',
-		'recurring_interval',
-		'recurring_order',
 		'registered_qty',
+		'shift_qty',
 		'max_qty',
 		'status',
 		'created_at',
@@ -73,14 +64,6 @@ class PracticeClass extends BaseModel
 	/**
 	 * @return BelongsTo
 	 */
-	public function practiceRoom(): BelongsTo
-	{
-		return $this->belongsTo(PracticeRoom::class, 'practice_room_id', 'id');
-	}
-
-	/**
-	 * @return BelongsTo
-	 */
 	public function teacher(): BelongsTo
 	{
 		return $this->belongsTo(Teacher::class, 'teacher_id', 'id');
@@ -92,6 +75,14 @@ class PracticeClass extends BaseModel
 	public function registrations(): HasMany
 	{
 		return $this->hasMany(Registration::class, 'practice_class_id', 'id');
+	}
+
+	/**
+	 * @return HasMany
+	 */
+	public function schedules(): HasMany
+	{
+		return $this->hasMany(Schedule::class, 'practice_class_id', 'id');
 	}
 
 	/**

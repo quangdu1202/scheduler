@@ -4,11 +4,14 @@ namespace App\Http\Controllers\PracticeClass;
 
 use App\Helper\Helper;
 use App\Http\Resources\PracticeClass\PracticeClassResource;
+use App\Models\Module\Module;
 use App\Models\PracticeClass\PracticeClass;
+use App\Models\PracticeRoom\PracticeRoom;
 use App\Services\Module\Contracts\ModuleServiceInterface;
 use App\Services\PracticeClass\Contracts\PracticeClassServiceInterface;
 use App\Services\PracticeRoom\PracticeRoomService;
 use App\Services\Registration\RegistrationService;
+use App\Services\Schedule\Contracts\ScheduleServiceInterface;
 use App\Services\Teacher\TeacherService;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
@@ -30,6 +33,11 @@ class PracticeClassController extends Controller
      * @var PracticeClassServiceInterface
      */
     protected PracticeClassServiceInterface $practiceClassService;
+
+    /**
+     * @var ScheduleServiceInterface
+     */
+    protected ScheduleServiceInterface $scheduleService;
 
     /**
      * @var ModuleServiceInterface
@@ -55,6 +63,7 @@ class PracticeClassController extends Controller
 
     /**
      * @param PracticeClassServiceInterface $practiceClassService
+     * @param ScheduleServiceInterface $scheduleService
      * @param ModuleServiceInterface $moduleService
      * @param RegistrationService $scheduleRegistrationService
      * @param TeacherService $teacherService
@@ -63,6 +72,7 @@ class PracticeClassController extends Controller
      */
     public function __construct(
         PracticeClassServiceInterface $practiceClassService,
+        ScheduleServiceInterface      $scheduleService,
         ModuleServiceInterface        $moduleService,
         RegistrationService           $scheduleRegistrationService,
         TeacherService                $teacherService,
@@ -71,6 +81,7 @@ class PracticeClassController extends Controller
     )
     {
         $this->practiceClassService = $practiceClassService;
+        $this->scheduleService = $scheduleService;
         $this->moduleService = $moduleService;
         $this->scheduleRegistrationService = $scheduleRegistrationService;
         $this->teacherService = $teacherService;
@@ -113,9 +124,7 @@ class PracticeClassController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        // Begin a database transaction
         DB::beginTransaction();
-
         $data = $request->all();
 
         $validator = Validator::make($data, [
@@ -123,99 +132,68 @@ class PracticeClassController extends Controller
         ]);
 
         if ($validator->fails()) {
-            // Rollback the transaction and return a validation error response
             DB::rollBack();
             return response()->json([
                 'status' => 422,
                 'title' => 'Validation Error',
-                'message' => $validator->errors()->first() // Sends back the first validation error
+                'message' => $validator->errors()->first()
             ]);
         }
 
         try {
-            $data['recurring_id'] = $this->helper->uniqidReal();
+            if (isset($data['multi_create'])) {
+                /**@var Module|null $module */
+                $module = $this->moduleService->findOrFail($data['module_id']);
+                $multi_qty = $data['multi_qty'];
 
-            switch ($data['recurring_interval']) {
-                // Case for recurring_interval = 0 (Once)
-                case 0:
-                    // Duplicate schedule
-                    if (!$this->isValidToSave($data)) {
-                        // Rollback the transaction and return a duplicate schedule error response
-                        DB::rollBack();
-                        return response()->json([
-                            'status' => 422,
-                            'title' => 'Duplicate Schedule',
-                            'message' => 'Duplicate schedule on ' . $data['schedule_date']
-                        ]);
-                    }
+                $practiceClasses = $this->practiceClassService->find(['module_id' => $module->id]);
 
-                    // Create a single practice class
-                    $newPracticeClass = $this->practiceClassService->create($data);
+                // Find the last practice class based on the index of the practice_class_code
+                $lastPracticeClass = $practiceClasses->sortByDesc('practice_class_code')->first();
 
-                    break;
+                if ($lastPracticeClass)
+                    $lastIndex = intval(substr($lastPracticeClass->practice_class_code, -3));
+                else
+                    $lastIndex = 0;
 
-                // Cases for recurring_interval = 604800 (Weekly) or 1209600 (Biweekly)
-                case 604800:
-                case 1209600:
-                    $limitCount = $data['repeat_limit'];
-                    $recurringInterval = $data['recurring_interval'];
+                for ($i = 1; $i <= $multi_qty; $i++) {
+                    $practiceClassData = [
+                        'module_id' => $module->id,
+                        'practice_class_name' => $module->module_name,
+                        'registered_qty' => 0,
+                        'shift_qty' => 2,
+                        'max_qty' => 65,
+                        'status' => 0,
+                    ];
 
-                    // Create multiple practice classes based on repeat_limit
-                    for ($i = 0; $i < $limitCount; $i++) {
-                        $data['recurring_order'] = $i + 1;
+                    $newIndex = $lastIndex + $i;
 
-                        // Duplicate schedule
-                        if (!$this->isValidToSave($data)) {
-                            // Rollback the transaction and delete the already created practice classes
-                            DB::rollBack();
+                    // Format the new practice_class_code
+                    $practiceClassData['practice_class_code'] = $module->id . str_pad($newIndex, 3, '0', STR_PAD_LEFT);
 
-                            return response()->json([
-                                'status' => 422,
-                                'title' => 'Error',
-                                'message' => 'Duplicate schedule on ' . $data['schedule_date']
-                            ]);
-                        }
-
-                        $newPracticeClass = $this->practiceClassService->create($data);
-
-                        // Set Schedule date for the next schedule
-                        $data['schedule_date'] = date('Y-m-d', strtotime($data['schedule_date'] . "+$recurringInterval seconds"));
-                    }
-
-                    break;
-
-                default:
-                    // Rollback the transaction and return an error response for an invalid recurring interval
-                    DB::rollBack();
-                    return response()->json([
-                        'status' => 422,
-                        'title' => 'Error',
-                        'message' => 'Invalid recurring interval data!'
-                    ]);
+                    $newPracticeClass = $this->practiceClassService->create($practiceClassData);
+                }
+            } else {
+                $newPracticeClass = $this->practiceClassService->create($data);
             }
 
-            // Commit the transaction
             DB::commit();
 
-            // Return a successful JSON response
             return response()->json([
                 'status' => 200,
                 'title' => 'Success!',
-                'message' => 'Practice Class created successfully!',
+                'message' => 'Practice Class(es) created successfully!',
                 'reloadTarget' => '#pclass-management-table',
                 'resetTarget' => '#new-pclass-form'
             ]);
         } catch (Exception $e) {
-            // Log the exception for internal review
             Log::error("Practice Class creation failed: {$e->getMessage()}");
-
-            // Rollback the transaction and return a generic error message to the client
             DB::rollBack();
 
             return response()->json([
                 'status' => 500,
                 'title' => 'Error!',
-                'message' => $e
+                'message' => $e->getMessage()
             ]);
         }
     }
@@ -242,14 +220,6 @@ class PracticeClassController extends Controller
             ]);
         }
 
-        if (!$this->isValidToSave($data)) {
-            return response()->json([
-                'status' => 422,
-                'title' => 'Duplicate Schedule',
-                'message' => 'Duplicate schedule on ' . $data['schedule_date']
-            ]);
-        }
-
         try {
             $editedPclass = $this->practiceClassService->update($practiceClass, $data);
             // Return a successful JSON response
@@ -257,8 +227,8 @@ class PracticeClassController extends Controller
                 'status' => 200,
                 'title' => 'Success!',
                 'message' => 'Practice Class updated successfully!',
-                'reloadTarget' => '#pclass-management-table, #pclass-all-schedule-table',
-                'hideTarget' => '#edit-single-pclass-modal'
+                'reloadTarget' => '#pclass-management-table',
+                'hideTarget' => '#edit-pclass-modal'
             ]);
         } catch (Exception $e) {
             // Log the exception for internal review
@@ -267,7 +237,7 @@ class PracticeClassController extends Controller
             return response()->json([
                 'status' => 500,
                 'title' => 'Error!',
-                'message' => 'Unknown error occurred, try again later!'
+                'message' => $e->getMessage()
             ]);
         }
     }
@@ -289,48 +259,22 @@ class PracticeClassController extends Controller
             ]);
         }
 
-        // Guard clause to check delete mode
-        $deleteMode = $request->input('_deleteMode');
-        if (!in_array($deleteMode, ['all', 'single'])) {
-            return response()->json([
-                'status' => 500,
-                'title' => 'Error!',
-                'message' => 'Invalid delete mode!',
-            ]);
-        }
-
-        // Begin a database transaction
-        DB::beginTransaction();
-
         try {
-            // Delete practice classes based on delete mode
-            if ($deleteMode === 'all') {
-                $recurringId = $practiceClass->recurring_id;
-                $this->practiceClassService->deleteByRecurringId($recurringId);
-            } else {
-                $this->practiceClassService->update($practiceClass->id, [
-                    'schedule_date' => null,
-                    'session' => null,
-                    'practice_room_id' => null,
-                    'teacher_id' => null
-                ]);
-            }
-
-            // Commit the transaction
-            DB::commit();
+            $this->practiceClassService->delete($practiceClass);
 
             // Return a successful JSON response
             return response()->json([
                 'status' => 200,
                 'title' => 'Success!',
-                'message' => 'Practice class schedule(s) deleted successfully!',
+                'message' => 'Practice class deleted successfully!',
                 'resetTarget' => '#delete-pclass-form',
                 'hideTarget' => '#delete-pclass-modal',
-                'reloadTarget' => $deleteMode === 'all' ? '#pclass-management-table' : '#pclass-management-table, #pclass-all-schedule-table',
+                'reloadTarget' => '#pclass-management-table',
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
-            Log::error("Failed to delete practice classes: {$e->getMessage()}");
+            // Log the exception for internal review
+            Log::error("Practice Class delete failed: {$e->getMessage()}");
+
             return response()->json([
                 'status' => 500,
                 'title' => 'Error!',
@@ -339,85 +283,15 @@ class PracticeClassController extends Controller
         }
     }
 
-    // Need update
-    /**
-     * @param $data
-     * @return bool
-     */
-    protected function isValidToSave($data)
-    {
-        $class_id = $data['id'] ?? null;
-
-        $module_id = $data['module_id'] ?? null;
-
-        $schedule_date = $data['schedule_date'] ?? null;
-
-        $session = $data['session'] ?? null;
-
-        $practice_room_id = $data['practice_room_id'] ?? null;
-
-        if (!$module_id || !$schedule_date || !$session || !$practice_room_id) {
-            return false;
-        }
-
-        $practiceClasses =  $this->practiceClassService->getAll();
-
-        // Filter $practiceClasses based on all conditions
-        $filteredPracticeClasses = $practiceClasses->filter(function ($class) use ($class_id, $module_id, $schedule_date, $session, $practice_room_id) {
-            return
-                $class->module_id == $module_id &&
-                $class->schedule_date == $schedule_date &&
-                $class->session == $session &&
-                $class->practice_room_id == $practice_room_id &&
-                (!$class_id || $class->id != $class_id);
-        });
-
-        if ($filteredPracticeClasses->count() > 0) {
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * @return JsonResponse
      */
     public function getJsonData(): JsonResponse
     {
-        $practiceClasses = $this->practiceClassService->getAll(['recurring_order' => 1]);
+        $practiceClasses = $this->practiceClassService->getAll();
 
         $responseData = $practiceClasses->map(function ($pclass, $index) {
-            $endDate = $this->practiceClassService
-                ->find(['recurring_id' => $pclass->recurring_id])
-                ->sortByDesc('recurring_order')
-                ->first()
-                ->schedule_date;
-
-            $session = match ($pclass->session) {
-                1 => [
-                    'title' => 'Morning',
-                    'value' => '<span class="badge rounded-pill text-bg-success">S</span>'
-                ],
-                2 => [
-                    'title' => 'Afternoon',
-                    'value' => '<span class="badge rounded-pill text-bg-primary">C</span>'
-                ],
-                3 => [
-                    'title' => 'Evening',
-                    'value' => '<span class="badge rounded-pill text-bg-danger">T</span>'
-                ],
-                default => [
-                    'title' => 'Unknown',
-                    'value' => '<span class="badge rounded-pill text-bg-dark">Unknown</span>'
-                ],
-            };
-
-            $recurring_interval = match ($pclass->recurring_interval) {
-                0 => '<span class="badge rounded-pill text-bg-secondary">Once</span>',
-                604800 => '<span class="badge rounded-pill text-bg-primary">Weekly</span>',
-                1209600 => '<span class="badge rounded-pill text-bg-success">Biweekly</span>',
-                default => '<span class="badge rounded-pill text-bg-dark">Unknown</span>',
-            };
+            /**@var PracticeClass $pclass */
 
             $registered_qty = $pclass->registered_qty;
             $max_qty = $pclass->max_qty;
@@ -426,15 +300,15 @@ class PracticeClassController extends Controller
                 0 => [
                     'title' => 'Not available for registration',
                     'value' => '<div class="form-check form-switch">
-                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $pclass->id . '" type="checkbox" id="'.$pclass->id.'-status">
-                                  <label for="'.$pclass->id.'-status" title="Not available for registration">Created</label>
+                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $pclass->id . '" type="checkbox" id="' . $pclass->id . '-status">
+                                  <label for="' . $pclass->id . '-status" title="Not available for registration">Created</label>
                                 </div>'
                 ],
                 1 => [
                     'title' => 'Ready for registration',
                     'value' => '<div class="form-check form-switch">
-                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $pclass->id . '" type="checkbox" id="'.$pclass->id.'-status" checked>
-                                  <label for="'.$pclass->id.'-status" title="Ready for registration">Ready</label>
+                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $pclass->id . '" type="checkbox" id="' . $pclass->id . '-status" checked>
+                                  <label for="' . $pclass->id . '-status" title="Ready for registration">Ready</label>
                                 </div>'
                 ],
                 2 => [
@@ -457,13 +331,16 @@ class PracticeClassController extends Controller
                             </button>
                             <div class="dropdown-menu">
                                 <div class="d-flex justify-content-evenly">
-                                    <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="' . route('practice-classes.get-json-data-for-schedule', ['recurring_id' => $pclass->recurring_id]) . '">
+                                    <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="' . route('practice-classes.get-json-data-for-schedule', ['practice_class_id' => $pclass->id]) . '" data-pclass-id="' . $pclass->id . '">
                                         <i class="fa-solid fa-magnifying-glass align-middle"></i>
                                     </button>
                                     <button type="button" class="btn btn-success btn-sm pclass-student-info-btn" data-get-url="' . route('practice-classes.get-student-data-for-schedule', ['recurring_id' => $pclass->recurring_id]) . '">
                                         <i class="fa-solid fa-user-graduate"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm pclass-delete-btn" data-delete-mode="all">
+                                    <button type="button" class="btn btn-primary btn-sm pclass-edit-btn" data-post-url="' . route('practice-classes.update', ['practice_class' => $pclass]) . '">
+                                        <i class="lni lni-pencil-alt align-middle"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm pclass-delete-btn">
                                         <i class="lni lni-trash-can align-middle"></i>
                                     </button>
                                 </div>
@@ -474,20 +351,16 @@ class PracticeClassController extends Controller
                 'DT_RowId' => $pclass->id,
                 'DT_RowData' => $pclass,
                 'index' => $index + 1,
+                'module_id' => $pclass->module_id,
+                'practice_class_code' => $pclass->practice_class_code,
                 'practice_class_name' => $pclass->practice_class_name,
-                'start_date' => $pclass->schedule_date != null ? $pclass->schedule_date : '<i>Not set</i>',
-                'end_date' => $endDate,
-                'session' => $session,
-                'practice_room' => [
-                    'title' => $pclass->practiceRoom != null ? ($pclass->practiceRoom->location . ' - ' . $pclass->practiceRoom->name) : 'Not set',
-                    'value' => $pclass->practiceRoom != null ? ('<b>' . $pclass->practiceRoom->location . '</b><br>' . $pclass->practiceRoom->name) : '<i>Not set</i>'
-                ],
-                'teacher' => $pclass->teacher != null ? $pclass->teacher->user->name : '<i>Not set</i>' ,
-                'recurring_id' => $pclass->recurring_id,
-                'recurring_interval' => $recurring_interval,
-                'recurring_order' => $pclass->recurring_order,
+                'teacher' => $pclass->teacher != null ? $pclass->teacher->user->name : '<i>Not set</i>',
+                'teacher_id' => $pclass->teacher_id,
                 'registered_qty' => $registered_qty . '/' . $max_qty,
+                'max_qty' => $max_qty,
+                'shift_qty' => $pclass->shift_qty,
                 'status' => $status,
+                'status_raw' => $pclass->status,
                 'actions' => $actions
             ];
         });
@@ -496,57 +369,92 @@ class PracticeClassController extends Controller
     }
 
     /**
+     * @param $practice_class_id
      * @param Request $request
      * @return JsonResponse
      */
-    public function getJsonDataForSchedule(Request $request): JsonResponse
+    public function getJsonDataForSchedule($practice_class_id, Request $request): JsonResponse
     {
-        $recurringId = $request->input('recurring_id');
-        $practiceClasses = $this->practiceClassService->getAll(['recurring_id' => $recurringId]);
+        $schedulesBySessionId = $this->scheduleService->getAll(['practice_class_id' => $practice_class_id])->sortBy(['schedule_date', 'shift'])->groupBy('session_id');
 
-        $responseData = $practiceClasses->map(function ($pclass, $index) {
-            $session = match ($pclass->session) {
-                1 => [
-                    'title' => 'Morning',
-                    'value' => '<span class="badge rounded-pill text-bg-success">S</span>'
-                ],
-                2 => [
-                    'title' => 'Afternoon',
-                    'value' => '<span class="badge rounded-pill text-bg-primary">C</span>'
-                ],
-                3 => [
-                    'title' => 'Evening',
-                    'value' => '<span class="badge rounded-pill text-bg-danger">T</span>'
-                ],
-                default => [
-                    'title' => 'Unknown',
-                    'value' => '<span class="badge rounded-pill text-bg-dark">Unknown</span>'
-                ],
-            };
+        $schedulesAll = $this->scheduleService->getAll();
+        $practiceRoomsAll = $this->practiceRoomService->getAll();
+        $responseData = [];
+        $index = 0;
 
-            $actions = '<button type="button" class="btn btn-primary btn-sm pclass-single-edit-btn">
-                            <i class="lni lni-pencil-alt align-middle"></i>
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm pclass-delete-btn" data-delete-mode="single">
-                            <i class="lni lni-trash-can align-middle"></i>
-                        </button>';
-            return [
-                'DT_RowId' => $pclass->id,
-                'DT_RowData' => $pclass,
-                'index' => $pclass->recurring_order,
-                'schedule_date' => $pclass->schedule_date != null ? $pclass->schedule_date : '<i>Not set</i>',
-                'practice_room' => [
-                    'title' => $pclass->practiceRoom != null ? ($pclass->practiceRoom->location . ' - ' . $pclass->practiceRoom->name) : 'Not set',
-                    'value' => $pclass->practiceRoom != null ? ('<b>' . $pclass->practiceRoom->location . '</b><br>' . $pclass->practiceRoom->name) : '<i>Not set</i>'
-                ],
-                'teacher' => $pclass->teacher != null ? $pclass->teacher->user->name : '<i>Not set</i>' ,
-                'session' => [
-                    'title' => $session['title'],
-                    'value' => $session['value']
-                ],
+        foreach ($schedulesBySessionId as $schedules) {
+            $teacher = $schedules[0]->practiceClass->teacher;
+            $sessionId = $schedules[0]->session_id;
+
+            $index++;
+            $schedule_date = '<input type="date" name="schedule_date" class="form-control d-inline-block schedule-date-select" value="' . $schedules[0]->schedule_date . '">';
+            $shifts = $practiceRooms = '<div class="cell-row-split">';
+            $loop = 0;
+
+            foreach ($schedules as $schedule) {
+                $loop++;
+
+                if ($schedule->practice_room_id) {
+                    $practiceRoom = $this->practiceRoomService->find(['id', $schedule->practice_room_id])->first();
+                }
+
+
+                $shifts .= "<div class=\"row-split\"><strong class='form-control fw-bold d-inline-block'>C$loop</strong></div>";
+
+                $practiceRooms .= "<div class=\"row-split\">
+                                        <select name='practice_room_id' class='form-control d-inline-block practice-room-select' id='" . $sessionId . '-' . $schedule->shift . "' data-shift='". $schedule->shift ."'>
+                                            <option value=''>Pick date and session first</option>";
+
+                if (isset($practiceRoom)) {
+                    /**@var PracticeRoom $practiceRoom */
+                    $practiceRooms .= "<option value='$practiceRoom->id' selected>$practiceRoom->name - $practiceRoom->location</option>";
+                }
+
+                $practiceRooms .= "</select></div>";
+            }
+
+            $shifts .= '</div>';
+
+            $sessionSelect = '
+                <select class="form-control text-center session-select">
+                    <option value=""></option>
+            ';
+
+            $availableSessions = [1 => 'S', 2 => 'C', 3 => 'T'];
+
+            foreach ($availableSessions as $value => $label) {
+                $selected = ($schedules[0]->session == $value) ? 'selected' : '';
+                $sessionSelect .= '<option value="' . $value . '"' . $selected . '>' . $label . '</option>';
+            }
+
+            $sessionSelect .= '</select>';
+
+            $actions = '
+                <button type="button" class="btn btn-primary btn-sm schedule-single-save-btn">
+                    <i class="lni lni-save align-middle"></i>
+                </button>
+                <div class="dropdown d-inline-block">
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="lni lni-trash-can align-middle"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <button class="btn btn-sm dropdown-item schedule-single-delete-confirm" data-session-id="' . $sessionId . '">Confirm</button>
+                    </div>
+                </div>
+            ';
+
+            $responseData[] = [
+                'DT_RowData' => $schedules,
+                'index' => $index,
+                'practice_class_id' => $practice_class_id,
+                'teacher' => $teacher != null ? $teacher->user->name : '<i>Not set</i>',
+                'schedule_date' => $schedule_date,
+                'session' => $sessionSelect,
+                'shifts' => $shifts,
+                'practice_room' => $practiceRooms,
                 'actions' => $actions
             ];
-        });
+        }
 
         return response()->json($responseData);
     }
@@ -555,12 +463,13 @@ class PracticeClassController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function updateScheduleStatus(Request $request)
+    public function updatePracticeClassStatus(Request $request)
     {
         $status = $request->input('status');
         $classId = $request->input('pclassId');
 
         try {
+            /**@var PracticeClass $editedPclass */
             $editedPclass = $this->practiceClassService->update($classId, ['status' => $status]);
 
             // Define message based on status
@@ -572,15 +481,15 @@ class PracticeClassController extends Controller
                 ? [
                     'title' => 'Not available for registration',
                     'value' => '<div class="form-check form-switch">
-                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $editedPclass->id . '" type="checkbox" id="'.$editedPclass->id.'-status">
-                                  <label for="'.$editedPclass->id.'-status" title="Not available for registration">Created</label>
+                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $editedPclass->id . '" type="checkbox" id="' . $editedPclass->id . '-status">
+                                  <label for="' . $editedPclass->id . '-status" title="Not available for registration">Created</label>
                                 </div>'
                 ]
                 : [
                     'title' => 'Ready for registration',
                     'value' => '<div class="form-check form-switch">
-                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $editedPclass->id . '" type="checkbox" id="'.$editedPclass->id.'-status" checked>
-                                  <label for="'.$editedPclass->id.'-status" title="Ready for registration">Ready</label>
+                                  <input class="form-check-input status-change-btn" data-pclass-id="' . $editedPclass->id . '" type="checkbox" id="' . $editedPclass->id . '-status" checked>
+                                  <label for="' . $editedPclass->id . '-status" title="Ready for registration">Ready</label>
                                 </div>'
                 ];
 
@@ -589,7 +498,8 @@ class PracticeClassController extends Controller
                 'status' => 200,
                 'title' => 'Success!',
                 'message' => $message,
-                'newStatus' => $newStatus
+                'newStatus' => $newStatus,
+                'newStatusRaw' => $editedPclass->status,
             ]);
 
         } catch (Exception $e) {
