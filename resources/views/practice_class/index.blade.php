@@ -168,7 +168,8 @@
                         <button type="submit" form="multi-schedule-form" id="add-multi-schedule-btn" class="btn btn-sm btn-primary">Add Multi Schedules</button>
                         <form data-action=""
                               data-action-method="post"
-                              id="multi-schedule-form">
+                              id="multi-schedule-form"
+                              class="d-flex gap-3">
                             <!-- Add multi schedules form -->
                             @csrf
                             <input type="hidden" name="practice_class_id" id="multi-schedule-pclass-id">
@@ -177,6 +178,23 @@
                                 <div class="input-group-text">QTY</div>
                                 <input type="number" name="multi_schedule_qty" class="form-control form-control-sm" id="multi-schedule-qty" min="2" max="10" required>
                                 <label for="multi-schedule-qty" class="visually-hidden">Qty</label>
+                            </div>
+                            <div class="input-group flex-nowrap">
+                                <div class="input-group-text">START</div>
+                                <input type="date" name="multi_schedule_start_date" class="form-control form-control-sm" id="multi-schedule-start-date" required>
+                                <label for="multi-schedule-start-date" class="visually-hidden">START</label>
+                            </div>
+                            <div class="d-flex multi-schedule-session-select">
+                                <div class="input-group-text">SS</div>
+
+                                <input type="radio" name="multi_schedule_session" value="1" class="btn-check" id="multi-schedule-session-1" autocomplete="off" required>
+                                <label class="btn btn-outline-primary" for="multi-schedule-session-1">S</label>
+
+                                <input type="radio" name="multi_schedule_session" value="2" class="btn-check" id="multi-schedule-session-2" autocomplete="off" required>
+                                <label class="btn btn-outline-primary" for="multi-schedule-session-2">C</label>
+
+                                <input type="radio" name="multi_schedule_session" value="3" class="btn-check" id="multi-schedule-session-3" autocomplete="off" required>
+                                <label class="btn btn-outline-primary" for="multi-schedule-session-3">T</label>
                             </div>
                         </form>
                     </div>

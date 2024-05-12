@@ -36,6 +36,7 @@ class ModuleController extends Controller
 
     /**
      * @param ModuleServiceInterface $service
+     * @param PracticeClassService $practiceClassService
      */
     public function __construct(
         ModuleServiceInterface $service,
@@ -211,7 +212,7 @@ class ModuleController extends Controller
         $modules = $this->moduleService
             ->withCount([
                 'practiceClasses as unique_practice_classes_count' => function ($query) {
-                    $query->select(DB::raw('count(distinct recurring_id)'));
+                    $query->select(DB::raw('count(distinct id)'));
                 },
                 'moduleClasses as module_class_qty'
             ])

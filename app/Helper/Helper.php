@@ -2,6 +2,7 @@
 
 namespace App\Helper;
 
+use App\Models\ModuleClass\ModuleClass;
 use App\Models\Student\Student;
 use App\Services\PracticeClass\PracticeClassService;
 use App\Services\Registration\RegistrationService;
@@ -70,6 +71,23 @@ class Helper
             unset($student->registrations);
             return $student;
         });
+    }
+
+    /**
+     * @param $teacherId
+     * @return \Illuminate\Support\Collection
+     */
+    public function getModulesByTeacherId($teacherId): \Illuminate\Support\Collection
+    {
+        return ModuleClass::whereHas('teacher', function ($query) use ($teacherId) {
+            $query->where('id', $teacherId);
+        })->with('module')
+            ->get()
+            ->map(function ($moduleClass) {
+                return $moduleClass->module;
+            })
+            ->unique('id')
+            ->values();
     }
 
 

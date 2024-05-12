@@ -23,8 +23,8 @@ class DatabaseSeeder extends Seeder
         OriginalClass::factory(5)->create();
         Module::factory(5)->create();
         PracticeRoom::factory(15)->create();
-        User::factory(50)->create();
-        ModuleClass::factory(5)->create();
+        User::factory(10)->create();
+        ModuleClass::factory(25)->create();
 //        PracticeClass::factory(5)->create();
 //        Registration::factory(50)->create();
 

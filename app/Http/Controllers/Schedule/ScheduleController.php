@@ -78,9 +78,18 @@ class ScheduleController extends Controller
             if ($add_mode == 'multi') {
                 $multi_schedule_qty = $request->input('multi_schedule_qty');
 
+                $multi_schedule_session = $request->input('multi_schedule_session');
+                $multi_schedule_start_date = $request->input('multi_schedule_start_date');
+
+                $multiData = [
+                    'schedule_date' => $multi_schedule_start_date,
+                    'session' => $multi_schedule_session,
+                ];
+
                 for ($i = 0; $i < $multi_schedule_qty; $i++) {
                     $sessionId = $this->helper->uniqidReal();
-                    $this->createSchedules($practiceClassId, $sessionId, $shift_qty);
+                    $this->createSchedules($practiceClassId, $sessionId, $shift_qty, $multiData);
+                    $multiData['schedule_date'] = date('Y-m-d', strtotime('+1 week', strtotime($multiData['schedule_date'])));
                 }
             } else {
                 $sessionId = $this->helper->uniqidReal();
@@ -115,16 +124,27 @@ class ScheduleController extends Controller
      * @param int $practiceClassId
      * @param string $sessionId
      * @param int $shiftQty
+     * @param array|null $multiData
      * @return void
      */
-    private function createSchedules(int $practiceClassId, string $sessionId, int $shiftQty)
+    private function createSchedules(int $practiceClassId, string $sessionId, int $shiftQty, array $multiData = null)
     {
         for ($i = 0; $i < $shiftQty; $i++) {
-            $this->scheduleService->create([
-                'practice_class_id' => $practiceClassId,
-                'session_id' => $sessionId,
-                'shift' => $i + 1,
-            ]);
+            if ($multiData) {
+                $this->scheduleService->create([
+                    'practice_class_id' => $practiceClassId,
+                    'schedule_date' => $multiData['schedule_date'],
+                    'session' => $multiData['session'],
+                    'session_id' => $sessionId,
+                    'shift' => $i + 1,
+                ]);
+            } else {
+                $this->scheduleService->create([
+                    'practice_class_id' => $practiceClassId,
+                    'session_id' => $sessionId,
+                    'shift' => $i + 1,
+                ]);
+            }
         }
     }
 

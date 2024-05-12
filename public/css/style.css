@@ -200,6 +200,17 @@ a.sidebar-link:hover {
     min-width: fit-content !important;
 }
 
+.multi-schedule-session-select > *:not(input) {
+    width: 40px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.multi-schedule-session-select > label {
+    border-color: #dee2e6;
+    border-radius: 0;
+}
+
 /*Full page spinner*/
 
 #loadingOverlay {

@@ -169,7 +169,7 @@ class PracticeClassController extends Controller
                     $newIndex = $lastIndex + $i;
 
                     // Format the new practice_class_code
-                    $practiceClassData['practice_class_code'] = $module->id . str_pad($newIndex, 3, '0', STR_PAD_LEFT);
+                    $practiceClassData['practice_class_code'] = $module->module_code . 'TH' . str_pad($newIndex, 3, '0', STR_PAD_LEFT);
 
                     $newPracticeClass = $this->practiceClassService->create($practiceClassData);
                 }
@@ -262,7 +262,6 @@ class PracticeClassController extends Controller
         try {
             $this->practiceClassService->delete($practiceClass);
 
-            // Return a successful JSON response
             return response()->json([
                 'status' => 200,
                 'title' => 'Success!',
@@ -272,7 +271,6 @@ class PracticeClassController extends Controller
                 'reloadTarget' => '#pclass-management-table',
             ]);
         } catch (Exception $e) {
-            // Log the exception for internal review
             Log::error("Practice Class delete failed: {$e->getMessage()}");
 
             return response()->json([
@@ -377,8 +375,6 @@ class PracticeClassController extends Controller
     {
         $schedulesBySessionId = $this->scheduleService->getAll(['practice_class_id' => $practice_class_id])->sortBy(['schedule_date', 'shift'])->groupBy('session_id');
 
-        $schedulesAll = $this->scheduleService->getAll();
-        $practiceRoomsAll = $this->practiceRoomService->getAll();
         $responseData = [];
         $index = 0;
 

@@ -7,6 +7,7 @@ use App\Models\Teacher\Teacher;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class UserFactory extends Factory
 {
@@ -23,7 +24,7 @@ class UserFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
-            'password' => $this->faker->password(),
+            'password' => Hash::make('123'),
             'userable_id' => $userable->id,
             'userable_type' => get_class($userable),
             'created_at' => Carbon::now(),

@@ -6,9 +6,9 @@ use App\Http\Controllers\Module\ModuleController;
 use App\Http\Controllers\ModuleClass\ModuleClassController;
 use App\Http\Controllers\PracticeClass\PracticeClassController;
 use App\Http\Controllers\PracticeRoom\PracticeRoomController;
-use App\Http\Controllers\RoomController;
 use App\Http\Controllers\Schedule\ScheduleController;
 use App\Http\Controllers\StudentMark\StudentMarkController;
+use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,7 +27,6 @@ Route::get('/filter', [HomeController::class, 'filter'])->name('calendar.filter'
 Route::get('rooms', [HomeController::class, 'rooms'])->name('rooms');
 Route::get('weekly', [HomeController::class, 'weeklyCalendar'])->name('weekly');
 Route::get('getCellData', [HomeController::class, 'getCellData']);
-Route::post('getRoomData', [RoomController::class, 'getRoomData']);
 Route::post('registerSchedule', [HomeController::class, 'registerSchedule']);
 
 Route::get('mark-by-module', [MarkController::class, 'markByModule'])->name('mark-by-module');
@@ -65,7 +64,17 @@ Route::put('schedules', [ScheduleController::class, 'updateSingleSchedule'])->na
 Route::delete('schedules', [ScheduleController::class, 'deleteSingleSchedule'])->name('schedules.delete-single-schedule');
 Route::resource('schedules', ScheduleController::class);
 
+Route::get('/teacher/register-classes', [TeacherController::class, 'index'])->name('teacher.register-classes');
+Route::post('/teacher/register-classes', [TeacherController::class, 'registerClass'])->name('teacher.register');
+Route::get('/teacher/get-available-classes', [TeacherController::class, 'getJsonData'])->name('teacher.get-available-classes');
+Route::get('/teacher/get-class-schedules/{practice_class_id}', [TeacherController::class, 'getJsonDataForSchedule'])->name('teacher.get-class-schedules');
+Route::get('/teacher/get-registered-class', [TeacherController::class, 'getJsonDataForRegisteredClasses'])->name('teacher.get-registered-class');
+Route::post('/teacher/cancel-registered-class', [TeacherController::class, 'cancelRegisteredClass'])->name('teacher.cancel-registered-class');
 
-//Auth::routes();
+Auth::routes();
 //
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

@@ -1,7 +1,7 @@
 <script>
     $(document).ready(function () {
         // Select2 initialize
-        $('form select').not('#recurringSelect, #statusSelect').select2({
+        $('form select').not('#recurringSelect, #statusSelect, #multi-schedule-date, #multi-schedule-session').select2({
             theme: "bootstrap-5",
             placeholder: "Select an option",
             allowClear: true
