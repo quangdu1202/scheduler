@@ -254,7 +254,7 @@ class ScheduleController extends Controller
             ->where('session', '==', $session)
             ->where('shift', '==', 1);
 
-        $availableRooms_1 = $this->practiceRoomService->with(['schedules'])->getAll();
+        $availableRooms_1 = $this->practiceRoomService->with(['schedules'])->getAll(['status' => 1]);
         $filteredRoomIds_1 = $filteredSchedules_1->pluck('practice_room_id')->toArray();
 
         $availableRooms_1 = $availableRooms_1->reject(function ($room) use ($filteredRoomIds_1) {
@@ -267,7 +267,7 @@ class ScheduleController extends Controller
             ->where('session', '==', $session)
             ->where('shift', '==', 2);
 
-        $availableRooms_2 = $this->practiceRoomService->with(['schedules'])->getAll();
+        $availableRooms_2 = $this->practiceRoomService->with(['schedules'])->getAll(['status' => 1]);
         $filteredRoomIds_2 = $filteredSchedules_2->pluck('practice_room_id')->toArray();
 
         $availableRooms_2 = $availableRooms_2->reject(function ($room) use ($filteredRoomIds_2) {
