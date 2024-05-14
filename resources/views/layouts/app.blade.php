@@ -45,10 +45,13 @@
 
     <div class="wrapper">
 
-        {{-- Sidebar --}}
-        <aside id="sidebar">
-            @include('partials/sidebar')
-        </aside>
+        {{--@if(auth()->user())--}}
+        @if(true)
+            {{-- Sidebar --}}
+            <aside id="sidebar">
+                @include('partials/sidebar')
+            </aside>
+        @endif
 
         {{-- Main content --}}
         <div id="app" class="main px-5">

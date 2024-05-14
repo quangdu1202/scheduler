@@ -2,6 +2,7 @@
 
 namespace App\Models\PracticeClass;
 
+use App\Models\Student\Student;
 use Carbon\Carbon;
 use App\Models\Module\Module;
 use App\Models\Teacher\Teacher;
@@ -10,6 +11,7 @@ use App\Models\StudentMark\StudentMark;
 use App\Models\Registration\Registration;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
@@ -30,6 +32,7 @@ use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
  * @property Carbon $updated_at
  * @property Module $module
  * @property Teacher $teacher
+ * @property Student[]|Collection $students
  * @property Registration[]|Collection $registrations
  * @property Schedule[]|Collection $schedules
  * @property StudentMark[]|Collection $studentMarks
@@ -76,6 +79,14 @@ class PracticeClass extends BaseModel
 	{
 		return $this->hasMany(Registration::class, 'practice_class_id', 'id');
 	}
+
+    /**
+     * @return BelongsToMany
+     */
+    public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class, 'registrations');
+    }
 
 	/**
 	 * @return HasMany

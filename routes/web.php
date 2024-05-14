@@ -34,6 +34,8 @@ Route::get('mark-by-practice', [MarkController::class, 'markByPractice'])->name(
 
 // New
 
+Route::get('/test', [HomeController::class, 'test'])->name('test');
+
 Route::resource('practice-classes', PracticeClassController::class);
 
 Route::get('modules/{id}/practice-classes', [ModuleController::class, 'showPracticeClasses'])->name('modules.show-practice-classes');
@@ -68,13 +70,9 @@ Route::get('/teacher/register-classes', [TeacherController::class, 'index'])->na
 Route::post('/teacher/register-classes', [TeacherController::class, 'registerClass'])->name('teacher.register');
 Route::get('/teacher/get-available-classes', [TeacherController::class, 'getJsonData'])->name('teacher.get-available-classes');
 Route::get('/teacher/get-class-schedules/{practice_class_id}', [TeacherController::class, 'getJsonDataForSchedule'])->name('teacher.get-class-schedules');
-Route::get('/teacher/get-registered-class', [TeacherController::class, 'getJsonDataForRegisteredClasses'])->name('teacher.get-registered-class');
+Route::get('/teacher/get-registered-class', [TeacherController::class, 'getRegisteredClasses'])->name('teacher.get-registered-class');
 Route::post('/teacher/cancel-registered-class', [TeacherController::class, 'cancelRegisteredClass'])->name('teacher.cancel-registered-class');
 
 Auth::routes();
 //
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
