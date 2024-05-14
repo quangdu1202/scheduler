@@ -162,7 +162,7 @@ class PracticeClassController extends Controller
                         'practice_class_name' => $module->module_name,
                         'registered_qty' => 0,
                         'shift_qty' => 2,
-                        'max_qty' => 65,
+                        'max_qty' => null,
                         'status' => 0,
                     ];
 
@@ -286,7 +286,7 @@ class PracticeClassController extends Controller
      */
     public function getJsonData(): JsonResponse
     {
-        $practiceClasses = $this->practiceClassService->getAll();
+        $practiceClasses = $this->practiceClassService->withCount(['schedules'])->getAll();
 
         $responseData = $practiceClasses->map(function ($pclass, $index) {
             /**@var PracticeClass $pclass */
@@ -354,9 +354,9 @@ class PracticeClassController extends Controller
                 'practice_class_name' => $pclass->practice_class_name,
                 'teacher' => $pclass->teacher != null ? $pclass->teacher->user->name : '<i>Not set</i>',
                 'teacher_id' => $pclass->teacher_id,
-                'registered_qty' => $registered_qty . '/' . $max_qty,
+                'registered_qty' => $max_qty == null ? '<i>Not set</i>' : $registered_qty . '/' . $max_qty,
                 'max_qty' => $max_qty,
-                'shift_qty' => $pclass->shift_qty,
+                'schedules_count' => $pclass->schedules_count / 2,
                 'status' => $status,
                 'status_raw' => $pclass->status,
                 'actions' => $actions

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('teacher_id')->nullable()->constrained('teachers');
             $table->integer('registered_qty')->default(0);
             $table->integer('shift_qty')->default(2);
-            $table->integer('max_qty');
+            $table->integer('max_qty')->nullable();
             $table->integer('status')->default(0);
             $table->timestamps();
         });

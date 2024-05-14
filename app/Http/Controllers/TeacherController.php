@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helper\Helper;
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\PracticeRoom\PracticeRoom;
+use App\Models\Teacher\Teacher;
 use App\Services\Module\Contracts\ModuleServiceInterface;
 use App\Services\ModuleClass\Contracts\ModuleClassServiceInterface;
 use App\Services\PracticeClass\Contracts\PracticeClassServiceInterface;
@@ -176,6 +177,46 @@ class TeacherController extends Controller
                 'message' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function getJsonDataForScheduleTable()
+    {
+        /**@var Teacher $teacher*/
+        $teacher = auth()->user()->userable;
+        $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll(['teacher_id' => $teacher->id]);
+
+        $schedules = $practiceClasses->mapWithKeys(function ($practiceClass) {
+            // Collect all schedules, setting 'session_id' as key and 'schedule_date' as value
+            $schedulesMapped = $practiceClass->schedules->mapWithKeys(function ($schedule) {
+                return [$schedule->session_id => ['session' => $schedule->session, 'date' => $schedule->schedule_date]];
+            });
+            // Remove duplicate dates, keeping the first occurrence
+            $uniqueSchedules = $schedulesMapped->unique();
+
+            // Map practice class id to its unique schedules
+            return [$practiceClass->id => $uniqueSchedules];
+        });
+
+        dd($schedules);
+
+        $responseData = [];
+        for ($i = 1; $i <= 3; $i++) {
+            $responseData[] = [
+                'row_session' => $i,
+                'mon' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
+                'tue' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
+                'wed' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
+                'thu' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
+                'fri' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
+                'sat' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
+                'sun' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
+            ];
+        }
+
+        return response()->json($responseData);
     }
 
     /**

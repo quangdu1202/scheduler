@@ -86,7 +86,7 @@
                     </div>
                     <div class="col-1">
                         <div class="form-floating mb-3">
-                            <input type="number" name="max_qty" class="form-control" id="studentQty" min="0" required>
+                            <input type="number" name="max_qty" class="form-control" id="studentQty" min="0">
                             <label for="studentQty" class="form-label">Max Student</label>
                         </div>
                     </div>
@@ -126,8 +126,8 @@
                 <th>Class Code</th>
                 <th>Class Name</th>
                 <th>Teacher</th>
-                <th>Reg.</th>
-                <th>Shift Qty</th>
+                <th>MaxRegs</th>
+                <th>ScheduleQTY</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>

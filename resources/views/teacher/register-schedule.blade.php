@@ -26,7 +26,26 @@
         </form>
     </div>
 
+    <div class="table-responsive">
+        <table id="register-schedule-table" class="table table-bordered w-100">
+            <thead class="border-black">
+                <tr>
+                    <th>MON</th>
+                    <th>TUE</th>
+                    <th>WED</th>
+                    <th>THU</th>
+                    <th>FRI</th>
+                    <th>SAT</th>
+                    <th>SUN</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <hr>
     <!-- Practice Classes Table -->
+    <button class="btn btn-outline-primary mx-auto d-block" id="toggle-register-table">
+        <i class="lni lni-chevron-up align-middle"></i>
+    </button>
     <div class="table-responsive" id="toggle-register-table-target">
         <table id="pclass-register-table" class="table table-bordered table-hover w-100">
             <thead class="thead-light">
@@ -43,25 +62,7 @@
             </thead>
         </table>
     </div>
-    <button class="btn btn-outline-primary mx-auto d-block" id="toggle-register-table">
-        <i class="lni lni-chevron-up align-middle"></i>
-    </button>
     <hr>
-    <h3>Your Modules</h3>
-    <!-- Modules info Table -->
-    <div class="table-responsive">
-        <table id="modules-info-table" class="table table-bordered table-hover w-100">
-            <thead class="thead-light">
-            <tr>
-                <th>#</th>
-                <th>Module Code</th>
-                <th>Module Name</th>
-                <th>Module Classes</th>
-                <th>Practice Classes</th>
-            </tr>
-            </thead>
-        </table>
-    </div>
     <!-- Registered Classes Table -->
     {{--<div class="table-responsive">
         <table id="registered-pclass-table" class="table table-bordered table-hover w-100">
@@ -121,6 +122,49 @@
                 allowClear: true
             });
             // end
+
+            // Schedule table initiate
+            const scheduleTable = $('#register-schedule-table').DataTable({
+                ajax: {
+                    url: '{{route('teacher.get-schedule-table')}}',
+                    dataSrc: ''
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching data: ", error);
+                    toastr.error("An error occurred while loading the data", "Error");
+                },
+                columns: [
+                    {data: 'mon'},
+                    {data: 'tue'},
+                    {data: 'wed'},
+                    {data: 'thu'},
+                    {data: 'fri'},
+                    {data: 'sat'},
+                    {data: 'sun'},
+                ],
+                columnDefs: [
+                    {
+                        className: "dt-center",
+                        targets: "_all"
+                    },
+                    {
+                        orderable: false,
+                        targets: "_all"
+                    },
+                    {
+                        "targets": '_all',
+                        "createdCell": function (td, cellData, rowData, row, col) {
+                            $(td).css('padding', '0')
+                        }
+                    }
+                ],
+                layout: {
+                    topStart: {},
+                    topEnd: {},
+                    bottomStart: {},
+                    bottomEnd: {}
+                },
+            });
 
             //Data table initiate
             const pclassRegisterTable = $('#pclass-register-table').DataTable({

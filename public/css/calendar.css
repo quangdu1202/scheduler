@@ -210,6 +210,15 @@ table.dataTable th {
     padding-left: 16px !important;
 }
 
+#register-schedule-table.dataTable td,
+#register-schedule-table.dataTable th {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+#register-schedule-table .dt-column-order {
+    display: none;
+}
+
 table.dataTable thead>tr>th.dt-orderable-asc span.dt-column-order,
 table.dataTable thead>tr>th.dt-orderable-desc span.dt-column-order {
     right: 4px !important;

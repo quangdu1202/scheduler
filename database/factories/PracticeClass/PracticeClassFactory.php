@@ -43,7 +43,7 @@ final class PracticeClassFactory extends Factory
             'recurring_interval' => 0,
             'recurring_order' => 1,
             'registered_qty' => $this->faker->numberBetween(20, 35),
-            'max_qty' => $this->faker->numberBetween(30, 35),
+            'max_qty' => null,
             'status' => 0,
         ];
     }

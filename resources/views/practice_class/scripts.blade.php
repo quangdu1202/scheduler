@@ -40,7 +40,7 @@
                 {data: 'practice_class_name', type: 'html', width: '25%'},
                 {data: 'teacher', type: 'html', width: '15%'},
                 {data: 'registered_qty', type: 'html', width: '5%'},
-                {data: 'shift_qty', type: 'html', width: '10%'},
+                {data: 'schedules_count', type: 'html', width: '10%'},
                 {
                     data: 'status', type: 'html', width: '10%',
                     render: function (data, type, row) {

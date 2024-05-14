@@ -71,6 +71,7 @@ Route::post('/teacher/register-classes', [TeacherController::class, 'registerCla
 Route::get('/teacher/get-available-classes', [TeacherController::class, 'getJsonData'])->name('teacher.get-available-classes');
 Route::get('/teacher/get-class-schedules/{practice_class_id}', [TeacherController::class, 'getJsonDataForSchedule'])->name('teacher.get-class-schedules');
 Route::get('/teacher/get-registered-class', [TeacherController::class, 'getRegisteredClasses'])->name('teacher.get-registered-class');
+Route::get('/teacher/get-schedule-table', [TeacherController::class, 'getJsonDataForScheduleTable'])->name('teacher.get-schedule-table');
 Route::post('/teacher/cancel-registered-class', [TeacherController::class, 'cancelRegisteredClass'])->name('teacher.cancel-registered-class');
 
 Auth::routes();
