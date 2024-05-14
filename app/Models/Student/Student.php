@@ -2,6 +2,7 @@
 
 namespace App\Models\Student;
 
+use App\Models\PracticeClass\PracticeClass;
 use App\Models\Registration\Registration;
 use App\Models\StudentMark\StudentMark;
 use App\Models\StudentModuleClass\StudentModuleClass;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
@@ -25,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property Carbon $updated_at
  * @property User $user
  * @property OriginalClass $originalClass
+ * @property PracticeClass[]|Collection $practiceClasses
  * @property StudentModuleClass[]|Collection $studentModuleClasses
  * @property Registration[]|Collection $registrations
  */
@@ -72,6 +75,14 @@ class Student extends BaseModel
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class);
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function practiceClasses(): BelongsToMany
+    {
+        return $this->belongsToMany(PracticeClass::class, 'registrations');
     }
 
     /**

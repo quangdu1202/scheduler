@@ -49,6 +49,9 @@ class TeacherController extends Controller
      */
     protected RegistrationService $scheduleRegistrationService;
 
+    /**
+     * @var PracticeRoomService
+     */
     protected PracticeRoomService $practiceRoomService;
 
     /**
@@ -67,7 +70,7 @@ class TeacherController extends Controller
         Helper                        $helper,
     )
     {
-        $this->middleware('auth');
+        $this->middleware('teacher');
         $this->moduleClassService = $moduleClassService;
         $this->practiceClassService = $practiceClassService;
         $this->scheduleService = $scheduleService;
@@ -80,7 +83,8 @@ class TeacherController extends Controller
 
     public function index()
     {
-        $availableModules = $this->helper->getModulesByTeacherId(auth()->user()->userable->id);
+        $user = auth()->user();
+        $availableModules = $this->helper->getModulesByTeacherId($user->userable->id);
         return view('teacher.register-schedule', [
             'modules' => $availableModules
         ]);
@@ -240,7 +244,7 @@ class TeacherController extends Controller
     /**
      * @return JsonResponse
      */
-    public function getJsonDataForRegisteredClasses(): JsonResponse
+    public function getRegisteredClasses(): JsonResponse
     {
         $teacherId = auth()->user()->userable->id;
 
@@ -343,6 +347,34 @@ class TeacherController extends Controller
                 'practice_room' => $practiceRooms,
             ];
         }
+
+        return response()->json($responseData);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getStudentOfPracticeClass(Request $request): JsonResponse
+    {
+        $pClassId = $request->input('$pClassId');
+
+        /**@var PracticeClass|null $pClass*/
+        $pClass = $this->practiceClassService->findOrFail($pClassId);
+
+        $pClassStudents = $pClass->students;
+
+        $responseData = $pClassStudents->map(function ($student, $index) use ($pClassId) {
+            return [
+                'DT_RowData' => $student,
+                'index' => $index++,
+                'student_code' => $student->student_code,
+                'student_name' => $student->user->name,
+                'student_gender' => 'Male',
+                'student_email' => $student->user->email,
+                'student_telephone' => '0123456789',
+            ];
+        });
 
         return response()->json($responseData);
     }

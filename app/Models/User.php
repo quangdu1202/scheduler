@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Student\Student;
+use App\Models\Teacher\Teacher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -52,5 +54,15 @@ class User extends Authenticatable
     public function userable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function isTeacher(): bool
+    {
+        return $this->userable instanceof Teacher;
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->userable instanceof Student;
     }
 }
