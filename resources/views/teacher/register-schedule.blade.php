@@ -30,6 +30,8 @@
         <table id="register-schedule-table" class="table table-bordered w-100">
             <thead class="border-black">
                 <tr>
+                    <th>#</th>
+                    <th></th>
                     <th>MON</th>
                     <th>TUE</th>
                     <th>WED</th>
@@ -134,6 +136,8 @@
                     toastr.error("An error occurred while loading the data", "Error");
                 },
                 columns: [
+                    {data: 'index', width: '0'},
+                    {data: 'row_session', width: '1%'},
                     {data: 'mon'},
                     {data: 'tue'},
                     {data: 'wed'},
@@ -144,7 +148,12 @@
                 ],
                 columnDefs: [
                     {
-                        className: "dt-center",
+                        visible: false,
+                        orderable: false,
+                        targets: 0
+                    },
+                    {
+                        className: "dt-center position-relative",
                         targets: "_all"
                     },
                     {

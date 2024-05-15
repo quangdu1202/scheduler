@@ -184,36 +184,86 @@ class TeacherController extends Controller
      */
     public function getJsonDataForScheduleTable()
     {
-        /**@var Teacher $teacher*/
+        /**@var Teacher $teacher */
         $teacher = auth()->user()->userable;
         $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll(['teacher_id' => $teacher->id]);
 
-        $schedules = $practiceClasses->mapWithKeys(function ($practiceClass) {
+        $practiceClassesMapped = $practiceClasses->mapWithKeys(function ($practiceClass) {
             // Collect all schedules, setting 'session_id' as key and 'schedule_date' as value
             $schedulesMapped = $practiceClass->schedules->mapWithKeys(function ($schedule) {
-                return [$schedule->session_id => ['session' => $schedule->session, 'date' => $schedule->schedule_date]];
+                if ($schedule->schedule_date != null) {
+                    return [
+                        $schedule->session_id => [
+                            'date' => $schedule->schedule_date,
+                            'session' => $schedule->session,
+                        ]
+                    ];
+                }else {
+                    return null;
+                }
             });
             // Remove duplicate dates, keeping the first occurrence
             $uniqueSchedules = $schedulesMapped->unique();
+            $firstSchedule = $uniqueSchedules->first();
 
-            // Map practice class id to its unique schedules
-            return [$practiceClass->id => $uniqueSchedules];
+            // Compute the day of the week, ensuring there is a date to process
+            $dayOfWeek = $firstSchedule ? date('N', strtotime($firstSchedule['date'])) : null;
+
+            if ($dayOfWeek == null) {
+                return [];
+            }
+
+            return [
+                $practiceClass->id => [
+                    'schedules' => $uniqueSchedules,
+                    'day_in_week' => $dayOfWeek,
+                    'session' => $firstSchedule['session'] ?? null,
+                    'practice_class_code' => $practiceClass->practice_class_code,
+                    'practice_class_name' => $practiceClass->practice_class_name,
+                ]
+            ];
         });
 
-//        dd($schedules);
+//        dd($practiceClassesMapped);
+
+        $indexedClasses = [];
+        foreach ($practiceClassesMapped as $class) {
+            $dayOfWeek = $class['day_in_week']; // e.g., 1 for Monday
+            $session = $class['session']; // e.g., 1, 2, or 3
+            $indexedClasses[$dayOfWeek][$session] = $class;
+        }
 
         $responseData = [];
-        for ($i = 1; $i <= 3; $i++) {
-            $responseData[] = [
-                'row_session' => $i,
-                'mon' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
-                'tue' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
-                'wed' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
-                'thu' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
-                'fri' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
-                'sat' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
-                'sun' => '<button type="button" class="h-100 w-100 border-0 btn btn-outline-primary schedule-table-add-btn"><i class="lni lni-plus align-middle"></i></button>',
+
+        for ($i = 1; $i <= 3; $i++) { // Assuming sessions 1 to 3
+            $entry = [
+                'index' => $i,
+                'row_session' => ($i == 1 ? 'S' : ($i == 2 ? 'C' : 'T'))
             ];
+            $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+            foreach ($days as $index => $day) {
+                $dayIndex = $index + 1; // Convert day string to day index (1 = Monday, 2 = Tuesday, etc.)
+                if (isset($indexedClasses[$dayIndex][$i])) {
+                    $classInfo = $indexedClasses[$dayIndex][$i];
+                    $entry[$day] = "
+                        <div style='padding: 6px'>
+                            <strong>{$classInfo['practice_class_name']}</strong>
+                            <div>{$classInfo['practice_class_code']}</div>
+                        </div>
+                    ";
+                } else {
+                    $entry[$day] = '
+                        <div class="d-flex align-items-center h-100">
+                            <button type="button" class="border-0 btn btn-outline-primary schedule-table-add-btn flex-grow-1">
+                                +
+                            </button>
+                        </div>
+                    ';
+                }
+            }
+
+            $responseData[] = $entry;
         }
 
         return response()->json($responseData);
@@ -400,7 +450,7 @@ class TeacherController extends Controller
     {
         $pClassId = $request->input('$pClassId');
 
-        /**@var PracticeClass|null $pClass*/
+        /**@var PracticeClass|null $pClass */
         $pClass = $this->practiceClassService->findOrFail($pClassId);
 
         $pClassStudents = $pClass->students;
