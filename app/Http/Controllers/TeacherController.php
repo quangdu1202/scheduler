@@ -200,7 +200,7 @@ class TeacherController extends Controller
             return [$practiceClass->id => $uniqueSchedules];
         });
 
-        dd($schedules);
+//        dd($schedules);
 
         $responseData = [];
         for ($i = 1; $i <= 3; $i++) {
