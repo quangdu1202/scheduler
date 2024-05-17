@@ -60,7 +60,7 @@ class ScheduleController extends Controller
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * //     * @return JsonResponse
      */
     public function store(Request $request)
     {
@@ -70,6 +70,28 @@ class ScheduleController extends Controller
         /** @var PracticeClass $practiceClass */
         $practiceClass = $this->practiceClassService->findOrFail($practiceClassId);
 
+        $signatureSchedule = $practiceClass->schedules->where('order', '=', 0)->first();
+
+        if (!$signatureSchedule) {
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'title' => 'Caution!',
+                'message' => 'Please set the signature data first!',
+            ]);
+        }
+        $lastSchedule = $practiceClass->schedules->sortByDesc('schedule_date')->first();
+
+        if (count($practiceClass->schedules) > 1) {
+            $lastScheduleDate = $lastSchedule->schedule_date;
+            $session = $signatureSchedule->session;
+            $lastOrder = $lastSchedule->order;
+        } else {
+            $lastScheduleDate = date('Y-m-d', strtotime('-1 week', strtotime($signatureSchedule->schedule_date)));
+            $session = $signatureSchedule->session;
+            $lastOrder = 0;
+        }
+
         $shift_qty = $practiceClass->shift_qty;
 
         DB::beginTransaction();
@@ -78,22 +100,42 @@ class ScheduleController extends Controller
             if ($add_mode == 'multi') {
                 $multi_schedule_qty = $request->input('multi_schedule_qty');
 
-                $multi_schedule_session = $request->input('multi_schedule_session');
-                $multi_schedule_start_date = $request->input('multi_schedule_start_date');
+                // Collect all dates to check for duplicates
+                $newDates = [];
+                for ($i = 1; $i <= $multi_schedule_qty; $i++) {
+                    $newDates[] = date('Y-m-d', strtotime("+$i week", strtotime($lastScheduleDate)));
+                }
 
-                $multiData = [
-                    'schedule_date' => $multi_schedule_start_date,
-                    'session' => $multi_schedule_session,
-                ];
+                // Check for existing dates in the database
+                $existingDates = $practiceClass->schedules->where('order', '!=', 0)->pluck('schedule_date')->toArray();
+                $duplicateDates = array_intersect($newDates, $existingDates);
+                if (count($duplicateDates) > 0) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => 500,
+                        'success' => false,
+                        'title' => 'Error!',
+                        'message' => 'Duplicate schedule dates detected: ' . implode(', ', $duplicateDates),
+                    ]);
+                }
 
-                for ($i = 0; $i < $multi_schedule_qty; $i++) {
+                foreach ($newDates as $date) {
                     $sessionId = $this->helper->uniqidReal();
-                    $this->createSchedules($practiceClassId, $sessionId, $shift_qty, $multiData);
-                    $multiData['schedule_date'] = date('Y-m-d', strtotime('+1 week', strtotime($multiData['schedule_date'])));
+                    $data = [
+                        'schedule_date' => $date,
+                        'session' => $session,
+                        'order' => $lastOrder + 1
+                    ];
+                    $this->createSchedules($practiceClassId, $sessionId, $shift_qty, $data);
                 }
             } else {
                 $sessionId = $this->helper->uniqidReal();
-                $this->createSchedules($practiceClassId, $sessionId, $shift_qty);
+                $data = [
+                    'schedule_date' => date('Y-m-d', strtotime('+1 week', strtotime($lastScheduleDate))),
+                    'session' => $session,
+                    'order' => $lastOrder + 1
+                ];
+                $this->createSchedules($practiceClassId, $sessionId, $shift_qty, $data);
             }
 
             DB::commit();
@@ -124,27 +166,21 @@ class ScheduleController extends Controller
      * @param int $practiceClassId
      * @param string $sessionId
      * @param int $shiftQty
-     * @param array|null $multiData
+     * @param $data
      * @return void
      */
-    private function createSchedules(int $practiceClassId, string $sessionId, int $shiftQty, array $multiData = null)
+    private function createSchedules(int $practiceClassId, string $sessionId, int $shiftQty, $data)
     {
         for ($i = 0; $i < $shiftQty; $i++) {
-            if ($multiData) {
-                $this->scheduleService->create([
-                    'practice_class_id' => $practiceClassId,
-                    'schedule_date' => $multiData['schedule_date'],
-                    'session' => $multiData['session'],
-                    'session_id' => $sessionId,
-                    'shift' => $i + 1,
-                ]);
-            } else {
-                $this->scheduleService->create([
-                    'practice_class_id' => $practiceClassId,
-                    'session_id' => $sessionId,
-                    'shift' => $i + 1,
-                ]);
-            }
+            $this->scheduleService->create([
+                'practice_class_id' => $practiceClassId,
+                'schedule_date' => $data['schedule_date'],
+                'session' => $data['session'],
+                'session_id' => $sessionId,
+                'order' => $data['order'],
+                'shift' => $i + 1,
+            ]);
+
         }
     }
 
@@ -154,17 +190,50 @@ class ScheduleController extends Controller
      */
     public function updateSingleSchedule(Request $request)
     {
-        $requestedSchedules = $request->all();
+        $practiceClassId = $request->input('pclassId');
+        $requestedSchedules = $request->input('newData');
 
-        foreach ($requestedSchedules as $key => $data) {
-            $schedule = $this->scheduleService->findOrFail($key);
+        /** @var PracticeClass $practiceClass */
+        $practiceClass = $this->practiceClassService->findOrFail($practiceClassId);
+        $existingDates = $practiceClass->schedules->whereNotIn('id', [array_keys($requestedSchedules)[0], array_keys($requestedSchedules)[1]])->where('order', '!=', 0)->pluck('schedule_date')->toArray();
 
+        // Extracting first existing schedule for comparison
+        $firstSchedule = $practiceClass->schedules->first();
+        $existingWeekDay = date('N', strtotime($firstSchedule->schedule_date));
+        $existingSession = $firstSchedule->session;
+
+        // Iterate over all requested schedules to check conditions
+        foreach ($requestedSchedules as $scheduleId => $data) {
+            $newScheduleDate = $data['schedule_date'];
+            $newSession = $data['session'];
+
+            // Check if the new date matches any existing dates
+            if (in_array($newScheduleDate, $existingDates)) {
+                return response()->json([
+                    'status' => 500,
+                    'success' => false,
+                    'title' => 'Error!',
+                    'message' => 'Duplicate schedule date detected: ' . $newScheduleDate,
+                ]);
+            }
+
+            // Check weekday and session match
+            $newWeekDay = date('N', strtotime($newScheduleDate));
+            if ($existingWeekDay != $newWeekDay || $existingSession != $newSession) {
+                return response()->json([
+                    'status' => 500,
+                    'success' => false,
+                    'title' => 'Error!',
+                    'message' => 'Must select the same schedule as existing schedules [<strong>' . date('l', strtotime($firstSchedule->schedule_date)) . ($existingSession == 1 ? '-Morning' : ($existingSession == 2 ? '-Afternoon' : '-Evening')) . '</strong>]'
+                ]);
+            }
+
+            // Update schedule if all checks pass
+            $schedule = $this->scheduleService->findOrFail($scheduleId);
             try {
                 $this->scheduleService->update($schedule, $data);
             } catch (Exception $e) {
-                // Log the exception for internal review
                 Log::error("Schedule update failed: {$e->getMessage()}");
-
                 return response()->json([
                     'status' => 500,
                     'title' => 'Error!',
@@ -178,8 +247,80 @@ class ScheduleController extends Controller
             'success' => true,
             'title' => 'Success!',
             'message' => 'Schedule updated!',
-            'reloadTarget' => '',
+            'reloadTarget' => '',  // Optionally specify target if needed
         ]);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function updateSignatureSchedule(Request $request)
+    {
+        $data = $request->input('data');
+        $weekday = $data['weekday'];
+        $schedule_date = $data['start_date'];
+        $session = $data['session'];
+        $pRoomId = $data['pRoomId'] ?? null;
+        $pClassId = $request->input('pclassId');
+        $sessionId = $this->helper->uniqidReal();
+
+        if (!$weekday || !$schedule_date || !$session) {
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'title' => 'Error!',
+                'message' => 'Unknown error occurred!'
+            ]);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $existing = $this->scheduleService->find([
+                'practice_class_id' => $pClassId,
+                'order' => 0
+            ])->first();
+
+            if ($existing) {
+                $this->scheduleService->update($existing,
+                    [
+                        'schedule_date' => $schedule_date,
+                        'session' => $session,
+                        'practice_room_id' => $pRoomId
+                    ]
+                );
+            } else {
+                $this->scheduleService->create([
+                    'practice_class_id' => $pClassId,
+                    'schedule_date' => $schedule_date,
+                    'practice_room_id' => $pRoomId,
+                    'session' => $session,
+                    'session_id' => $sessionId,
+                    'order' => 0
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'title' => 'Success!',
+                'message' => 'Signature data set successfully!',
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Signature data set failed: {$e->getMessage()}");
+
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'title' => 'Error!',
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -254,7 +395,7 @@ class ScheduleController extends Controller
             ->where('session', '==', $session)
             ->where('shift', '==', 1);
 
-        $availableRooms_1 = $this->practiceRoomService->with(['schedules'])->getAll(['status' => 1]);
+        $availableRooms_1 = $this->practiceRoomService->with(['schedules'])->getAll();
         $filteredRoomIds_1 = $filteredSchedules_1->pluck('practice_room_id')->toArray();
 
         $availableRooms_1 = $availableRooms_1->reject(function ($room) use ($filteredRoomIds_1) {
@@ -267,7 +408,7 @@ class ScheduleController extends Controller
             ->where('session', '==', $session)
             ->where('shift', '==', 2);
 
-        $availableRooms_2 = $this->practiceRoomService->with(['schedules'])->getAll(['status' => 1]);
+        $availableRooms_2 = $this->practiceRoomService->with(['schedules'])->getAll();
         $filteredRoomIds_2 = $filteredSchedules_2->pluck('practice_room_id')->toArray();
 
         $availableRooms_2 = $availableRooms_2->reject(function ($room) use ($filteredRoomIds_2) {

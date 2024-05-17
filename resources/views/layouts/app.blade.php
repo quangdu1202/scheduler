@@ -34,6 +34,9 @@
         src="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/b-html5-3.0.1/b-print-3.0.1/fh-4.0.1/r-3.0.0/sc-2.4.1/datatables.min.js">
     </script>
 
+    <!-- DatePicker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css">
+
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdn.lineicons.com/4.0/lineicons.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
@@ -77,6 +80,8 @@
     <script type="text/javascript" src="{{ asset('/js/vfs_fonts.js') }}"></script>
     <script type="text/javascript" src="{{ asset('/js/select2.min.js') }}"></script>
 
+    <!-- DatePicker -->
+    <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker-full.min.js"></script>
     <!-- DataTables -->
     <script type="text/javascript" src="{{ asset('/js/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('/js/dataTables.select.min.js') }}"></script>

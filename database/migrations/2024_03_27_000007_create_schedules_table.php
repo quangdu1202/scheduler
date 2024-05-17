@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('session')->nullable();
             $table->string('session_id');
             $table->integer('shift')->nullable();
+            $table->integer('order');
             $table->timestamps();
         });
     }

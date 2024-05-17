@@ -4,7 +4,16 @@
         $('form select').not('#recurringSelect, #statusSelect, #multi-schedule-date, #multi-schedule-session').select2({
             theme: "bootstrap-5",
             placeholder: "Select an option",
-            allowClear: true
+            // allowClear: true
+        });
+        $('#sessionSelect, #weekdaySelect').select2({
+            theme: "bootstrap-5",
+            minimumResultsForSearch: -1
+        });
+        $('#pRoomSelect').select2({
+            theme: "bootstrap-5",
+            searchable: true,
+            dropdownParent: $('#all-schedule-modal-content')
         });
         // end
 
@@ -121,11 +130,11 @@
         // end
 
         // Update the practice class schedule status
-        pclassTable.on('change', '.status-change-btn', function (e) {
-            // e.preventDefault();
-            const status = $(this).is(':checked') ? 1 : 0;
-            const pclassId = $(this).data('pclass-id');
-            const $row = $(this).closest('tr'); // Get the closest row (<tr>) element
+        pclassTable.on('change', '.status-change-btn', function () {
+            const $statusChangeBtn = $(this);
+            const status = $statusChangeBtn.is(':checked') ? 1 : 0;
+            const pclassId = $statusChangeBtn.data('pclass-id');
+            const $row = $statusChangeBtn.closest('tr'); // Get the closest row (<tr>) element
             const rowData = pclassTable.row($row).data(); // Get the data for this row
 
             // Show the loading overlay
@@ -153,7 +162,9 @@
                             pclassTable.row($row).data(rowData).invalidate().draw(false); // Invalidate the data cache
                             console.log(rowData);
                             break;
-                        default:
+                        case 500:
+                            console.log('failed');
+                            $statusChangeBtn.prop('checked', false);
                             toastr.error(response.message || "Unknown error occurred", response.title || "Error");
                     }
                 },
@@ -314,7 +325,8 @@
                     bottomEnd: {},
                 },
                 paging: false,
-                initComplete: function () {
+                initComplete: function (settings, json) {
+                    console.log(json);
                     const $sessionSelects = $('.session-select');
                     const pRoomSelects = $('.practice-room-select');
 
@@ -336,7 +348,78 @@
             // Setup for adding multi schedules
             $('#multi-schedule-pclass-id').val(pClassAllScheduleTable.data('practice_class_id'));
 
+            const weekdaySignature = $('#pclass-signature-form #weekdaySelect');
+            const startDateSignature = $('#pclass-signature-form #start_date');
+            const pRoomSignature = $('#pclass-signature-form #pRoomSelect');
+
+            $.ajax({
+                url: '<?= route('practice-classes.get-signature-info') ?>',
+                type: 'get',
+                data: {pClassId: pClassAllScheduleTable.data('practice_class_id')},
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function (response) {
+                    console.log(response);
+
+                    startDateSignature.val(response.start_date);
+
+                    weekdaySignature.val(response.weekday).trigger('change');
+
+                    if (response.session != null) {
+                        const radio = $('.signature-session[value=' + response.session + ']');
+                        radio.prop('checked', true);
+                        $("label[for='" + radio.attr('id') + "']").addClass('btn-outline-danger');
+                    } else {
+                        $('.signature-session').prop('checked', false);
+                        $("#pclass-signature-form label").removeClass('btn-outline-danger');
+                    }
+
+                    pRoomSignature.val(response.pRoomId).change();
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                    toastr.error("A server error occurred. Please try again.", "Error");
+                }
+            });
+
             infoModal.show();
+        });
+        // end
+
+        // Update signature schedule
+        const signatureForm = $('#pclass-signature-form');
+        signatureForm.on('submit', function (e) {
+            e.preventDefault();
+            const $pclassId = pClassAllScheduleTable.data('practice_class_id');
+            const formData = $(this).serializeObject();
+
+            $.ajax({
+                url: '<?= route('schedules.update-signature-schedule') ?>',
+                method: 'put',
+                data: {
+                    pclassId: $pclassId,
+                    data: formData
+                },
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function (response) {
+                    hideOverlay();
+
+                    console.log(response);
+                    if (response.success === false) {
+                        toastr.error(response.message || "Unknown error occurred", response.title || "Error");
+                    } else {
+                        toastr.success(response.message, response.title || "Success");
+                    }
+
+                    // Reload requested element (mostly data table)
+                    if (response.reloadTarget && $.fn.dataTable.isDataTable(response.reloadTarget)) {
+                        $(response.reloadTarget).DataTable().ajax.reload();
+                    }
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                    toastr.error("A server error occurred. Please try again.", "Error");
+                }
+            });
         });
         // end
 
@@ -430,6 +513,8 @@
                     console.log(response);
                     if (response.success === false) {
                         toastr.error(response.message || "Unknown error occurred", response.title || "Error");
+                    } else {
+                        toastr.success(response.message, response.title || "Success");
                     }
 
                     // Reset requested element (mostly input form)
@@ -467,6 +552,7 @@
             const rowData = row.data();
             const datePicker = row.find('.schedule-date-select');
 
+            const pClassId = rowData[0].practice_class_id;
             const pRoomIds = [];
             const pRoomSelects = row.find('.practice-room-select');
             pRoomSelects.each(function () {
@@ -494,7 +580,10 @@
             $.ajax({
                 url: '<?= route('schedules.update-single-schedule') ?>',
                 method: 'put',
-                data: data,
+                data: {
+                    pclassId: pClassId,
+                    newData: data
+                },
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                 success: function (response) {
                     hideOverlay();

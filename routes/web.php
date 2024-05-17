@@ -46,6 +46,7 @@ Route::get('/getSinglePracticeRoomJsonData', [PracticeRoomController::class, 'ge
 Route::get('/getPracticeRoomsJsonData', [PracticeRoomController::class, 'getJsonData'])->name('practice-rooms.get-json-data');
 Route::resource('practice-rooms', PracticeRoomController::class);
 
+Route::get('/getSignatureClassInfo', [PracticeClassController::class, 'getSignatureClassInfo'])->name('practice-classes.get-signature-info');
 Route::get('/getPracticeClassesJsonData', [PracticeClassController::class, 'getJsonData'])->name('practice-classes.get-json-data');
 Route::get('/getJsonDataForSchedule/{practice_class_id}', [PracticeClassController::class, 'getJsonDataForSchedule'])->name('practice-classes.get-json-data-for-schedule');
 Route::get('/getJsonDataForStudentsOfPracticeClass', [PracticeClassController::class, 'getJsonDataForStudentsOfPracticeClass'])->name('practice-classes.get-student-data-for-schedule');
@@ -63,6 +64,7 @@ Route::resource('student-marks', StudentMarkController::class);
 
 Route::get('getAvailableRooms', [ScheduleController::class, 'getAvailableRooms'])->name('schedules.get-available-rooms');
 Route::put('schedules', [ScheduleController::class, 'updateSingleSchedule'])->name('schedules.update-single-schedule');
+Route::put('schedules/signature', [ScheduleController::class, 'updateSignatureSchedule'])->name('schedules.update-signature-schedule');
 Route::delete('schedules', [ScheduleController::class, 'deleteSingleSchedule'])->name('schedules.delete-single-schedule');
 Route::resource('schedules', ScheduleController::class);
 
@@ -72,6 +74,7 @@ Route::get('/teacher/get-available-classes', [TeacherController::class, 'getJson
 Route::get('/teacher/get-class-schedules/{practice_class_id}', [TeacherController::class, 'getJsonDataForSchedule'])->name('teacher.get-class-schedules');
 Route::get('/teacher/get-registered-class', [TeacherController::class, 'getRegisteredClasses'])->name('teacher.get-registered-class');
 Route::get('/teacher/get-schedule-table', [TeacherController::class, 'getJsonDataForScheduleTable'])->name('teacher.get-schedule-table');
+Route::get('/teacher/get-classes-ondate', [TeacherController::class, 'getClassOndate'])->name('teacher.get-classes-ondate');
 Route::post('/teacher/cancel-registered-class', [TeacherController::class, 'cancelRegisteredClass'])->name('teacher.cancel-registered-class');
 
 Auth::routes();

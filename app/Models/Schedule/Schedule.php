@@ -18,6 +18,7 @@ use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
  * @property integer $session
  * @property string $session_id
  * @property integer $shift
+ * @property integer $order
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property PracticeClass $practiceClass
@@ -35,6 +36,7 @@ class Schedule extends BaseModel
 		'session',
 		'session_id',
 		'shift',
+		'order',
 		'created_at',
 		'updated_at'
 	];

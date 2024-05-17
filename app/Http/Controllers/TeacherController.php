@@ -110,7 +110,17 @@ class TeacherController extends Controller
         }
 
         try {
+            /**@var PracticeClass $practiceClass*/
             $practiceClass = $this->practiceClassService->findOrFail($pclassId);
+            if ($practiceClass->teacher_id != null) {
+                return response()->json([
+                    'status' => 500,
+                    'success' => false,
+                    'title' => 'Fail!',
+                    'message' => 'This class has been registered by another teacher, please reload the page!',
+                ]);
+            }
+
             $this->practiceClassService->update($practiceClass, [
                 'teacher_id' => $teacherId,
                 'status' => 3,
@@ -120,8 +130,8 @@ class TeacherController extends Controller
                 'status' => 200,
                 'title' => 'Success!',
                 'message' => 'Practice class registered successfully!',
-                'hideTarget' => '#pclass-schedules-modal',
-                'reloadTarget' => '#pclass-register-table, #registered-pclass-table',
+                'hideTarget' => '#pclass-schedules-modal, #pclass-ondate-modal',
+                'reloadTarget' => '#pclass-register-table, #registered-pclass-table, #register-schedule-table',
             ]);
         } catch (Exception $e) {
             // Log the exception for internal review
@@ -164,7 +174,7 @@ class TeacherController extends Controller
                 'status' => 200,
                 'title' => 'Success!',
                 'message' => 'Practice class canceled successfully!',
-                'reloadTarget' => '#pclass-register-table, #registered-pclass-table',
+                'reloadTarget' => '#pclass-register-table, #registered-pclass-table, #register-schedule-table',
             ]);
         } catch (Exception $e) {
             // Log the exception for internal review
@@ -190,55 +200,59 @@ class TeacherController extends Controller
 
         $practiceClassesMapped = $practiceClasses->mapWithKeys(function ($practiceClass) {
             // Collect all schedules, setting 'session_id' as key and 'schedule_date' as value
-            $schedulesMapped = $practiceClass->schedules->mapWithKeys(function ($schedule) {
-                if ($schedule->schedule_date != null) {
-                    return [
-                        $schedule->session_id => [
-                            'date' => $schedule->schedule_date,
-                            'session' => $schedule->session,
-                        ]
-                    ];
-                }else {
-                    return null;
-                }
-            });
-            // Remove duplicate dates, keeping the first occurrence
-            $uniqueSchedules = $schedulesMapped->unique();
-            $firstSchedule = $uniqueSchedules->first();
+//            $schedulesMapped = $practiceClass->schedules->mapWithKeys(function ($schedule) {
+//                if ($schedule->schedule_date != null) {
+//                    return [
+//                        $schedule->session_id => [
+//                            'date' => $schedule->schedule_date,
+//                            'session' => $schedule->session,
+//                            'room_name' => $schedule->practiceRoom->name ?? null,
+//                            'room_location' => $schedule->practiceRoom->location ?? null
+//                        ]
+//                    ];
+//                }else {
+//                    return null;
+//                }
+//            });
+//            // Remove duplicate dates, keeping the first occurrence
+//            $uniqueSchedules = $schedulesMapped->unique();
+            /**@var PracticeClass $practiceClass*/
+            $signatureSchedule = $practiceClass->schedules->where('order', '=', 0)->first();
 
             // Compute the day of the week, ensuring there is a date to process
-            $dayOfWeek = $firstSchedule ? date('N', strtotime($firstSchedule['date'])) : null;
+            $weekday = $signatureSchedule ? date('N', strtotime($signatureSchedule->schedule_date)) : null;
 
-            if ($dayOfWeek == null) {
+            if ($weekday == null) {
                 return [];
             }
 
             return [
                 $practiceClass->id => [
-                    'schedules' => $uniqueSchedules,
-                    'day_in_week' => $dayOfWeek,
-                    'session' => $firstSchedule['session'] ?? null,
+                    'schedules' => $signatureSchedule,
+                    'weekday' => $weekday,
+                    'session' => $signatureSchedule->session ?? null,
+                    'practice_class_id' => $practiceClass->id,
                     'practice_class_code' => $practiceClass->practice_class_code,
                     'practice_class_name' => $practiceClass->practice_class_name,
+                    'room_name' => $signatureSchedule->practiceRoom->name ?? null,
+                    'room_location' => $signatureSchedule->practiceRoom->location ?? null,
                 ]
             ];
         });
 
-//        dd($practiceClassesMapped);
-
         $indexedClasses = [];
         foreach ($practiceClassesMapped as $class) {
-            $dayOfWeek = $class['day_in_week']; // e.g., 1 for Monday
+            $weekday = $class['weekday']; // e.g., 1 for Monday
             $session = $class['session']; // e.g., 1, 2, or 3
-            $indexedClasses[$dayOfWeek][$session] = $class;
+            $indexedClasses[$weekday][$session] = $class;
         }
 
         $responseData = [];
 
-        for ($i = 1; $i <= 3; $i++) { // Assuming sessions 1 to 3
+        for ($i = 1; $i <= 3; $i++) { // sessions 1 to 3
             $entry = [
                 'index' => $i,
-                'row_session' => ($i == 1 ? 'S' : ($i == 2 ? 'C' : 'T'))
+                'row_session' => '<strong class="text-danger">' . ($i == 1 ? 'S' : ($i == 2 ? 'C' : 'T')) . '</strong>'
             ];
             $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -247,15 +261,21 @@ class TeacherController extends Controller
                 if (isset($indexedClasses[$dayIndex][$i])) {
                     $classInfo = $indexedClasses[$dayIndex][$i];
                     $entry[$day] = "
-                        <div style='padding: 6px'>
-                            <strong>{$classInfo['practice_class_name']}</strong>
+                        <div style='font-size: 13px' class='text-start position-relative m-2 pe-3'>
+                            <span class='position-absolute top-0 end-0 px-1 py-0 btn btn-sm text-danger cancel-class-btn' data-pclass-id=\"{$classInfo['practice_class_id']}\"><i class='fa-solid fa-xmark'></i></span>
                             <div>{$classInfo['practice_class_code']}</div>
+                            <strong>{$classInfo['practice_class_name']}</strong><br>
+                            <strong>{$classInfo['room_name']}</strong> <span>({$classInfo['room_location']})</span><br>
                         </div>
                     ";
                 } else {
                     $entry[$day] = '
                         <div class="d-flex align-items-center h-100">
-                            <button type="button" class="border-0 btn btn-outline-primary schedule-table-add-btn flex-grow-1">
+                            <button type="button" 
+                                    class="border-0 btn btn-outline-primary flex-grow-1 schedule-table-add-btn" 
+                                    data-get-url="'.route('teacher.get-classes-ondate').'" 
+                                    data-weekday="'.$dayIndex.'"
+                                    data-session="'.$i.'">
                                 +
                             </button>
                         </div>
@@ -264,6 +284,57 @@ class TeacherController extends Controller
             }
 
             $responseData[] = $entry;
+        }
+
+        return response()->json($responseData);
+    }
+
+    public function getClassOndate(Request $request)
+    {
+        $weekDay = $request->input('weekDay');
+        $session = $request->input('session');
+        // Retrieve all practice classes
+        $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll();
+
+        // Filter the classes by checking only the first schedule
+        $filteredClasses = $practiceClasses->filter(function ($class) use ($weekDay, $session) {
+            // Get the first schedule of the class
+            $firstSchedule = $class->schedules->first();
+
+            // If there's no schedule, skip this class
+            if (!$firstSchedule) {
+                return false;
+            }
+
+            // Convert the schedule_date to a DateTime object to extract the day of the week
+            $date = new \DateTime($firstSchedule->schedule_date);
+            $dayOfWeek = (int) $date->format('N'); // 'N' gives the day of the week (1 = Monday, 7 = Sunday)
+
+            // Check if the day and session match the request
+            return $dayOfWeek == $weekDay && $firstSchedule->session == $session;
+        });
+
+        $responseData = [];
+        $index = 0;
+        foreach ($filteredClasses as $pclass) {
+            $index++;
+            $actions = '
+                <button type="button" class="btn btn-primary btn-sm schedule-info-btn" data-get-url="' . route('teacher.get-class-schedules', ['practice_class_id' => $pclass->id]) . '">
+                    <i class="fa-solid fa-magnifying-glass align-middle"></i>
+                </button>
+                <button type="button" class="btn btn-success btn-sm register-class-btn" data-pclass-id="' . $pclass->id . '">
+                    Register
+                </button>
+            ';
+
+            $responseData[] = [
+                'index' => $index,
+                'practice_class_id' => $pclass->id,
+                'module_info' => '(' . $pclass->module->module_code . ') ' . $pclass->module->module_name,
+                'practice_class_name' => $pclass->practice_class_name,
+                'practice_class_code' => $pclass->practice_class_code,
+                'actions' => $actions
+            ];
         }
 
         return response()->json($responseData);
@@ -281,8 +352,8 @@ class TeacherController extends Controller
 
             $module_info = '(' . $pclass->module->module_code . ') ' . $pclass->module->module_name;
 
-            $schedule_dates = $pclass->schedules->sortBy('schedule_date')->first();
-            $start_date = '<strong class="btn-sm form-control">' . ($schedule_dates != null ? $schedule_dates->schedule_date : 'No info') . '</button>';
+            $firstSchedule = $pclass->schedules->sortBy('schedule_date')->first();
+            $start_date = '<strong class="btn-sm form-control">' . ($firstSchedule != null ? $firstSchedule->schedule_date : 'No info') . '</button>';
             $max_qty = $pclass->max_qty;
 
             $status = match ($pclass->status) {
@@ -391,7 +462,7 @@ class TeacherController extends Controller
      */
     public function getJsonDataForSchedule($practice_class_id, Request $request): JsonResponse
     {
-        $schedulesBySessionId = $this->scheduleService->getAll(['practice_class_id' => $practice_class_id])->sortBy(['schedule_date', 'shift'])->groupBy('session_id');
+        $schedulesBySessionId = $this->scheduleService->getAll(['practice_class_id' => $practice_class_id])->where('order', '!=', 0)->sortBy(['schedule_date', 'shift'])->groupBy('session_id');
 
         $responseData = [];
         $index = 0;
@@ -412,9 +483,9 @@ class TeacherController extends Controller
             $shifts .= '</div>';
 
             /**@var PracticeRoom $pRoom1 */
-            $pRoom1 = $schedules[0]->practiceRoom;
+            $pRoom1 = $schedules[0]->practiceRoom ?? null;
             /**@var PracticeRoom $pRoom2 */
-            $pRoom2 = $schedules[1]->practiceRoom;
+            $pRoom2 = $schedules[1]->practiceRoom ?? null;
 
             $practiceRooms = '<div class="cell-row-split">';
 

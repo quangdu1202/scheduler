@@ -26,22 +26,55 @@
         </form>
     </div>
 
+    <!-- Schedule table -->
     <div class="table-responsive">
         <table id="register-schedule-table" class="table table-bordered w-100">
             <thead class="border-black">
-                <tr>
-                    <th>#</th>
-                    <th></th>
-                    <th>MON</th>
-                    <th>TUE</th>
-                    <th>WED</th>
-                    <th>THU</th>
-                    <th>FRI</th>
-                    <th>SAT</th>
-                    <th>SUN</th>
-                </tr>
+            <tr>
+                <th>#</th>
+                <th>K</th>
+                <th>MON</th>
+                <th>TUE</th>
+                <th>WED</th>
+                <th>THU</th>
+                <th>FRI</th>
+                <th>SAT</th>
+                <th>SUN</th>
+            </tr>
             </thead>
         </table>
+    </div>
+
+    <!-- Class on date modal -->
+    <div class="modal modal-xl fade" id="pclass-ondate-modal" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" id="pclass-ondate-modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="edit-modal-title">
+                        All class on:
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table id="pclass-ondate-table" class="table table-bordered table-hover w-100">
+                            <thead class="thead-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Module</th>
+                                <th>Class Code</th>
+                                <th>Class Name</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
     <hr>
     <!-- Practice Classes Table -->
@@ -126,7 +159,7 @@
             // end
 
             // Schedule table initiate
-            const scheduleTable = $('#register-schedule-table').DataTable({
+            const registerScheduleTable = $('#register-schedule-table').DataTable({
                 ajax: {
                     url: '{{route('teacher.get-schedule-table')}}',
                     dataSrc: ''
@@ -162,7 +195,7 @@
                     },
                     {
                         "targets": '_all',
-                        "createdCell": function (td, cellData, rowData, row, col) {
+                        "createdCell": function (td) {
                             $(td).css('padding', '0')
                         }
                     }
@@ -175,7 +208,7 @@
                 },
             });
 
-            //Data table initiate
+            // Available Schedules for register initiate
             const pclassRegisterTable = $('#pclass-register-table').DataTable({
                 ajax: {
                     url: '{{route('teacher.get-available-classes')}}',
@@ -194,7 +227,7 @@
                     {data: 'shift_qty', type: 'html', width: '10%'},
                     {
                         data: 'status', type: 'html', width: '10%',
-                        render: function (data, type, row) {
+                        render: function (data) {
                             return `
                                 <div class="cell-clamp" title="${data.title}">
                                     ${data.value}
@@ -211,7 +244,7 @@
                     },
                     {
                         targets: [1, 2, 3, 5],
-                        render: function (data, type, row) {
+                        render: function (data) {
                             return `<div class="cell-clamp" title="${data}">${data}</div>`;
                         }
                     },
@@ -271,7 +304,7 @@
             });
             // end
 
-            $('#toggle-register-table').click(function() {
+            $('#toggle-register-table').click(function () {
                 const $icon = $(this).find('i');
                 $('#toggle-register-table-target').slideToggle();
                 if ($icon.css('transform') === 'none') {
@@ -300,7 +333,7 @@
                     {data: 'shift_qty', type: 'html', width: '10%'},
                     {
                         data: 'status', type: 'html', width: '10%',
-                        render: function (data, type, row) {
+                        render: function (data) {
                             return `
                                 <div class="cell-clamp" title="${data.title}">
                                     ${data.value}
@@ -317,7 +350,7 @@
                     },
                     {
                         targets: [1, 2, 3, 5],
-                        render: function (data, type, row) {
+                        render: function (data) {
                             return `<div class="cell-clamp" title="${data}">${data}</div>`;
                         }
                     },
@@ -336,11 +369,11 @@
             });
             // end
 
-            registeredClassesTable.on('click', '.schedule-info-btn', function () {
+            $(document).on('click', '.schedule-info-btn', function () {
                 showScheduleInfo($(this));
             });
 
-            registeredClassesTable.on('click', '.cancel-class-btn', function () {
+            $(document).on('click', '.cancel-class-btn', function () {
                 if (!confirm("Cancel your registration for this class?")) {
                     return;
                 }
@@ -354,7 +387,7 @@
                         pclassId: pclassId
                     },
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    success: function(response) {
+                    success: function (response) {
                         // Hide the loading overlay
                         hideOverlay();
 
@@ -383,7 +416,7 @@
                             $(response.hideTarget).modal('hide');
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         hideOverlay();
                         console.log(xhr.responseText);
                         toastr.error("A server error occurred. Please try again.", "Error");
@@ -398,6 +431,7 @@
             pclassRegisterTable.on('click', '.schedule-info-btn', function () {
                 showScheduleInfo($(this));
             });
+
             // end
 
             function showScheduleInfo($selector) {
@@ -446,7 +480,7 @@
                 infoModal.show();
             }
 
-            pclassRegisterTable.on('click', '.register-class-btn', function () {
+            $(document).on('click', '.register-class-btn', function () {
                 if (!confirm("Confirm to register for this class?")) {
                     return;
                 }
@@ -462,7 +496,7 @@
                         pclassId: pclassId
                     },
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    success: function(response) {
+                    success: function (response) {
                         // Hide the loading overlay
                         hideOverlay();
 
@@ -491,13 +525,73 @@
                             $(response.hideTarget).modal('hide');
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         hideOverlay();
                         console.log(xhr.responseText);
                         toastr.error("A server error occurred. Please try again.", "Error");
                     }
                 });
             });
+
+            //
+            const classOnDateModal = new bootstrap.Modal('#pclass-ondate-modal');
+            const pClassOndateTable = $('#pclass-ondate-table');
+            registerScheduleTable.on('click', '.schedule-table-add-btn', function () {
+                showClassesOnDate($(this));
+            });
+
+            function showClassesOnDate($addBtn) {
+                showOverlay();
+                const $weekDay = $addBtn.data('weekday');
+                const $session = $addBtn.data('session');
+
+                if ($.fn.DataTable.isDataTable(pClassOndateTable)) {
+                    pClassOndateTable.DataTable().destroy();
+                }
+
+                pClassOndateTable.DataTable({
+                    ajax: {
+                        url: $($addBtn).data('get-url'),
+                        data: {
+                            weekDay: $weekDay,
+                            session: $session
+                        },
+                        dataSrc: ''
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching data: ", error);
+                        toastr.error("An error occurred while loading the data", "Error");
+                        hideOverlay();
+                    },
+                    columns: [
+                        {data: 'index', width: '5%'},
+                        {data: 'module_info', type: 'html', width: '20%'},
+                        {data: 'practice_class_code', type: 'html', width: '10%'},
+                        {data: 'practice_class_name', type: 'html', width: '20%'},
+                        {data: 'actions', type: 'html', width: '10%'},
+                    ],
+                    autoWidth: false,
+                    columnDefs: [
+                        {
+                            className: "dt-center",
+                            targets: "_all"
+                        }
+                    ],
+                    layout: {
+                        topStart: {},
+                        topEnd: {},
+                        bottomStart: {},
+                        bottomEnd: {},
+                    },
+                    paging: false,
+                    initComplete: function () {
+                        hideOverlay();
+                        classOnDateModal.show();
+                    }
+                });
+            }
+
+            // end
         });
     </script>
 

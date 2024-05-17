@@ -10,8 +10,11 @@ use App\Models\OriginalClass\OriginalClass;
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\PracticeRoom\PracticeRoom;
 use App\Models\Registration\Registration;
+use App\Models\Teacher\Teacher;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -31,5 +34,17 @@ class DatabaseSeeder extends Seeder
         foreach (['TX1', 'TX2', 'GK', 'CK'] as $type) {
             MarkType::factory()->create(['type' => $type]);
         }
+
+        $teacher = Teacher::factory()->create();
+        User::create([
+            'name' => 'Nguyễn Văn A',
+            'email' => 'gva@gmail.com',
+            'password' => Hash::make('123'),
+            'userable_id' => $teacher->id,
+            'userable_type' => get_class($teacher),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
     }
 }

@@ -49,3 +49,19 @@ function setupAjaxForm(formSelector) {
         });
     });
 }
+
+$.fn.serializeObject = function() {
+    var obj = {};
+    var arr = this.serializeArray();
+    arr.forEach(function(item) {
+        if (obj[item.name]) {
+            if (typeof(obj[item.name]) === "string") {
+                obj[item.name] = [obj[item.name]];
+            }
+            obj[item.name].push(item.value);
+        } else {
+            obj[item.name] = item.value;
+        }
+    });
+    return obj;
+};

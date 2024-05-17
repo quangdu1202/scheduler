@@ -49,13 +49,15 @@
                     </div>
                     <div class="col-1">
                         <div class="form-control form-switch py-3">
-                            <input class="form-check-input" name="multi_create" type="checkbox" role="switch" id="multi-switch">
+                            <input class="form-check-input" name="multi_create" type="checkbox" role="switch"
+                                   id="multi-switch">
                             <label class="form-check-label ms-1" for="multi-switch">Multi</label>
                         </div>
                     </div>
                     <div class="col-1 show-for-multi" style="display: none">
                         <div class="form-floating mb-3">
-                            <input type="number" name="multi_qty" class="form-control" id="multi-qty" min="2" disabled required>
+                            <input type="number" name="multi_qty" class="form-control" id="multi-qty" min="2" disabled
+                                   required>
                             <label for="multi-qty" class="form-label">Qty</label>
                         </div>
                     </div>
@@ -74,13 +76,15 @@
                     </div>
                     <div class="col-3">
                         <div class="form-floating mb-3">
-                            <input type="text" name="practice_class_code" class="form-control" id="classCode" placeholder="Class Code" required>
+                            <input type="text" name="practice_class_code" class="form-control" id="classCode"
+                                   placeholder="Class Code" required>
                             <label for="classCode" class="form-label">Class Code</label>
                         </div>
                     </div>
                     <div class="col-3">
                         <div class="form-floating mb-3">
-                            <input type="text" name="practice_class_name" class="form-control" id="className" placeholder="Class Name" required>
+                            <input type="text" name="practice_class_name" class="form-control" id="className"
+                                   placeholder="Class Name" required>
                             <label for="className" class="form-label">Class Name</label>
                         </div>
                     </div>
@@ -146,6 +150,104 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="pclass-signature-data">
+                        <h4>Data to show in Calendar (signature data)</h4>
+                        <form id="pclass-signature-form"
+                              class="p-3"
+                              data-action="{{route('schedules.update-signature-schedule')}}"
+                              data-action-type="create"
+                              data-action-method="post">
+                            @csrf
+                            <fieldset class="">
+                                <div class="row">
+                                    <div class="col-auto">
+                                        <div class="input-group mb-3 border border-danger">
+                                            <label for="weekdaySelect" class="input-group-text">Weekday</label>
+                                            <select name="weekday" id="weekdaySelect" class="form-select" required>
+                                                <option value="">->Select</option>
+                                                <option value="1">Monday</option>
+                                                <option value="2">Tuesday</option>
+                                                <option value="3">Wednesday</option>
+                                                <option value="4">Thursday</option>
+                                                <option value="5">Friday</option>
+                                                <option value="6">Saturday</option>
+                                                <option value="7">Sunday</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="input-group mb-3 border border-danger">
+                                            <div class="input-group-text">START</div>
+                                            <input type="date" name="start_date" class="form-control form-control-sm"
+                                                   id="start_date" required>
+                                            <label for="start_date" class="visually-hidden">START</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="d-flex multi-schedule-session-select border border-danger">
+                                            <div class="input-group-text">SESSION</div>
+
+                                            <input type="radio" name="session" value="1"
+                                                   class="btn-check signature-session" id="session-1" autocomplete="off"
+                                                   required>
+                                            <label class="btn btn-outline-primary" for="session-1">S</label>
+
+                                            <input type="radio" name="session" value="2"
+                                                   class="btn-check signature-session" id="session-2" autocomplete="off"
+                                                   required>
+                                            <label class="btn btn-outline-primary" for="session-2">C</label>
+
+                                            <input type="radio" name="session" value="3"
+                                                   class="btn-check signature-session" id="session-3" autocomplete="off"
+                                                   required>
+                                            <label class="btn btn-outline-primary" for="session-3">T</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="input-group mb-3 border border-success">
+                                            <label for="pRoomSelect" class="input-group-text">ROOM</label>
+                                            <select name="pRoomId" id="pRoomSelect" class="form-select">
+                                                <option value="">->Select (not required)</option>
+                                                @foreach($practiceRooms as $practiceRoom)
+                                                    <option value="{{$practiceRoom->id}}">{{$practiceRoom->name . ' - ' . $practiceRoom->location}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-1 ms-auto">
+                                        <button type="submit" class="btn btn-primary" id="create-pclass-btn">Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <div class="row">
+                            <div class="col-6">
+                                <button type="button" id="add-schedule-btn" class="btn btn-success">Add Schedule
+                                </button>
+                                <div class="vr mx-3"></div>
+                                <form data-action=""
+                                      data-action-method="post"
+                                      id="multi-schedule-form"
+                                      class="d-inline-block">
+                                    <!-- Add multi schedules form -->
+                                    @csrf
+                                    <input type="hidden" name="practice_class_id" id="multi-schedule-pclass-id">
+                                    <input type="hidden" name="add_mode" value="multi">
+                                    <div class="input-group d-inline-flex w-auto">
+                                        <div class="input-group-text">QTY</div>
+                                        <input type="number" name="multi_schedule_qty"
+                                               class="form-control form-control-sm" id="multi-schedule-qty" min="2"
+                                               max="10" required>
+                                        <label for="multi-schedule-qty" class="visually-hidden">Qty</label>
+                                    </div>
+                                    <button type="submit" form="multi-schedule-form" id="add-multi-schedule-btn"
+                                            class="btn btn-primary rounded-start-0">Add Multi Schedules
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table id="pclass-all-schedule-table" class="table table-bordered table-hover w-100">
                             <thead class="thead-light">
@@ -162,42 +264,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="modal-footer d-flex justify-content-between">
-                    <div class="actions d-flex gap-3">
-                        <button type="button" id="add-schedule-btn" class="btn btn-sm btn-success">Add Schedule</button>
-                        <button type="submit" form="multi-schedule-form" id="add-multi-schedule-btn" class="btn btn-sm btn-primary">Add Multi Schedules</button>
-                        <form data-action=""
-                              data-action-method="post"
-                              id="multi-schedule-form"
-                              class="d-flex gap-3">
-                            <!-- Add multi schedules form -->
-                            @csrf
-                            <input type="hidden" name="practice_class_id" id="multi-schedule-pclass-id">
-                            <input type="hidden" name="add_mode" value="multi">
-                            <div class="input-group">
-                                <div class="input-group-text">QTY</div>
-                                <input type="number" name="multi_schedule_qty" class="form-control form-control-sm" id="multi-schedule-qty" min="2" max="10" required>
-                                <label for="multi-schedule-qty" class="visually-hidden">Qty</label>
-                            </div>
-                            <div class="input-group flex-nowrap">
-                                <div class="input-group-text">START</div>
-                                <input type="date" name="multi_schedule_start_date" class="form-control form-control-sm" id="multi-schedule-start-date" required>
-                                <label for="multi-schedule-start-date" class="visually-hidden">START</label>
-                            </div>
-                            <div class="d-flex multi-schedule-session-select">
-                                <div class="input-group-text">SS</div>
-
-                                <input type="radio" name="multi_schedule_session" value="1" class="btn-check" id="multi-schedule-session-1" autocomplete="off" required>
-                                <label class="btn btn-outline-primary" for="multi-schedule-session-1">S</label>
-
-                                <input type="radio" name="multi_schedule_session" value="2" class="btn-check" id="multi-schedule-session-2" autocomplete="off" required>
-                                <label class="btn btn-outline-primary" for="multi-schedule-session-2">C</label>
-
-                                <input type="radio" name="multi_schedule_session" value="3" class="btn-check" id="multi-schedule-session-3" autocomplete="off" required>
-                                <label class="btn btn-outline-primary" for="multi-schedule-session-3">T</label>
-                            </div>
-                        </form>
-                    </div>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -227,13 +294,15 @@
                             <div class="row">
                                 <div class="col-6">
                                     <div class="form-floating mb-3">
-                                        <input type="text" name="practice_class_code" class="form-control" id="editClassCode" placeholder="Class Code" required>
+                                        <input type="text" name="practice_class_code" class="form-control"
+                                               id="editClassCode" placeholder="Class Code" required>
                                         <label for="editClassCode" class="form-label">Class Code</label>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="form-floating mb-3">
-                                        <input type="text" name="practice_class_name" class="form-control" id="editClassName" placeholder="Class Name" required>
+                                        <input type="text" name="practice_class_name" class="form-control"
+                                               id="editClassName" placeholder="Class Name" required>
                                         <label for="editClassName" class="form-label">Class Name</label>
                                     </div>
                                 </div>
@@ -252,7 +321,8 @@
                                 </div>
                                 <div class="col-3">
                                     <div class="form-floating mb-3">
-                                        <input type="number" name="max_qty" class="form-control" id="editStudentQty" min="0" required>
+                                        <input type="number" name="max_qty" class="form-control" id="editStudentQty"
+                                               min="0" required>
                                         <label for="editStudentQty" class="form-label">Max Student</label>
                                     </div>
                                 </div>
@@ -304,7 +374,8 @@
                                     <label for="pclass-confirm-delete">
                                         Enter "<b><i>delete</i></b>" in the field below to proceed
                                     </label>
-                                    <input type="text" name="confirmDelete" class="form-control" id="pclass-confirm-delete">
+                                    <input type="text" name="confirmDelete" class="form-control"
+                                           id="pclass-confirm-delete">
                                 </div>
                             </div>
                         </fieldset>

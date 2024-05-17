@@ -7,6 +7,7 @@ use App\Http\Resources\PracticeClass\PracticeClassResource;
 use App\Models\Module\Module;
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\PracticeRoom\PracticeRoom;
+use App\Models\Schedule\Schedule;
 use App\Services\Module\Contracts\ModuleServiceInterface;
 use App\Services\PracticeClass\Contracts\PracticeClassServiceInterface;
 use App\Services\PracticeRoom\PracticeRoomService;
@@ -171,10 +172,10 @@ class PracticeClassController extends Controller
                     // Format the new practice_class_code
                     $practiceClassData['practice_class_code'] = $module->module_code . 'TH' . str_pad($newIndex, 3, '0', STR_PAD_LEFT);
 
-                    $newPracticeClass = $this->practiceClassService->create($practiceClassData);
+                    $this->practiceClassService->create($practiceClassData);
                 }
             } else {
-                $newPracticeClass = $this->practiceClassService->create($data);
+                $this->practiceClassService->create($data);
             }
 
             DB::commit();
@@ -221,7 +222,7 @@ class PracticeClassController extends Controller
         }
 
         try {
-            $editedPclass = $this->practiceClassService->update($practiceClass, $data);
+            $this->practiceClassService->update($practiceClass, $data);
             // Return a successful JSON response
             return response()->json([
                 'status' => 200,
@@ -356,7 +357,7 @@ class PracticeClassController extends Controller
                 'teacher_id' => $pclass->teacher_id,
                 'registered_qty' => $max_qty == null ? '<i>Not set</i>' : $registered_qty . '/' . $max_qty,
                 'max_qty' => $max_qty,
-                'schedules_count' => $pclass->schedules_count / 2,
+                'schedules_count' => floor($pclass->schedules_count / 2),
                 'status' => $status,
                 'status_raw' => $pclass->status,
                 'actions' => $actions
@@ -368,12 +369,11 @@ class PracticeClassController extends Controller
 
     /**
      * @param $practice_class_id
-     * @param Request $request
      * @return JsonResponse
      */
-    public function getJsonDataForSchedule($practice_class_id, Request $request): JsonResponse
+    public function getJsonDataForSchedule($practice_class_id): JsonResponse
     {
-        $schedulesBySessionId = $this->scheduleService->getAll(['practice_class_id' => $practice_class_id])->sortBy(['schedule_date', 'shift'])->groupBy('session_id');
+        $schedulesBySessionId = $this->scheduleService->getAll(['practice_class_id' => $practice_class_id])->where('order', '!=', 0)->sortBy(['schedule_date', 'shift'])->groupBy('session_id');
 
         $responseData = [];
         $index = 0;
@@ -470,6 +470,18 @@ class PracticeClassController extends Controller
         $status = $request->input('status');
         $classId = $request->input('pclassId');
 
+        /**@var PracticeClass $practiceClass */
+        $practiceClass = $this->practiceClassService->findOrFail($classId);
+
+        if (!$practiceClass->schedules->where('order', '=', 0)->first() && $status == 1) {
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'title' => 'Error!',
+                'message' => 'Set the <b>signature data</b> for this class before marking it ready!'
+            ]);
+        }
+
         try {
             /**@var PracticeClass $editedPclass */
             $editedPclass = $this->practiceClassService->update($classId, ['status' => $status]);
@@ -513,6 +525,25 @@ class PracticeClassController extends Controller
                 'message' => $e->getMessage()
             ]);
         }
+    }
+
+    public function getSignatureClassInfo(Request $request)
+    {
+        $pClassId = $request->input('pClassId');
+
+        /**@var PracticeClass $pClass */
+        $pClass = $this->practiceClassService->findOrFail($pClassId);
+
+        /**@var Schedule $signatureSchedule */
+        $signatureSchedule = $pClass->schedules->where('order', '=', 0)->first();
+
+        $responseData = [
+            'start_date' => isset($signatureSchedule->schedule_date) ? $signatureSchedule->schedule_date : null,
+            'weekday' => isset($signatureSchedule->schedule_date) ? date('N', strtotime($signatureSchedule->schedule_date)) : null,
+            'session' => isset($signatureSchedule->session) ? $signatureSchedule->session : null,
+            'pRoomId' => isset($signatureSchedule->practice_room_id) ? $signatureSchedule->practice_room_id : null,
+        ];
+        return response()->json($responseData);
     }
 
     public function getJsonDataForStudentsOfPracticeClass()
