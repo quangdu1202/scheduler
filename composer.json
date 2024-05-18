@@ -5,7 +5,7 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.1",
+        "php": "^8.3",
         "ext-calendar": "*",
         "adobrovolsky97/laravel-repository-service-pattern": "^2.1",
         "bpampuch/pdfmake": "*",
@@ -15,10 +15,11 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
+        "php-flasher/flasher-laravel": "^1.15",
+        "php-flasher/flasher-toastr-laravel": "^1.15",
         "spatie/laravel-permission": "^6.4",
         "stuk/jszip": "^3.0",
-        "vakata/jstree": "^3.3",
-        "yoeunes/toastr": "^2.3"
+        "vakata/jstree": "^3.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "*",

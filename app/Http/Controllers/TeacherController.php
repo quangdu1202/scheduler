@@ -13,7 +13,9 @@ use App\Services\PracticeRoom\PracticeRoomService;
 use App\Services\Registration\RegistrationService;
 use App\Services\Schedule\Contracts\ScheduleServiceInterface;
 use App\Services\Teacher\TeacherService;
+use DateTime;
 use Exception;
+use Flasher\Prime\FlasherInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +62,11 @@ class TeacherController extends Controller
      */
     protected Helper $helper;
 
+    /**
+     * @var FlasherInterface
+     */
+    protected FlasherInterface $flasher;
+
     public function __construct(
         ModuleClassServiceInterface   $moduleClassService,
         PracticeClassServiceInterface $practiceClassService,
@@ -69,6 +76,7 @@ class TeacherController extends Controller
         TeacherService                $teacherService,
         PracticeRoomService           $practiceRoomService,
         Helper                        $helper,
+        FlasherInterface $flasher,
     )
     {
         $this->middleware('teacher');
@@ -80,6 +88,7 @@ class TeacherController extends Controller
         $this->teacherService = $teacherService;
         $this->practiceRoomService = $practiceRoomService;
         $this->helper = $helper;
+        $this->flasher = $flasher;
     }
 
     public function index()
@@ -110,7 +119,7 @@ class TeacherController extends Controller
         }
 
         try {
-            /**@var PracticeClass $practiceClass*/
+            /**@var PracticeClass $practiceClass */
             $practiceClass = $this->practiceClassService->findOrFail($pclassId);
             if ($practiceClass->teacher_id != null) {
                 return response()->json([
@@ -170,6 +179,8 @@ class TeacherController extends Controller
                 'status' => 1,
             ]);
 
+//            $this->flasher->addSuccess('Practice class canceled successfully!', 'Success!');
+
             return response()->json([
                 'status' => 200,
                 'title' => 'Success!',
@@ -199,24 +210,7 @@ class TeacherController extends Controller
         $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll(['teacher_id' => $teacher->id]);
 
         $practiceClassesMapped = $practiceClasses->mapWithKeys(function ($practiceClass) {
-            // Collect all schedules, setting 'session_id' as key and 'schedule_date' as value
-//            $schedulesMapped = $practiceClass->schedules->mapWithKeys(function ($schedule) {
-//                if ($schedule->schedule_date != null) {
-//                    return [
-//                        $schedule->session_id => [
-//                            'date' => $schedule->schedule_date,
-//                            'session' => $schedule->session,
-//                            'room_name' => $schedule->practiceRoom->name ?? null,
-//                            'room_location' => $schedule->practiceRoom->location ?? null
-//                        ]
-//                    ];
-//                }else {
-//                    return null;
-//                }
-//            });
-//            // Remove duplicate dates, keeping the first occurrence
-//            $uniqueSchedules = $schedulesMapped->unique();
-            /**@var PracticeClass $practiceClass*/
+            /**@var PracticeClass $practiceClass */
             $signatureSchedule = $practiceClass->schedules->where('order', '=', 0)->first();
 
             // Compute the day of the week, ensuring there is a date to process
@@ -273,9 +267,9 @@ class TeacherController extends Controller
                         <div class="d-flex align-items-center h-100">
                             <button type="button" 
                                     class="border-0 btn btn-outline-primary flex-grow-1 schedule-table-add-btn" 
-                                    data-get-url="'.route('teacher.get-classes-ondate').'" 
-                                    data-weekday="'.$dayIndex.'"
-                                    data-session="'.$i.'">
+                                    data-get-url="' . route('teacher.get-classes-ondate') . '" 
+                                    data-weekday="' . $dayIndex . '"
+                                    data-session="' . $i . '">
                                 +
                             </button>
                         </div>
@@ -293,25 +287,25 @@ class TeacherController extends Controller
     {
         $weekDay = $request->input('weekDay');
         $session = $request->input('session');
-        // Retrieve all practice classes
-        $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll();
+        $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll(['status' => 1]);
 
-        // Filter the classes by checking only the first schedule
+        // Filter the classes by signature schedule
         $filteredClasses = $practiceClasses->filter(function ($class) use ($weekDay, $session) {
-            // Get the first schedule of the class
-            $firstSchedule = $class->schedules->first();
+            // Get the signature schedule of the class
+            /**@var PracticeClass $class */
+            $signatureSchedule = $class->schedules->where('order', '=', 0)->first();
 
             // If there's no schedule, skip this class
-            if (!$firstSchedule) {
+            if (!$signatureSchedule) {
                 return false;
             }
 
             // Convert the schedule_date to a DateTime object to extract the day of the week
-            $date = new \DateTime($firstSchedule->schedule_date);
-            $dayOfWeek = (int) $date->format('N'); // 'N' gives the day of the week (1 = Monday, 7 = Sunday)
+            $date = new DateTime($signatureSchedule->schedule_date);
+            $dayOfWeek = (int)$date->format('N'); // 'N' gives the day of the week (1 = Monday, 7 = Sunday)
 
             // Check if the day and session match the request
-            return $dayOfWeek == $weekDay && $firstSchedule->session == $session;
+            return $dayOfWeek == $weekDay && $signatureSchedule->session == $session;
         });
 
         $responseData = [];
