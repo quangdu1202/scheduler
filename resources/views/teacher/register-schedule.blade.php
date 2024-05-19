@@ -28,7 +28,7 @@
 
     <!-- Schedule table -->
     <div class="table-responsive">
-        <table id="register-schedule-table" class="table table-bordered w-100">
+        <table id="register-schedule-table" class="table table-bordered w-100" style="table-layout: fixed">
             <thead class="border-black">
             <tr>
                 <th>#</th>
@@ -90,7 +90,7 @@
                 <th>Class Code</th>
                 <th>Class Name</th>
                 <th>Start Date</th>
-                <th>Shift Qty</th>
+                <th>Schedule</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -170,7 +170,7 @@
                 },
                 columns: [
                     {data: 'index', width: '0'},
-                    {data: 'row_session', width: '1%'},
+                    {data: 'row_session', width: '3%'},
                     {data: 'mon'},
                     {data: 'tue'},
                     {data: 'wed'},
@@ -179,7 +179,10 @@
                     {data: 'sat'},
                     {data: 'sun'},
                 ],
+                autoWidth: false,
                 columnDefs: [
+                    {
+                        width: (95 / 7) + "%", "targets": [2, 3, 4, 5, 6, 7, 8] },
                     {
                         visible: false,
                         orderable: false,
@@ -207,6 +210,15 @@
                     bottomEnd: {}
                 },
             });
+            // end
+
+            // show registered class schedule
+            registerScheduleTable.on('mouseenter', '.registered-class', function() {
+                $(this).addClass('text-bg-secondary');
+            }).on('mouseleave', '.registered-class', function() {
+                $(this).removeClass('text-bg-secondary');
+            });
+            // end
 
             // Available Schedules for register initiate
             const pclassRegisterTable = $('#pclass-register-table').DataTable({
@@ -224,7 +236,7 @@
                     {data: 'practice_class_code', type: 'html', width: '10%'},
                     {data: 'practice_class_name', type: 'html', width: '20%'},
                     {data: 'start_date', type: 'html', width: '10%'},
-                    {data: 'shift_qty', type: 'html', width: '10%'},
+                    {data: 'schedule_text', type: 'html', width: '10%'},
                     {
                         data: 'status', type: 'html', width: '10%',
                         render: function (data) {
@@ -257,28 +269,7 @@
                     topEnd: {
                         search: {
                             placeholder: 'Search anything'
-                        },
-                        buttons: [
-                            'length',
-                            {
-                                extend: 'csv',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5]
-                                }
-                            },
-                            {
-                                extend: 'excel',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5]
-                                }
-                            },
-                            {
-                                extend: 'print',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5]
-                                }
-                            }
-                        ]
+                        }
                     },
                 },
                 pageLength: -1,
@@ -434,6 +425,7 @@
 
             // end
 
+            // show schedule info function
             function showScheduleInfo($selector) {
                 showOverlay();
                 if ($.fn.DataTable.isDataTable(pClassSchedulesTable)) {
@@ -479,7 +471,9 @@
 
                 infoModal.show();
             }
+            // end
 
+            // Register class button
             $(document).on('click', '.register-class-btn', function () {
                 if (!confirm("Confirm to register for this class?")) {
                     return;
@@ -532,8 +526,9 @@
                     }
                 });
             });
+            // end
 
-            //
+            // show class on date
             const classOnDateModal = new bootstrap.Modal('#pclass-ondate-modal');
             const pClassOndateTable = $('#pclass-ondate-table');
             registerScheduleTable.on('click', '.schedule-table-add-btn', function () {
@@ -590,7 +585,6 @@
                     }
                 });
             }
-
             // end
         });
     </script>

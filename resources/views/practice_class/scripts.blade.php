@@ -364,13 +364,13 @@
 
                     weekdaySignature.val(response.weekday).trigger('change');
 
+                    $("#pclass-signature-form label").removeClass('btn-outline-danger');
                     if (response.session != null) {
                         const radio = $('.signature-session[value=' + response.session + ']');
                         radio.prop('checked', true);
                         $("label[for='" + radio.attr('id') + "']").addClass('btn-outline-danger');
                     } else {
                         $('.signature-session').prop('checked', false);
-                        $("#pclass-signature-form label").removeClass('btn-outline-danger');
                     }
 
                     pRoomSignature.val(response.pRoomId).change();

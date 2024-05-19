@@ -255,7 +255,7 @@ class TeacherController extends Controller
                 if (isset($indexedClasses[$dayIndex][$i])) {
                     $classInfo = $indexedClasses[$dayIndex][$i];
                     $entry[$day] = "
-                        <div style='font-size: 13px' class='text-start position-relative m-2 pe-3'>
+                        <div style='font-size: 13px; cursor: pointer' class='text-start position-relative m-1 p-1 pe-3 border border-primary rounded registered-class'>
                             <span class='position-absolute top-0 end-0 px-1 py-0 btn btn-sm text-danger cancel-class-btn' data-pclass-id=\"{$classInfo['practice_class_id']}\"><i class='fa-solid fa-xmark'></i></span>
                             <div>{$classInfo['practice_class_code']}</div>
                             <strong>{$classInfo['practice_class_name']}</strong><br>
@@ -346,9 +346,32 @@ class TeacherController extends Controller
 
             $module_info = '(' . $pclass->module->module_code . ') ' . $pclass->module->module_name;
 
-            $firstSchedule = $pclass->schedules->sortBy('schedule_date')->first();
-            $start_date = '<strong class="btn-sm form-control">' . ($firstSchedule != null ? $firstSchedule->schedule_date : 'No info') . '</button>';
+            $signatureSchedule = $pclass->schedules->where('order', '=', 0)->first();
+            $start_date = '<strong class="btn-sm form-control">' . ($signatureSchedule != null ? $signatureSchedule->schedule_date : 'No info') . '</button>';
             $max_qty = $pclass->max_qty;
+
+            $session_text = match ($signatureSchedule->session) {
+                1 => 'S',
+                2 => 'C',
+                3 => 'T',
+                default => null
+            };
+
+            $date = new DateTime($signatureSchedule->schedule_date);
+            $weekday_int = (int)$date->format('N');
+
+            $weekday_text = match ($weekday_int) {
+                1 => 'T2',
+                2 => 'T3',
+                3 => 'T4',
+                4 => 'T5',
+                5 => 'T6',
+                6 => 'T7',
+                7 => 'CN',
+                default => null,
+            };
+
+            $schedule_text = $session_text . '_' . $weekday_text;
 
             $status = match ($pclass->status) {
                 1 => [
@@ -388,7 +411,7 @@ class TeacherController extends Controller
                 'practice_class_name' => $pclass->practice_class_name,
                 'start_date' => $start_date,
                 'max_qty' => $max_qty,
-                'shift_qty' => $pclass->shift_qty,
+                'schedule_text' => $schedule_text,
                 'status' => $status,
                 'actions' => $actions
             ];
