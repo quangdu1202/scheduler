@@ -19,6 +19,7 @@ use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
  * @property string $session_id
  * @property integer $shift
  * @property integer $order
+ * @property integer $student_qty
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property PracticeClass $practiceClass
@@ -37,6 +38,7 @@ class Schedule extends BaseModel
 		'session_id',
 		'shift',
 		'order',
+		'student_qty',
 		'created_at',
 		'updated_at'
 	];

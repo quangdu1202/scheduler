@@ -93,7 +93,7 @@ class PracticeClassController extends Controller
     /**
      * @return Application|Factory|View|\Illuminate\Foundation\Application|\Illuminate\View\View
      */
-    public function index()
+    public function index(): \Illuminate\Foundation\Application|View|Factory|\Illuminate\View\View|Application
     {
         $modules = $this->moduleService->getAll();
         $practiceClasses = $this->practiceClassService->getAll();
@@ -205,7 +205,7 @@ class PracticeClassController extends Controller
      *
      * @return JsonResponse
      */
-    public function update(PracticeClass $practiceClass, Request $request)
+    public function update(PracticeClass $practiceClass, Request $request): JsonResponse
     {
         $data = $request->all();
 
@@ -294,6 +294,7 @@ class PracticeClassController extends Controller
 
             $registered_qty = $pclass->registered_qty;
             $max_qty = $pclass->max_qty;
+            $module = $pclass->module;
 
             $status = match ($pclass->status) {
                 0 => [
@@ -333,7 +334,7 @@ class PracticeClassController extends Controller
                                     <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="' . route('practice-classes.get-json-data-for-schedule', ['practice_class_id' => $pclass->id]) . '" data-pclass-id="' . $pclass->id . '">
                                         <i class="fa-solid fa-magnifying-glass align-middle"></i>
                                     </button>
-                                    <button type="button" class="btn btn-success btn-sm pclass-student-info-btn" data-get-url="' . route('practice-classes.get-student-data-for-schedule', ['recurring_id' => $pclass->recurring_id]) . '">
+                                    <button type="button" class="btn btn-success btn-sm pclass-student-list-btn" data-get-url="' . route('practice-classes.get-students-of-pclass') . '" data-pclass-id="' . $pclass->id . '">
                                         <i class="fa-solid fa-user-graduate"></i>
                                     </button>
                                     <button type="button" class="btn btn-primary btn-sm pclass-edit-btn" data-post-url="' . route('practice-classes.update', ['practice_class' => $pclass]) . '">
@@ -350,7 +351,7 @@ class PracticeClassController extends Controller
                 'DT_RowId' => $pclass->id,
                 'DT_RowData' => $pclass,
                 'index' => $index + 1,
-                'module_id' => $pclass->module_id,
+                'module_info' => '(' . $module->module_code . ') ' . $module->module_name,
                 'practice_class_code' => $pclass->practice_class_code,
                 'practice_class_name' => $pclass->practice_class_name,
                 'teacher' => $pclass->teacher != null ? $pclass->teacher->user->name : '<i>Not set</i>',
@@ -374,22 +375,37 @@ class PracticeClassController extends Controller
     public function getJsonDataForSchedule($practice_class_id): JsonResponse
     {
         $schedulesBySessionId = $this->scheduleService->getAll(['practice_class_id' => $practice_class_id])->where('order', '!=', 0)->sortBy(['schedule_date', 'shift'])->groupBy('session_id');
+        /**@var PracticeClass $pClass */
+        $pClass = $this->practiceClassService->findOrFail($practice_class_id);
+
+        $signatureSchedule = $pClass->getSignatureSchedule();
+        $signatureSession = $signatureSchedule->session;
+        $signatureWeekday = $this->helper->dateStringToWeekdayInt($signatureSchedule->schedule_date);
+        $signatureRoomId = $signatureSchedule->practice_room_id;
 
         $responseData = [];
         $index = 0;
 
         foreach ($schedulesBySessionId as $schedules) {
-            $teacher = $schedules[0]->practiceClass->teacher;
-            $sessionId = $schedules[0]->session_id;
+            /**@var Schedule[] $schedules */
 
             $index++;
-            $schedule_date = '<input type="date" name="schedule_date" class="form-control d-inline-block schedule-date-select" value="' . $schedules[0]->schedule_date . '">';
-            $shifts = $practiceRooms = '<div class="cell-row-split">';
+
+            $sessionId = $schedules[0]->session_id;
+
+            $scheduleWeekdayInt = $this->helper->dateStringToWeekdayInt($schedules[0]->schedule_date);
+            $schedule_date = '<input type="date" name="schedule_date" class="form-control d-inline-block ' . ($scheduleWeekdayInt != $signatureWeekday ? 'border-danger' : '') . ' schedule-date-select" value="' . $schedules[0]->schedule_date . '">';
+
+            $weekday = $this->helper->dateToFullCharsWeekday($schedules[0]->schedule_date);
+            $weekdayText = '<span class="weekday-text">' . strtoupper($weekday) . '</span>';
+
+            $shifts = $practiceRooms = $studentQTY = '<div class="cell-row-split">';
             $shift = 0;
 
             foreach ($schedules as $schedule) {
                 $shift++;
 
+                /**@var PracticeRoom $practiceRoom */
                 $practiceRoom = $this->practiceRoomService
                     ->with(['schedules'])
                     ->getAll()
@@ -401,24 +417,25 @@ class PracticeClassController extends Controller
                     })
                     ->first();
 
-                $shifts .= "<div class=\"row-split\"><strong class='form-control fw-bold d-inline-block'>C$shift</strong></div>";
+                $shifts .= "<div class=\"row-split\"><strong class='form-control fw-bold d-inline-block'>K$shift</strong></div>";
 
                 $practiceRooms .= "<div class=\"row-split\">
-                                        <select name='practice_room_id' class='form-control d-inline-block practice-room-select' id='" . $sessionId . '-' . $schedule->shift . "' data-shift='" . $schedule->shift . "'>
+                                        <select name='practice_room_id' class='form-control d-inline-block practice-room-select " . (!isset($practiceRoom) || ($practiceRoom->id != $signatureRoomId) ? 'text-danger' : '') . "' id='" . $sessionId . '-' . $schedule->shift . "' data-shift='" . $schedule->shift . "'>
                                             <option value=''>Pick date and session first</option>";
 
                 if (isset($practiceRoom)) {
-                    /**@var PracticeRoom $practiceRoom */
                     $practiceRooms .= "<option value='$practiceRoom->id' selected>$practiceRoom->name - $practiceRoom->location</option>";
                 }
 
                 $practiceRooms .= "</select></div>";
+
+                $studentQTY .= "<div class=\"row-split\"><input type='number' min='0' class='form-control' value='" . $schedule->student_qty . "'></div>";
             }
 
             $shifts .= '</div>';
 
             $sessionSelect = '
-                <select class="form-control text-center session-select" id="session-' . $sessionId . '">
+                <select class="form-control text-center session-select ' . ($schedules[0]->session != $signatureSession ? 'border-danger' : '') . '" id="session-' . $sessionId . '">
                     <option value=""></option>
             ';
 
@@ -430,6 +447,8 @@ class PracticeClassController extends Controller
             }
 
             $sessionSelect .= '</select>';
+
+            $studentQTY .= '</div>';
 
             $actions = '
                 <button type="button" class="btn btn-primary btn-sm schedule-single-save-btn">
@@ -449,11 +468,12 @@ class PracticeClassController extends Controller
                 'DT_RowData' => $schedules,
                 'index' => $index,
                 'practice_class_id' => $practice_class_id,
-                'teacher' => $teacher != null ? $teacher->user->name : '<i>Not set</i>',
+                'weekday' => $weekdayText,
                 'schedule_date' => $schedule_date,
                 'session' => $sessionSelect,
                 'shifts' => $shifts,
                 'practice_room' => $practiceRooms,
+                'studentQTY' => $studentQTY,
                 'actions' => $actions
             ];
         }
@@ -465,7 +485,7 @@ class PracticeClassController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function updatePracticeClassStatus(Request $request)
+    public function updatePracticeClassStatus(Request $request): JsonResponse
     {
         $status = $request->input('status');
         $classId = $request->input('pclassId');
@@ -527,7 +547,11 @@ class PracticeClassController extends Controller
         }
     }
 
-    public function getSignatureClassInfo(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getSignatureClassInfo(Request $request): JsonResponse
     {
         $pClassId = $request->input('pClassId');
 
@@ -537,17 +561,45 @@ class PracticeClassController extends Controller
         /**@var Schedule $signatureSchedule */
         $signatureSchedule = $pClass->schedules->where('order', '=', 0)->first();
 
+        $studentQty = $this->helper->getMaxStudentOfShifts($pClass);
+
         $responseData = [
             'start_date' => isset($signatureSchedule->schedule_date) ? $signatureSchedule->schedule_date : null,
             'weekday' => isset($signatureSchedule->schedule_date) ? date('N', strtotime($signatureSchedule->schedule_date)) : null,
             'session' => isset($signatureSchedule->session) ? $signatureSchedule->session : null,
             'pRoomId' => isset($signatureSchedule->practice_room_id) ? $signatureSchedule->practice_room_id : null,
+            'studentQty1' => $studentQty['studentQty1'],
+            'studentQty2' => $studentQty['studentQty2'],
         ];
         return response()->json($responseData);
     }
 
-    public function getJsonDataForStudentsOfPracticeClass()
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getStudentsOfPracticeClass(Request $request)
     {
-        // TODO
+//        $pClassId = $request->input('pClassId');
+//
+//        /**@var PracticeClass $pClass */
+//        $pClass = $this->practiceClassService->findOrFail($pClassId);
+//
+//        $students = $pClass->students;
+        $responseData = [];
+
+        for ($i = 0; $i < 10; $i++) {
+            $responseData[] = [
+                'index' => $i+1,
+                'student_code' => '2020604595',
+                'student_name' => 'Du Dang Quang',
+                'gender' => 'M',
+                'dob' => '01-02-2002',
+                'k1Shift' => 'Yes',
+                'k2Shift' => 'No',
+            ];
+        }
+
+        return response()->json($responseData);
     }
 }

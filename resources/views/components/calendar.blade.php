@@ -67,7 +67,8 @@
         {{--Main table--}}
         <div class="table-responsive">
             <table id="schedule-table"
-                   class="mt-1 table table-bordered text-center main-table w-100 border-opacity-25 border-dark h-100">
+                   class="mt-1 table table-bordered text-center main-table w-100 border-opacity-25 border-dark h-100"
+                   style="table-layout: fixed">
                 <thead>
                 <th class="row-order d-none">#</th>
                 @foreach ($weekday_names as $weekday)

@@ -19,6 +19,7 @@ use Flasher\Prime\FlasherInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Route;
 
 class TeacherController extends Controller
 {
@@ -76,7 +77,7 @@ class TeacherController extends Controller
         TeacherService                $teacherService,
         PracticeRoomService           $practiceRoomService,
         Helper                        $helper,
-        FlasherInterface $flasher,
+        FlasherInterface              $flasher,
     )
     {
         $this->middleware('teacher');
@@ -95,8 +96,19 @@ class TeacherController extends Controller
     {
         $user = auth()->user();
         $availableModules = $this->helper->getModulesByTeacherId($user->userable->id);
-        return view('teacher.register-schedule', [
+        return view('teacher.register-classes', [
             'modules' => $availableModules
+        ]);
+    }
+
+    public function manageClasses()
+    {
+        $user = auth()->user();
+        $availableModules = $this->helper->getModulesByTeacherId($user->userable->id);
+        $practiceRooms = $this->practiceRoomService->getAll();
+        return view('teacher.manage-classes', [
+            'modules' => $availableModules,
+            'practiceRooms' => $practiceRooms
         ]);
     }
 
@@ -140,7 +152,7 @@ class TeacherController extends Controller
                 'title' => 'Success!',
                 'message' => 'Practice class registered successfully!',
                 'hideTarget' => '#pclass-schedules-modal, #pclass-ondate-modal',
-                'reloadTarget' => '#pclass-register-table, #registered-pclass-table, #register-schedule-table',
+                'reloadTarget' => '#registered-pclass-table, #register-schedule-table, #pclass-register-table',
             ]);
         } catch (Exception $e) {
             // Log the exception for internal review
@@ -254,16 +266,19 @@ class TeacherController extends Controller
                 $dayIndex = $index + 1; // Convert day string to day index (1 = Monday, 2 = Tuesday, etc.)
                 if (isset($indexedClasses[$dayIndex][$i])) {
                     $classInfo = $indexedClasses[$dayIndex][$i];
-                    $entry[$day] = "
-                        <div style='font-size: 13px; cursor: pointer' class='text-start position-relative m-1 p-1 pe-3 border border-primary rounded registered-class'>
-                            <span class='position-absolute top-0 end-0 px-1 py-0 btn btn-sm text-danger cancel-class-btn' data-pclass-id=\"{$classInfo['practice_class_id']}\"><i class='fa-solid fa-xmark'></i></span>
-                            <div>{$classInfo['practice_class_code']}</div>
+                    $entry[$day] = "<div style='font-size: 13px; cursor: pointer' class='text-start position-relative m-1 p-1 pe-3 border border-primary rounded registered-class'>";
+                    if (Route::currentRouteName() == 'teacher.get-schedule-table') {
+                        $entry[$day] .= "<span class='position-absolute top-0 end-0 px-1 py-0 btn btn-sm text-danger cancel-class-btn' data-pclass-id=\"{$classInfo['practice_class_id']}\"><i class='fa-solid fa-xmark'></i></span>";
+                    }
+                    $entry[$day] .= "
+                        <div>{$classInfo['practice_class_code']}</div>
                             <strong>{$classInfo['practice_class_name']}</strong><br>
                             <strong>{$classInfo['room_name']}</strong> <span>({$classInfo['room_location']})</span><br>
                         </div>
                     ";
                 } else {
-                    $entry[$day] = '
+                    if (Route::currentRouteName() == 'teacher.get-schedule-table') {
+                        $entry[$day] = '
                         <div class="d-flex align-items-center h-100">
                             <button type="button" 
                                     class="border-0 btn btn-outline-primary flex-grow-1 schedule-table-add-btn" 
@@ -274,6 +289,9 @@ class TeacherController extends Controller
                             </button>
                         </div>
                     ';
+                    }else{
+                        $entry[$day] = '-';
+                    }
                 }
             }
 
@@ -443,14 +461,11 @@ class TeacherController extends Controller
             ];
 
             $actions = '
-                <button type="button" class="btn btn-primary btn-sm schedule-info-btn" data-get-url="' . route('teacher.get-class-schedules', ['practice_class_id' => $pclass->id]) . '">
+                <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="' . route('practice-classes.get-json-data-for-schedule', ['practice_class_id' => $pclass->id]) . '" data-pclass-id="' . $pclass->id . '">
                     <i class="fa-solid fa-magnifying-glass align-middle"></i>
                 </button>
-                <button type="button" class="btn btn-success btn-sm pclass-student-info-btn" data-get-url="">
+                <button type="button" class="btn btn-primary btn-sm pclass-student-list-btn" data-get-url="'.route('practice-classes.get-students-of-pclass').'">
                     <i class="fa-solid fa-user-graduate"></i>
-                </button>
-                <button type="button" class="btn btn-danger btn-sm cancel-class-btn" data-pclass-id="' . $pclass->id . '">
-                    <i class="lni lni-ban align-middle"></i>
                 </button>
             ';
 

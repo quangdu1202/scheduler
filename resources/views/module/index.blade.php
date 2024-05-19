@@ -228,7 +228,7 @@
             setupAjaxForm(newModuleForm);
 
             // Edit module modal
-            const editModuleModal = new bootstrap.Modal('#edit-module-modal')
+            const editModuleModal = new bootstrap.Modal('#edit-module-modal', {backdrop: true})
             const editModuleForm = $('#edit-module-form');
             moduleTable.on('click', '.module-edit-btn', function () {
                 const data = moduleTable.row($(this).parents('tr')).data();
@@ -245,7 +245,7 @@
             //
 
             // Delete module modal
-            const deleteModuleModal = new bootstrap.Modal('#delete-module-modal')
+            const deleteModuleModal = new bootstrap.Modal('#delete-module-modal', {backdrop: true})
             const deleteModuleForm = $('#delete-module-form');
             moduleTable.on('click', '.module-delete-btn', function () {
                 const data = moduleTable.row($(this).parents('tr')).data();

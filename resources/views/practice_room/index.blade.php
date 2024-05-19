@@ -13,17 +13,6 @@
                 <i class="lni lni-circle-plus align-middle"></i> Add new
             </button>
         </div>
-        <div class="vr mx-5"></div>
-        <form id="practice-class-filter" action="#" class="d-flex align-items-center">
-            <label for="practice-room-select" class="me-2 text-nowrap fw-bold">Module:</label>
-            <select name="practice-room" id="practice-room-select" class="form-select">
-                <option value="-1" selected>--- Select Module ---</option>
-                <option value="1">Nhập môn lập trình máy tính</option>
-                <option value="2">Kỹ thuật lập trình</option>
-                <option value="3">Cơ sở dữ liệu</option>
-                <option value="4">Kiến trúc máy tính</option>
-            </select>
-        </form>
     </div>
 
     <!-- Create form -->
@@ -276,7 +265,7 @@
             //
 
             // Edit room modal
-            const editRoomModal = new bootstrap.Modal('#edit-room-modal');
+            const editRoomModal = new bootstrap.Modal('#edit-room-modal', {backdrop: true});
             const editRoomForm = $('#edit-room-form');
             const roomStatusSelect = $('#edit-room-status');
             roomTable.on('click', '.room-edit-btn', function () {
@@ -298,7 +287,7 @@
             //
 
             // Delete room modal
-            const deleteRoomModal = new bootstrap.Modal('#delete-room-modal')
+            const deleteRoomModal = new bootstrap.Modal('#delete-room-modal', {backdrop: true})
             const deleteRoomForm = $('#delete-room-form');
             roomTable.on('click', '.room-delete-btn', function () {
                 const data = roomTable.row($(this).parents('tr')).data();

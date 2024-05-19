@@ -46,6 +46,7 @@ class ScheduleResource extends JsonResource
 			'session_id' => $this->session_id,
 			'shift' => $this->shift,
 			'order' => $this->order,
+			'student_qty' => $this->student_qty,
 			'created_at' => $this->created_at,
 			'updated_at' => $this->updated_at,
 		];

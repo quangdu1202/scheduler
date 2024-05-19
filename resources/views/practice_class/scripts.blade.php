@@ -44,15 +44,16 @@
                 toastr.error("An error occurred while loading the data", "Error");
             },
             columns: [
-                {data: 'index', width: '5%'},
-                {data: 'practice_class_code', type: 'html', width: '10%'},
-                {data: 'practice_class_name', type: 'html', width: '25%'},
-                {data: 'teacher', type: 'html', width: '15%'},
-                {data: 'registered_qty', type: 'html', width: '5%'},
-                {data: 'schedules_count', type: 'html', width: '10%'},
+                {data: 'index', width: '4%'},
+                {data: 'module_info', type: 'html', width: '15%'},
+                {data: 'practice_class_code', type: 'html', width: '9%'},
+                {data: 'practice_class_name', type: 'html', width: '15%'},
+                {data: 'teacher', type: 'html', width: '10%'},
+                {data: 'registered_qty', type: 'html', width: '7%'},
+                {data: 'schedules_count', type: 'html', width: '7%'},
                 {
-                    data: 'status', type: 'html', width: '10%',
-                    render: function (data, type, row) {
+                    data: 'status', type: 'html', width: '8%',
+                    render: function (data) {
                         return `
                                 <div class="cell-clamp" title="${data.title}">
                                     ${data.value}
@@ -65,17 +66,17 @@
             columnDefs: [
                 {
                     className: "dt-center",
-                    targets: [0, 4, 5, 6, 7]
+                    targets: [0, 4, 5, 6, 7, 8]
                 },
                 {
-                    targets: [1, 2, 3, 6],
-                    render: function (data, type, row) {
+                    targets: [1, 2, 3, 4, 5, 6],
+                    render: function (data) {
                         return `<div class="cell-clamp" title="${data}">${data}</div>`;
                     }
                 },
                 {
                     orderable: false,
-                    targets: [1, 2, 3, 5, 7]
+                    targets: [1, 2, 3, 4, 7, 8]
                 }
             ],
             layout: {
@@ -213,7 +214,7 @@
         // end
 
         // Edit practice class schedule modal
-        const editPclassModal = new bootstrap.Modal('#edit-pclass-modal');
+        const editPclassModal = new bootstrap.Modal('#edit-pclass-modal', {backdrop: true});
         const editPclassForm = $('#edit-pclass-form');
 
         $(document).on('click', '.pclass-edit-btn', function () {
@@ -237,7 +238,7 @@
         // end
 
         // Delete practice class schedule modal
-        const deletePclassModal = new bootstrap.Modal('#delete-pclass-modal')
+        const deletePclassModal = new bootstrap.Modal('#delete-pclass-modal', {backdrop: true})
         const deletePclassForm = $('#delete-pclass-form');
         $(document).on('click', '.pclass-delete-btn', function () {
             const data = $(this).closest('tr').data();
@@ -255,14 +256,19 @@
         // end
 
         // View all schedules of a practice class
-        const infoModal = new bootstrap.Modal('#all-schedule-modal');
+        const infoModal = new bootstrap.Modal('#all-schedule-modal', {backdrop: true});
         const pClassAllScheduleTable = $('#pclass-all-schedule-table');
 
         pclassTable.on('click', '.schedule-info-btn', function () {
+            showOverlay();
             if ($.fn.DataTable.isDataTable(pClassAllScheduleTable)) {
                 pClassAllScheduleTable.DataTable().destroy();
             }
             pClassAllScheduleTable.data('practice_class_id', $(this).data('pclass-id'));
+
+            const weekdaySignature = $('#pclass-signature-form #weekdaySelect');
+            const startDateSignature = $('#pclass-signature-form #start_date');
+            const pRoomSignature = $('#pclass-signature-form #pRoomSelect');
 
             pClassAllScheduleTable.DataTable({
                 ajax: {
@@ -272,10 +278,10 @@
                 select: true,
                 columns: [
                     {data: 'index', width: '5%'},
-                    {data: 'teacher', type: 'string', width: '25%'},
                     {data: 'schedule_date', type: 'html', width: '15%'},
+                    {data: 'weekday', type: 'string', width: '15%'},
                     {data: 'session', type: 'html', width: '5%', orderable: false},
-                    {data: 'shifts', type: 'html', width: '15%'},
+                    {data: 'shifts', type: 'html', width: '10%'},
                     {data: 'practice_room', type: 'html', width: '25%', orderable: false},
                     {data: 'actions', type: 'html', width: '10%'},
                 ],
@@ -326,7 +332,42 @@
                 },
                 paging: false,
                 initComplete: function (settings, json) {
-                    console.log(json);
+                    // console.log(json);
+
+                    // Setup for adding multi schedules
+                    $('#multi-schedule-pclass-id').val(pClassAllScheduleTable.data('practice_class_id'));
+
+                    // Update signature schedule info
+                    $.ajax({
+                        url: '<?= route('practice-classes.get-signature-info') ?>',
+                        type: 'get',
+                        data: {pClassId: pClassAllScheduleTable.data('practice_class_id')},
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        success: function (response) {
+                            console.log(response);
+
+                            startDateSignature.val(response.start_date);
+
+                            weekdaySignature.val(response.weekday).trigger('change');
+
+                            $("#pclass-signature-form label").removeClass('btn-outline-danger');
+                            if (response.session != null) {
+                                const radio = $('.signature-session[value=' + response.session + ']');
+                                radio.prop('checked', true);
+                                $("label[for='" + radio.attr('id') + "']").addClass('btn-outline-danger');
+                            } else {
+                                $('.signature-session').prop('checked', false);
+                            }
+
+                            pRoomSignature.val(response.pRoomId).change();
+                        },
+                        error: function (xhr) {
+                            console.log(xhr.responseText);
+                            toastr.error("A server error occurred. Please try again.", "Error");
+                        }
+                    });
+
+                    // Update rooms selection
                     const $sessionSelects = $('.session-select');
                     const pRoomSelects = $('.practice-room-select');
 
@@ -338,46 +379,11 @@
                             dropdownParent: $('#all-schedule-modal-content')
                         });
                     });
-
                     $sessionSelects.each(function () {
                         refreshPracticeRooms($(this));
                     });
-                }
-            });
 
-            // Setup for adding multi schedules
-            $('#multi-schedule-pclass-id').val(pClassAllScheduleTable.data('practice_class_id'));
-
-            const weekdaySignature = $('#pclass-signature-form #weekdaySelect');
-            const startDateSignature = $('#pclass-signature-form #start_date');
-            const pRoomSignature = $('#pclass-signature-form #pRoomSelect');
-
-            $.ajax({
-                url: '<?= route('practice-classes.get-signature-info') ?>',
-                type: 'get',
-                data: {pClassId: pClassAllScheduleTable.data('practice_class_id')},
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                success: function (response) {
-                    console.log(response);
-
-                    startDateSignature.val(response.start_date);
-
-                    weekdaySignature.val(response.weekday).trigger('change');
-
-                    $("#pclass-signature-form label").removeClass('btn-outline-danger');
-                    if (response.session != null) {
-                        const radio = $('.signature-session[value=' + response.session + ']');
-                        radio.prop('checked', true);
-                        $("label[for='" + radio.attr('id') + "']").addClass('btn-outline-danger');
-                    } else {
-                        $('.signature-session').prop('checked', false);
-                    }
-
-                    pRoomSignature.val(response.pRoomId).change();
-                },
-                error: function (xhr) {
-                    console.log(xhr.responseText);
-                    toastr.error("A server error occurred. Please try again.", "Error");
+                    hideOverlay();
                 }
             });
 
@@ -411,8 +417,13 @@
                     }
 
                     // Reload requested element (mostly data table)
-                    if (response.reloadTarget && $.fn.dataTable.isDataTable(response.reloadTarget)) {
-                        $(response.reloadTarget).DataTable().ajax.reload();
+                    const reloadTarget = $(`${response.reloadTarget}`);
+                    if (reloadTarget) {
+                        reloadTarget.each(function (){
+                            if ($.fn.dataTable.isDataTable($(this))) {
+                                $(this).DataTable().ajax.reload();
+                            }
+                        })
                     }
                 },
                 error: function (xhr) {
@@ -485,7 +496,15 @@
 
         pClassAllScheduleTable.on('change', '.schedule-date-select', function () {
             $(this).removeClass('is-invalid');
-            const sessionSelect = $(this).closest('tr').find('.session-select');
+            const $row = $(this).closest('tr');
+
+            const date = new Date($(this).val());
+            const options = {weekday: 'long'};
+            const weekday = date.toLocaleDateString('en-US', options).toUpperCase();
+            const weekdayText = $row.find('.weekday-text');
+            weekdayText.text(weekday);
+
+            const sessionSelect = $row.find('.session-select');
             if (sessionSelect.val() !== '') {
                 sessionSelect.change();
             }
@@ -521,10 +540,17 @@
                     if (response.resetTarget) {
                         $(response.resetTarget).trigger('reset');
                     }
+
                     // Reload requested element (mostly data table)
-                    if (response.reloadTarget && $.fn.dataTable.isDataTable(response.reloadTarget)) {
-                        $(response.reloadTarget).DataTable().ajax.reload();
+                    const reloadTarget = $(`${response.reloadTarget}`);
+                    if (reloadTarget) {
+                        reloadTarget.each(function (){
+                            if ($.fn.dataTable.isDataTable($(this))) {
+                                $(this).DataTable().ajax.reload();
+                            }
+                        })
                     }
+
                     //Hide requested element (mostly confirm modal)
                     if (response.hideTarget) {
                         $(response.hideTarget).modal('hide');
@@ -592,12 +618,21 @@
                     if (response.success === false) {
                         toastr.error(response.message || "Unknown error occurred", response.title || "Error");
                     } else {
-                        toastr.success(response.message, response.title || "Success");
+                        if (response.isCaution === true){
+                            toastr.warning(response.message, response.title);
+                        }else {
+                            toastr.success(response.message, response.title || "Success");
+                        }
                     }
 
                     // Reload requested element (mostly data table)
-                    if (response.reloadTarget && $.fn.dataTable.isDataTable(response.reloadTarget)) {
-                        $(response.reloadTarget).DataTable().ajax.reload();
+                    const reloadTarget = $(`${response.reloadTarget}`);
+                    if (reloadTarget) {
+                        reloadTarget.each(function (){
+                            if ($.fn.dataTable.isDataTable($(this))) {
+                                $(this).DataTable().ajax.reload();
+                            }
+                        })
                     }
                 },
                 error: function (xhr) {
@@ -632,8 +667,13 @@
                     }
 
                     // Reload requested element (mostly data table)
-                    if (response.reloadTarget && $.fn.dataTable.isDataTable(response.reloadTarget)) {
-                        $(response.reloadTarget).DataTable().ajax.reload();
+                    const reloadTarget = $(`${response.reloadTarget}`);
+                    if (reloadTarget) {
+                        reloadTarget.each(function (){
+                            if ($.fn.dataTable.isDataTable($(this))) {
+                                $(this).DataTable().ajax.reload();
+                            }
+                        })
                     }
                 },
                 error: function (xhr) {

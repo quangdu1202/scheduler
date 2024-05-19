@@ -406,7 +406,7 @@
             setupAjaxForm(newModuleClassForm);
 
             // Edit module class modal
-            const editModuleClassModal = new bootstrap.Modal('#edit-mclass-modal')
+            const editModuleClassModal = new bootstrap.Modal('#edit-mclass-modal', {backdrop: true})
             const editModuleClassForm = $('#edit-mclass-form');
             const moduleClassStatusSelect = $('#edit-ModuleClassStatus');
             mclassTable.on('click', '.mclass-edit-btn', function () {
@@ -431,7 +431,7 @@
             //
 
             // Delete module class modal
-            const deleteModuleClassModal = new bootstrap.Modal('#delete-mclass-modal')
+            const deleteModuleClassModal = new bootstrap.Modal('#delete-mclass-modal', {backdrop: true})
             const deleteModuleClassForm = $('#delete-mclass-form');
             mclassTable.on('click', '.mclass-delete-btn', function () {
                 const data = mclassTable.row($(this).parents('tr')).data();

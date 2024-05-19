@@ -202,6 +202,8 @@ class ScheduleController extends Controller
         $existingWeekDay = date('N', strtotime($firstSchedule->schedule_date));
         $existingSession = $firstSchedule->session;
 
+        $hasSignatureConflict = false;
+
         // Iterate over all requested schedules to check conditions
         foreach ($requestedSchedules as $scheduleId => $data) {
             $newScheduleDate = $data['schedule_date'];
@@ -220,12 +222,7 @@ class ScheduleController extends Controller
             // Check weekday and session match
             $newWeekDay = date('N', strtotime($newScheduleDate));
             if ($existingWeekDay != $newWeekDay || $existingSession != $newSession) {
-                return response()->json([
-                    'status' => 500,
-                    'success' => false,
-                    'title' => 'Error!',
-                    'message' => 'Must select the same schedule as existing schedules [<strong>' . date('l', strtotime($firstSchedule->schedule_date)) . ($existingSession == 1 ? '-Morning' : ($existingSession == 2 ? '-Afternoon' : '-Evening')) . '</strong>]'
-                ]);
+                $hasSignatureConflict = true;
             }
 
             // Update schedule if all checks pass
@@ -240,6 +237,16 @@ class ScheduleController extends Controller
                     'message' => 'Unknown error occurred, try again later!',
                 ]);
             }
+        }
+
+        if ($hasSignatureConflict) {
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'isCaution' => true,
+                'title' => 'Saved but Caution!',
+                'message' => 'Conflict with signature schedule [<strong>' . date('l', strtotime($firstSchedule->schedule_date)) . ($existingSession == 1 ? '-Morning' : ($existingSession == 2 ? '-Afternoon' : '-Evening')) . '</strong>]'
+            ]);
         }
 
         return response()->json([
@@ -263,6 +270,9 @@ class ScheduleController extends Controller
         $schedule_date = $data['start_date'];
         $session = $data['session'];
         $pRoomId = $data['pRoomId'] ?? null;
+        $studentQty1 = $data['studentQty1'] ?? 0;
+        $studentQty2 = $data['studentQty2'] ?? 0;
+        $studentQty = (int)$studentQty1 * 100 + (int)$studentQty2;
         $pClassId = $request->input('pclassId');
         $sessionId = $this->helper->uniqidReal();
 
@@ -288,7 +298,8 @@ class ScheduleController extends Controller
                     [
                         'schedule_date' => $schedule_date,
                         'session' => $session,
-                        'practice_room_id' => $pRoomId
+                        'practice_room_id' => $pRoomId,
+                        'student_qty' => $studentQty,
                     ]
                 );
             } else {

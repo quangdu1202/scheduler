@@ -103,4 +103,12 @@ class PracticeClass extends BaseModel
 	{
 		return $this->hasMany(StudentMark::class, 'practice_class_id', 'id');
 	}
+
+    /**
+     * @return Schedule|null
+     */
+    public function getSignatureSchedule(): ?Schedule
+    {
+        return $this->schedules->where('order', '=', 0)->first();
+    }
 }

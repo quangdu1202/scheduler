@@ -49,11 +49,11 @@ Route::resource('practice-rooms', PracticeRoomController::class);
 Route::get('/getSignatureClassInfo', [PracticeClassController::class, 'getSignatureClassInfo'])->name('practice-classes.get-signature-info');
 Route::get('/getPracticeClassesJsonData', [PracticeClassController::class, 'getJsonData'])->name('practice-classes.get-json-data');
 Route::get('/getJsonDataForSchedule/{practice_class_id}', [PracticeClassController::class, 'getJsonDataForSchedule'])->name('practice-classes.get-json-data-for-schedule');
-Route::get('/getJsonDataForStudentsOfPracticeClass', [PracticeClassController::class, 'getJsonDataForStudentsOfPracticeClass'])->name('practice-classes.get-student-data-for-schedule');
+Route::get('/getStudentsList', [PracticeClassController::class, 'getStudentsOfPracticeClass'])->name('practice-classes.get-students-of-pclass');
 Route::post('/updatePracticeClassStatus', [PracticeClassController::class, 'updatePracticeClassStatus'])->name('practice-classes.update-practice-class-status');
 Route::resource('practice-classes', PracticeClassController::class);
 
-Route::get('/getJsonDataForStudentsOfModuleClass', [ModuleClassController::class, 'getJsonDataForStudentsOfModuleClass'])->name('module-classes.get-student-data-for-mclass');
+Route::get('/getStudentsOfModuleClass', [ModuleClassController::class, 'getJsonDataForStudentsOfModuleClass'])->name('module-classes.get-student-data-for-mclass');
 Route::get('/getModuleClassJsonData', [ModuleClassController::class, 'getJsonData'])->name('module-classes.get-json-data');
 Route::post('/updateModuleClassStatus', [ModuleClassController::class, 'updateModuleClassStatus'])->name('module-classes.update-mclass-status');
 Route::resource('module-classes', ModuleClassController::class);
@@ -69,11 +69,13 @@ Route::delete('schedules', [ScheduleController::class, 'deleteSingleSchedule'])-
 Route::resource('schedules', ScheduleController::class);
 
 Route::get('/teacher/register-classes', [TeacherController::class, 'index'])->name('teacher.register-classes');
+Route::get('/teacher/manage-classes', [TeacherController::class, 'manageClasses'])->name('teacher.manage-classes');
 Route::post('/teacher/register-classes', [TeacherController::class, 'registerClass'])->name('teacher.register');
 Route::get('/teacher/get-available-classes', [TeacherController::class, 'getJsonData'])->name('teacher.get-available-classes');
 Route::get('/teacher/get-class-schedules/{practice_class_id}', [TeacherController::class, 'getJsonDataForSchedule'])->name('teacher.get-class-schedules');
 Route::get('/teacher/get-registered-class', [TeacherController::class, 'getRegisteredClasses'])->name('teacher.get-registered-class');
 Route::get('/teacher/get-schedule-table', [TeacherController::class, 'getJsonDataForScheduleTable'])->name('teacher.get-schedule-table');
+Route::get('/teacher/get-registered-schedule-table', [TeacherController::class, 'getJsonDataForScheduleTable'])->name('teacher.get-registered-schedule-table');
 Route::get('/teacher/get-classes-ondate', [TeacherController::class, 'getClassOndate'])->name('teacher.get-classes-ondate');
 Route::post('/teacher/cancel-registered-class', [TeacherController::class, 'cancelRegisteredClass'])->name('teacher.cancel-registered-class');
 

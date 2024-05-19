@@ -20,7 +20,11 @@ function setupAjaxForm(formSelector) {
                 console.log(response);
                 switch (response.status) {
                     case 200:
-                        toastr.success(response.message, response.title || "Success");
+                        if (response.isCaution === true){
+                            toastr.warning(response.message, response.title);
+                        }else {
+                            toastr.success(response.message, response.title || "Success");
+                        }
                         break;
                     case 422:
                         toastr.error(response.message, response.title || "Validation Error");
@@ -33,10 +37,17 @@ function setupAjaxForm(formSelector) {
                 if (response.resetTarget) {
                     $(response.resetTarget).trigger('reset');
                 }
+
                 // Reload requested element (mostly data table)
-                if (response.reloadTarget && $.fn.dataTable.isDataTable(response.reloadTarget)) {
-                    $(response.reloadTarget).DataTable().ajax.reload();
+                const reloadTarget = $(`${response.reloadTarget}`);
+                if (reloadTarget) {
+                    reloadTarget.each(function (){
+                        if ($.fn.dataTable.isDataTable($(this))) {
+                            $(this).DataTable().ajax.reload();
+                        }
+                    })
                 }
+
                 //Hide requested element (mostly confirm modal)
                 if (response.hideTarget) {
                     $(response.hideTarget).modal('hide');
@@ -51,8 +62,10 @@ function setupAjaxForm(formSelector) {
 }
 
 $.fn.serializeObject = function() {
-    var obj = {};
-    var arr = this.serializeArray();
+    // Find disabled inputs, and remove the "disabled" attribute
+    const disabled = this.find(':input:disabled').removeAttr('disabled');
+    const obj = {};
+    const arr = this.serializeArray();
     arr.forEach(function(item) {
         if (obj[item.name]) {
             if (typeof(obj[item.name]) === "string") {
@@ -63,5 +76,6 @@ $.fn.serializeObject = function() {
             obj[item.name] = item.value;
         }
     });
+    disabled.attr('disabled','disabled');
     return obj;
 };

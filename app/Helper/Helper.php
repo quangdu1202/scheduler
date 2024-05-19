@@ -3,12 +3,14 @@
 namespace App\Helper;
 
 use App\Models\ModuleClass\ModuleClass;
+use App\Models\PracticeClass\PracticeClass;
 use App\Models\Student\Student;
 use App\Services\PracticeClass\PracticeClassService;
 use App\Services\Registration\RegistrationService;
 use App\Services\Student\StudentService;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 class Helper
 {
@@ -90,5 +92,42 @@ class Helper
             ->values();
     }
 
+    /**
+     * @param $dateString
+     * @return string
+     */
+    public function dateToFullCharsWeekday($dateString): string
+    {
+        // Create a Carbon instance from the date string
+        $date = Carbon::parse($dateString);
 
+        // Format the date to get the 3-letter weekday
+        // Output will be 'SUN' for the example date
+        return $date->format('l');
+    }
+
+    /**
+     * @param $dateString
+     * @return string
+     */
+    public function dateStringToWeekdayInt($dateString): string
+    {
+        $date = Carbon::parse($dateString);
+
+        return $date->format('N');
+    }
+
+    /**
+     * @param PracticeClass $practiceClass
+     * @return array
+     */
+    public function getMaxStudentOfShifts(PracticeClass $practiceClass): array
+    {
+        $signatureSchedule = $practiceClass->getSignatureSchedule();
+
+        return [
+            'studentQty1' => intval($signatureSchedule->student_qty / 100) ?? 0,
+            'studentQty2' => $signatureSchedule->student_qty % 100 ?? 0,
+        ];
+    }
 }
