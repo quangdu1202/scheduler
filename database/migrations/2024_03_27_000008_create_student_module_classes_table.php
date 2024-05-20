@@ -18,6 +18,10 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('students');
             $table->foreignId('module_class_id')->constrained('module_classes');
             $table->timestamps();
+
+            // Adding indexes
+            $table->index('student_id');
+            $table->index('module_class_id');
         });
     }
 

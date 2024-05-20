@@ -379,9 +379,9 @@ class PracticeClassController extends Controller
         $pClass = $this->practiceClassService->findOrFail($practice_class_id);
 
         $signatureSchedule = $pClass->getSignatureSchedule();
-        $signatureSession = $signatureSchedule->session;
-        $signatureWeekday = $this->helper->dateStringToWeekdayInt($signatureSchedule->schedule_date);
-        $signatureRoomId = $signatureSchedule->practice_room_id;
+        $signatureSession = $signatureSchedule->session ?? null;
+        $signatureWeekday = $this->helper->dateStringToWeekdayInt($signatureSchedule->schedule_date ?? null);
+        $signatureRoomId = $signatureSchedule->practice_room_id ?? null;
 
         $responseData = [];
         $index = 0;
@@ -590,7 +590,7 @@ class PracticeClassController extends Controller
 
         for ($i = 0; $i < 10; $i++) {
             $responseData[] = [
-                'index' => $i+1,
+                'index' => $i + 1,
                 'student_code' => '2020604595',
                 'student_name' => 'Du Dang Quang',
                 'gender' => 'M',

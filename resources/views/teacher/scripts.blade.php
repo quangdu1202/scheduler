@@ -187,75 +187,17 @@
 
         // end
 
+        // View schedule info
         $(document).on('click', '.schedule-info-btn', function () {
             showScheduleInfo($(this));
         });
+        // end
 
-        $(document).on('click', '.cancel-class-btn', function () {
-            if (!confirm("Cancel your registration for this class?")) {
-                return;
-            }
-            showOverlay();
-            const pclassId = $(this).data('pclass-id');
-
-            $.ajax({
-                url: '{{route('teacher.cancel-registered-class')}}',
-                type: 'post',
-                data: {
-                    pclassId: pclassId
-                },
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                success: function (response) {
-                    // Hide the loading overlay
-                    hideOverlay();
-
-                    console.log(response);
-                    switch (response.status) {
-                        case 200:
-                            toastr.success(response.message, response.title || "Success");
-                            break;
-                        case 422:
-                            toastr.error(response.message, response.title || "Validation Error");
-                            break;
-                        default:
-                            toastr.error(response.message || "Unknown error occurred", response.title || "Error");
-                    }
-
-                    // Reset requested element (mostly input form)
-                    if (response.resetTarget) {
-                        $(response.resetTarget).trigger('reset');
-                    }
-
-                    // Reload requested element (mostly data table)
-                    const reloadTarget = $(`${response.reloadTarget}`);
-                    if (reloadTarget) {
-                        reloadTarget.each(function (){
-                            if ($.fn.dataTable.isDataTable($(this))) {
-                                $(this).DataTable().ajax.reload();
-                            }
-                        })
-                    }
-
-                    //Hide requested element (mostly confirm modal)
-                    if (response.hideTarget) {
-                        $(response.hideTarget).modal('hide');
-                    }
-                },
-                error: function (xhr) {
-                    hideOverlay();
-                    console.log(xhr.responseText);
-                    toastr.error("A server error occurred. Please try again.", "Error");
-                }
-            });
-        });
-
-        // View all schedules of a practice class
+        // View all schedules of a practice class (on date)
         const pClassSchedulesTable = $('#pclass-schedules-table');
-
         pClassSchedulesTable.on('click', '.schedule-info-btn', function () {
             showScheduleInfo($(this));
         });
-
         // end
 
         // show schedule info function
@@ -307,20 +249,80 @@
         }
         // end
 
-        // Register class button
+        // Register class
         $(document).on('click', '.register-class-btn', function () {
             if (!confirm("Confirm to register for this class?")) {
                 return;
             }
             showOverlay();
-            const teacherId = '{{auth()->user()->userable->id}}';
+            const teacherId = '{{Auth::user()->userable->id}}';
             const pclassId = $(this).data('pclass-id');
 
             $.ajax({
-                url: '{{route('teacher.register')}}',
+                url: '{{route('teacher.register-class')}}',
                 type: 'post',
                 data: {
                     teacherId: teacherId,
+                    pclassId: pclassId
+                },
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function (response) {
+                    // Hide the loading overlay
+                    hideOverlay();
+
+                    console.log(response);
+                    switch (response.status) {
+                        case 200:
+                            toastr.success(response.message, response.title || "Success");
+                            break;
+                        case 422:
+                            toastr.error(response.message, response.title || "Validation Error");
+                            break;
+                        default:
+                            toastr.error(response.message || "Unknown error occurred", response.title || "Error");
+                    }
+
+                    // Reset requested element (mostly input form)
+                    if (response.resetTarget) {
+                        $(response.resetTarget).trigger('reset');
+                    }
+
+                    // Reload requested element (mostly data table)
+                    const reloadTarget = $(`${response.reloadTarget}`);
+                    if (reloadTarget) {
+                        reloadTarget.each(function (){
+                            if ($.fn.dataTable.isDataTable($(this))) {
+                                $(this).DataTable().ajax.reload();
+                            }
+                        })
+                    }
+
+                    //Hide requested element (mostly confirm modal)
+                    if (response.hideTarget) {
+                        $(response.hideTarget).modal('hide');
+                    }
+                },
+                error: function (xhr) {
+                    hideOverlay();
+                    console.log(xhr.responseText);
+                    toastr.error("A server error occurred. Please try again.", "Error");
+                }
+            });
+        });
+        // end
+
+        // Cancel Register class
+        $(document).on('click', '.cancel-class-btn', function () {
+            if (!confirm("Cancel your registration for this class?")) {
+                return;
+            }
+            showOverlay();
+            const pclassId = $(this).data('pclass-id');
+
+            $.ajax({
+                url: '{{route('teacher.cancel-registered-class')}}',
+                type: 'post',
+                data: {
                     pclassId: pclassId
                 },
                 headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},

@@ -2,16 +2,19 @@
 
 namespace App\Models\ModuleClass;
 
+use App\Models\Student\Student;
 use Carbon\Carbon;
 use App\Models\Module\Module;
 use App\Models\Teacher\Teacher;
 use App\Models\StudentMark\StudentMark;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\StudentModuleClass\StudentModuleClass;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * Class ModuleClass
@@ -83,4 +86,12 @@ class ModuleClass extends BaseModel
 	{
 		return $this->hasMany(StudentModuleClass::class, 'module_class_id', 'id');
 	}
+
+    /**
+     * @return belongsToMany
+     */
+    public function students(): belongsToMany
+    {
+        return $this->belongsToMany(Student::class, 'student_module_classes');
+    }
 }

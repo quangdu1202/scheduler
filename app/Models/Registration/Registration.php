@@ -17,6 +17,7 @@ use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
  * @property integer $student_id
  * @property integer $module_class_id
  * @property integer $practice_class_id
+ * @property integer $shift
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property ModuleClass $moduleClass
@@ -34,6 +35,7 @@ class Registration extends BaseModel
         'student_id',
         'module_class_id',
         'practice_class_id',
+        'shift',
         'created_at',
         'updated_at'
     ];

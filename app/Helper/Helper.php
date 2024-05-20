@@ -5,6 +5,7 @@ namespace App\Helper;
 use App\Models\ModuleClass\ModuleClass;
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\Student\Student;
+use App\Models\StudentModuleClass\StudentModuleClass;
 use App\Services\PracticeClass\PracticeClassService;
 use App\Services\Registration\RegistrationService;
 use App\Services\Student\StudentService;
@@ -93,6 +94,19 @@ class Helper
     }
 
     /**
+     * @param $studentId
+     * @return \Illuminate\Support\Collection
+     */
+    public function getModulesByStudentId($studentId): \Illuminate\Support\Collection
+    {
+        $student = Student::with(['moduleClasses.module'])->find($studentId);
+
+        return $student->moduleClasses->map(function ($moduleClass) {
+            return $moduleClass->module;
+        });
+    }
+
+    /**
      * @param $dateString
      * @return string
      */
@@ -124,10 +138,11 @@ class Helper
     public function getMaxStudentOfShifts(PracticeClass $practiceClass): array
     {
         $signatureSchedule = $practiceClass->getSignatureSchedule();
+        $studentQty = $signatureSchedule->student_qty ?? 0;
 
         return [
-            'studentQty1' => intval($signatureSchedule->student_qty / 100) ?? 0,
-            'studentQty2' => $signatureSchedule->student_qty % 100 ?? 0,
+            'studentQty1' => intval($studentQty / 100) ?? 0,
+            'studentQty2' => $studentQty % 100 ?? 0,
         ];
     }
 }

@@ -10,6 +10,7 @@ use App\Models\OriginalClass\OriginalClass;
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\PracticeRoom\PracticeRoom;
 use App\Models\Registration\Registration;
+use App\Models\Student\Student;
 use App\Models\Teacher\Teacher;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -46,5 +47,15 @@ class DatabaseSeeder extends Seeder
             'updated_at' => Carbon::now(),
         ]);
 
+        $student = Student::factory()->create();
+        User::create([
+            'name' => 'Dư Đăng Quang',
+            'email' => 'hsa@gmail.com',
+            'password' => Hash::make('123'),
+            'userable_id' => $student->id,
+            'userable_type' => get_class($student),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
     }
 }

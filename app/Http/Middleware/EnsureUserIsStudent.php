@@ -16,9 +16,12 @@ class EnsureUserIsStudent
     public function handle(Request $request, Closure $next): Response
     {
         // Check if the user is logged in and if the user is a student
-        if (!auth()->check() || !auth()->user()->isStudent()) {
-            // If user is not a student, return a 404 response
-            abort(404);
+        if (auth()->check() && !auth()->user()->isStudent()) {
+            return redirect()->route('practice-classes.index')->with('error', 'Access restricted to students only.');
+        }
+
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Access restricted to students only.');
         }
 
         return $next($request);

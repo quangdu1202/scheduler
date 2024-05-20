@@ -6,8 +6,8 @@
         <h1 class="h2">Register Classes</h1>
         @if(auth()->user() !== null)
             <div class="user-info">
-                <span>Hello Teacher <b>{{auth()->user()->name}}</b>!</span>
-                <span>Teacher ID: {{auth()->user()->userable->id}}</span>
+                <span>Hello Teacher <b>{{Auth::user()->name}}</b>!</span>
+                <span>Teacher ID: {{Auth::user()->userable->id}}</span>
             </div>
         @endif
     </div>

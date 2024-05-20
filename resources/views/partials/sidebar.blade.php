@@ -26,6 +26,18 @@
         </a>
     </li>
     <li class="sidebar-item">
+        <a href="{{route('student.register-classes')}}" class="sidebar-link">
+            <i class="lni lni-grid"></i>
+            <span>(S) Register Classes</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="{{route('student.manage-classes')}}" class="sidebar-link">
+            <i class="lni lni-grid"></i>
+            <span>(S) Manage Classes</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
         <a href="{{route('modules.index')}}" class="sidebar-link">
             <i class="lni lni-book"></i>
             <span>Modules</span>

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('students');
             $table->foreignId('module_class_id')->constrained('module_classes');
             $table->foreignId('practice_class_id')->constrained('practice_classes');
+            $table->integer('shift');
             $table->timestamps();
         });
     }

@@ -119,12 +119,16 @@ class ScheduleController extends Controller
                     ]);
                 }
 
+//                if ($lastOrder == 0) {
+//                    $lastOrder = 1;
+//                }
+
                 foreach ($newDates as $date) {
                     $sessionId = $this->helper->uniqidReal();
                     $data = [
                         'schedule_date' => $date,
                         'session' => $session,
-                        'order' => $lastOrder + 1
+                        'order' => ++$lastOrder
                     ];
                     $this->createSchedules($practiceClassId, $sessionId, $shift_qty, $data);
                 }

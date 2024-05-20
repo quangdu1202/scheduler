@@ -2,6 +2,7 @@
 
 namespace App\Models\Student;
 
+use App\Models\ModuleClass\ModuleClass;
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\Registration\Registration;
 use App\Models\StudentMark\StudentMark;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
@@ -67,6 +69,14 @@ class Student extends BaseModel
     public function studentModuleClasses(): HasMany
     {
         return $this->hasMany(StudentModuleClass::class);
+    }
+
+    /**
+     * @return belongsToMany
+     */
+    public function moduleClasses(): belongsToMany
+    {
+        return $this->belongsToMany(ModuleClass::class, 'student_module_classes');
     }
 
     /**

@@ -18,6 +18,7 @@ use Exception;
 use Flasher\Prime\FlasherInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Route;
 
@@ -94,8 +95,9 @@ class TeacherController extends Controller
 
     public function index()
     {
-        $user = auth()->user();
-        $availableModules = $this->helper->getModulesByTeacherId($user->userable->id);
+        /**@var Teacher $teacher */
+        $teacher = Auth::user()->userable;
+        $availableModules = $this->helper->getModulesByTeacherId($teacher->id);
         return view('teacher.register-classes', [
             'modules' => $availableModules
         ]);
@@ -103,8 +105,9 @@ class TeacherController extends Controller
 
     public function manageClasses()
     {
-        $user = auth()->user();
-        $availableModules = $this->helper->getModulesByTeacherId($user->userable->id);
+        /**@var Teacher $teacher */
+        $teacher = Auth::user()->userable;
+        $availableModules = $this->helper->getModulesByTeacherId($teacher->id);
         $practiceRooms = $this->practiceRoomService->getAll();
         return view('teacher.manage-classes', [
             'modules' => $availableModules,
@@ -218,7 +221,7 @@ class TeacherController extends Controller
     public function getJsonDataForScheduleTable()
     {
         /**@var Teacher $teacher */
-        $teacher = auth()->user()->userable;
+        $teacher = Auth::user()->userable;
         $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll(['teacher_id' => $teacher->id]);
 
         $practiceClassesMapped = $practiceClasses->mapWithKeys(function ($practiceClass) {
@@ -289,7 +292,7 @@ class TeacherController extends Controller
                             </button>
                         </div>
                     ';
-                    }else{
+                    } else {
                         $entry[$day] = '-';
                     }
                 }
@@ -443,8 +446,9 @@ class TeacherController extends Controller
      */
     public function getRegisteredClasses(): JsonResponse
     {
-        $teacherId = auth()->user()->userable->id;
-        $practiceClasses = $this->practiceClassService->withCount(['schedules'])->getAll([['teacher_id', '=', $teacherId]]);
+        /**@var Teacher $teacher */
+        $teacher = Auth::user()->userable;
+        $practiceClasses = $this->practiceClassService->withCount(['schedules'])->getAll([['teacher_id', '=', $teacher->id]]);
 
         $responseData = $practiceClasses->map(function ($pclass, $index) {
             /**@var PracticeClass $pclass */
@@ -491,7 +495,7 @@ class TeacherController extends Controller
                 <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="' . route('practice-classes.get-json-data-for-schedule', ['practice_class_id' => $pclass->id]) . '" data-pclass-id="' . $pclass->id . '">
                     <i class="fa-solid fa-magnifying-glass align-middle"></i>
                 </button>
-                <button type="button" class="btn btn-primary btn-sm pclass-student-list-btn" data-get-url="'.route('practice-classes.get-students-of-pclass').'">
+                <button type="button" class="btn btn-primary btn-sm pclass-student-list-btn" data-get-url="' . route('practice-classes.get-students-of-pclass') . '">
                     <i class="fa-solid fa-user-graduate"></i>
                 </button>
             ';
@@ -517,10 +521,9 @@ class TeacherController extends Controller
 
     /**
      * @param $practice_class_id
-     * @param Request $request
      * @return JsonResponse
      */
-    public function getJsonDataForSchedule($practice_class_id, Request $request): JsonResponse
+    public function getJsonDataForSchedule($practice_class_id): JsonResponse
     {
         $schedulesBySessionId = $this->scheduleService->getAll(['practice_class_id' => $practice_class_id])->where('order', '!=', 0)->sortBy(['schedule_date', 'shift'])->groupBy('session_id');
 
@@ -576,6 +579,7 @@ class TeacherController extends Controller
     /**
      * @param Request $request
      * @return JsonResponse
+     * TODO
      */
     public function getStudentOfPracticeClass(Request $request): JsonResponse
     {
@@ -589,7 +593,7 @@ class TeacherController extends Controller
         $responseData = $pClassStudents->map(function ($student, $index) use ($pClassId) {
             return [
                 'DT_RowData' => $student,
-                'index' => $index++,
+                'index' => $index,
                 'student_code' => $student->student_code,
                 'student_name' => $student->user->name,
                 'student_gender' => 'Male',
