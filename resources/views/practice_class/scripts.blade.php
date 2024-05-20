@@ -222,7 +222,7 @@
 
             console.log(data);
 
-            $('#editModuleId').val(data.module_id);
+            $('#editModuleId').val(data.DT_RowData.module_id);
             $('#editClassCode').val(data.practice_class_code || '');
             $('#editClassName').val(data.practice_class_name || '');
             $('#editTeacherSelect').val(data.teacher_id || '').change();

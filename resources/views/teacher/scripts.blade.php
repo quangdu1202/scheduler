@@ -187,62 +187,6 @@
 
         // end
 
-        //Registered classes table
-        const registeredClassesTable = $('#registered-pclass-table');
-        registeredClassesTable.DataTable({
-            ajax: {
-                url: '{{route('teacher.get-registered-class')}}',
-                dataSrc: ''
-            },
-            error: function (xhr, status, error) {
-                console.error("Error fetching data: ", error);
-                toastr.error("An error occurred while loading the data", "Error");
-            },
-            columns: [
-                {data: 'index', width: '5%'},
-                {data: 'module_info', type: 'html', width: '20%'},
-                {data: 'practice_class_code', type: 'html', width: '10%'},
-                {data: 'practice_class_name', type: 'html', width: '20%'},
-                {data: 'registered_qty', type: 'html', width: '10%'},
-                {data: 'shift_qty', type: 'html', width: '10%'},
-                {
-                    data: 'status', type: 'html', width: '10%',
-                    render: function (data) {
-                        return `
-                                <div class="cell-clamp" title="${data.title}">
-                                    ${data.value}
-                                </div>
-                            `;
-                    }
-                },
-                {data: 'actions', type: 'html', width: '10%'},
-            ],
-            columnDefs: [
-                {
-                    className: "dt-center",
-                    targets: [0, 4, 5, 6, 7]
-                },
-                {
-                    targets: [1, 2, 3, 5],
-                    render: function (data) {
-                        return `<div class="cell-clamp" title="${data}">${data}</div>`;
-                    }
-                },
-                {
-                    orderable: false,
-                    targets: "_all"
-                }
-            ],
-            layout: {
-                topStart: {},
-                topEnd: {},
-                bottomStart: {},
-                bottomEnd: {},
-            },
-            pageLength: -1,
-        });
-        // end
-
         $(document).on('click', '.schedule-info-btn', function () {
             showScheduleInfo($(this));
         });

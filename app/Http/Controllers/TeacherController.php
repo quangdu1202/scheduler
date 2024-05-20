@@ -444,21 +444,48 @@ class TeacherController extends Controller
     public function getRegisteredClasses(): JsonResponse
     {
         $teacherId = auth()->user()->userable->id;
-
-        $practiceClasses = $this->practiceClassService->getAll([['teacher_id', '=', $teacherId]]);
+        $practiceClasses = $this->practiceClassService->withCount(['schedules'])->getAll([['teacher_id', '=', $teacherId]]);
 
         $responseData = $practiceClasses->map(function ($pclass, $index) {
             /**@var PracticeClass $pclass */
 
+            $signatureSchedule = $pclass->getSignatureSchedule();
             $module_info = '(' . $pclass->module->module_code . ') ' . $pclass->module->module_name;
-
             $registered_qty = $pclass->registered_qty;
             $max_qty = $pclass->max_qty;
+            $scheduleQty = floor($pclass->schedules_count / 2);
 
-            $status = [
-                'title' => 'Approved',
-                'value' => '<button type="button" class="btn badge rounded-pill text-bg-success status-change-btn" data-status="3">Approved</button>'
-            ];
+            $classInfo = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$pclass->practice_class_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$pclass->practice_class_code</strong> - </span>
+                        <span class='d-inline-block'><strong>$scheduleQty</strong> schedules - </span>
+                        <span class='d-inline-block'><strong>$pclass->shift_qty</strong> shifts</span>
+                    </div>
+                </div>
+            ";
+            $start_date = $signatureSchedule->schedule_date;
+            $signatureWeekday = strtoupper($this->helper->dateToFullCharsWeekday($start_date));
+
+            $status = match ($pclass->status) {
+                1 => [
+                    'title' => 'Ready for registration',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-primary status-change-btn" data-status="1">Available</button>'
+                ],
+                2 => [
+                    'title' => 'Awaiting Approval',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-warning status-change-btn" data-status="2">Pending Approval</button>'
+                ],
+                3 => [
+                    'title' => 'Approved',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-success status-change-btn" data-status="3">Approved</button>'
+                ],
+                default => [
+                    'title' => 'Unknown',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-dark">Unknown</button>'
+                ],
+            };
 
             $actions = '
                 <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="' . route('practice-classes.get-json-data-for-schedule', ['practice_class_id' => $pclass->id]) . '" data-pclass-id="' . $pclass->id . '">
@@ -475,10 +502,11 @@ class TeacherController extends Controller
                 'index' => $index + 1,
                 'module_id' => $pclass->module_id,
                 'module_info' => $module_info,
-                'practice_class_code' => $pclass->practice_class_code,
-                'practice_class_name' => $pclass->practice_class_name,
+                'pclass_info' => $classInfo,
+                'start_date' => $start_date,
+                'weekday' => $signatureWeekday,
                 'registered_qty' => $registered_qty . '/' . $max_qty,
-                'shift_qty' => $pclass->shift_qty,
+                'schedule_qty' => $scheduleQty,
                 'status' => $status,
                 'actions' => $actions
             ];
