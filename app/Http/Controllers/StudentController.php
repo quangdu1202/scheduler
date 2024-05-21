@@ -19,6 +19,9 @@ use App\Services\Teacher\TeacherService;
 use DateTime;
 use Exception;
 use Flasher\Prime\FlasherInterface;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -123,6 +126,9 @@ class StudentController extends Controller
         $this->flasher = $flasher;
     }
 
+    /**
+     * @return Application|Factory|View|\Illuminate\Foundation\Application|\Illuminate\View\View
+     */
     public function index()
     {
         /**@var Student $student */
@@ -136,13 +142,28 @@ class StudentController extends Controller
     }
 
     /**
+     * @return Application|Factory|View|\Illuminate\Foundation\Application|\Illuminate\View\View
+     */
+    public function manageClasses()
+    {
+        /**@var Student $student */
+        $student = Auth::user()->userable;
+        $availableModules = $this->helper->getModulesByStudentId($student->id);
+        $practiceRooms = $this->practiceRoomService->getAll();
+        return view('student.manage-classes', [
+            'modules' => $availableModules,
+            'practiceRooms' => $practiceRooms
+        ]);
+    }
+
+    /**
      * @return JsonResponse
      */
     public function getJsonDataForScheduleTable()
     {
         /**@var Student $student */
         $student = Auth::user()->userable;
-        $registrations = $this->registrationService->getAll(['student_id' => $student->id]);
+        $registrations = $student->registrations;
 
         $practiceClassesMapped = [];
         foreach ($registrations as $registration) {
@@ -152,6 +173,7 @@ class StudentController extends Controller
             $weekday = date('N', strtotime($signatureSchedule->schedule_date));
 
             $practiceClassesMapped[$practiceClass->id] = [
+                'registration_id' => $registration->id,
                 'schedules' => $signatureSchedule,
                 'weekday' => $weekday,
                 'session' => $signatureSchedule->session ?? null,
@@ -171,40 +193,6 @@ class StudentController extends Controller
             $session = $class['session']; // e.g., 1, 2, or 3
             $indexedClasses[$weekday][$session] = $class;
         }
-
-//        $practiceClasses = $this->registrationService->getAll(['student_id' => $student->id]);
-//
-//        $practiceClassesMapped = $practiceClasses->mapWithKeys(function ($practiceClass) {
-//            /**@var PracticeClass $practiceClass */
-//            $signatureSchedule = $practiceClass->schedules->where('order', '=', 0)->first();
-//
-//            // Compute the day of the week, ensuring there is a date to process
-//            $weekday = $signatureSchedule ? date('N', strtotime($signatureSchedule->schedule_date)) : null;
-//
-//            if ($weekday == null) {
-//                return [];
-//            }
-//
-//            return [
-//                $practiceClass->id => [
-//                    'schedules' => $signatureSchedule,
-//                    'weekday' => $weekday,
-//                    'session' => $signatureSchedule->session ?? null,
-//                    'practice_class_id' => $practiceClass->id,
-//                    'practice_class_code' => $practiceClass->practice_class_code,
-//                    'practice_class_name' => $practiceClass->practice_class_name,
-//                    'room_name' => $signatureSchedule->practiceRoom->name ?? null,
-//                    'room_location' => $signatureSchedule->practiceRoom->location ?? null,
-//                ]
-//            ];
-//        });
-//
-//        $indexedClasses = [];
-//        foreach ($practiceClassesMapped as $class) {
-//            $weekday = $class['weekday']; // e.g., 1 for Monday
-//            $session = $class['session']; // e.g., 1, 2, or 3
-//            $indexedClasses[$weekday][$session] = $class;
-//        }
 
         $responseData = [];
 
@@ -233,7 +221,7 @@ class StudentController extends Controller
                             $entry[$day] .= "<div style='font-size: 13px; cursor: pointer' class='text-start position-relative m-1 p-1 pe-3 border border-primary rounded registered-class'>";
 
                             if (Route::currentRouteName() == 'student.get-schedule-table') {
-                                $entry[$day] .= "<span class='position-absolute top-0 end-0 px-1 py-0 btn btn-sm text-danger cancel-class-btn' data-pclass-id=\"{$classInfo['practice_class_id']}\"><i class='fa-solid fa-xmark'></i></span>";
+                                $entry[$day] .= "<span class='position-absolute top-0 end-0 px-1 py-0 btn btn-sm text-danger cancel-class-btn' data-registration-id=\"{$classInfo['registration_id']}\"><i class='fa-solid fa-xmark'></i></span>";
                             }
 
                             $entry[$day] .= "
@@ -255,7 +243,7 @@ class StudentController extends Controller
                                 </button>
                             ';
                             } else {
-                                $entry[$day] = '-';
+                                $entry[$day] .= '-';
                             }
                         }
                     } else {
@@ -283,6 +271,8 @@ class StudentController extends Controller
 
             $responseData[] = $entry;
         }
+
+//        dd(Route::currentRouteName());
         return response()->json($responseData);
     }
 
@@ -298,13 +288,22 @@ class StudentController extends Controller
         $registeredModulesIds = $student->registrations->pluck('practice_class_id')->all();
 
         $practiceClasses = $this->practiceClassService
+            ->with(['registrations'])
             ->withCount(['schedules'])
             ->getAll([['id', 'not_in', $registeredModulesIds], ['status', '=', '3'], ['module_id', 'in', $availableModulesIds]]);
 
         $responseData = $practiceClasses->map(function ($pclass, $index) {
             /**@var PracticeClass $pclass */
 
-            $module_info = "({$pclass->module->module_code}) {$pclass->module->module_name}";
+            $module = $pclass->module;
+            $module_info = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$module->module_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$module->module_code</strong></span>
+                    </div>
+                </div>
+            ";
             $schedulesQty = floor($pclass->schedules_count / 2);
 
             $classInfo = "
@@ -317,6 +316,8 @@ class StudentController extends Controller
                     </div>
                 </div>
             ";
+
+            $teacher_name = $pclass->teacher->user->name;
 
             $signatureSchedule = $pclass->getSignatureSchedule();
             $start_date = '<strong class="btn-sm form-control">' . ($signatureSchedule != null ? $signatureSchedule->schedule_date : 'No info') . '</button>';
@@ -345,8 +346,8 @@ class StudentController extends Controller
             $k1MaxQty = $maxStudentsOfShifts['studentQty1'];
             $k2MaxQty = $maxStudentsOfShifts['studentQty2'];
 
-            $k1RegisteredQty = $this->registrationService->getAll([['practice_class_id' => $pclass->id], ['shift' => 1]])->count();
-            $k2RegisteredQty = $this->registrationService->getAll([['practice_class_id' => $pclass->id], ['shift' => 2]])->count();
+            $k1RegisteredQty = $pclass->registrations->where('shift', '=', 1)->count();
+            $k2RegisteredQty = $pclass->registrations->where('shift', '=', 2)->count();
 
             $k1Qty = $k1RegisteredQty . '/' . $k1MaxQty;
             $k2Qty = $k2RegisteredQty . '/' . $k2MaxQty;
@@ -355,21 +356,21 @@ class StudentController extends Controller
                 <button type="button" class="btn btn-primary btn-sm schedule-info-btn" data-get-url="' . route('student.get-class-schedules', ['practice_class_id' => $pclass->id]) . '">
                     <i class="fa-solid fa-magnifying-glass align-middle"></i>
                 </button>
-                <button type="button" class="btn btn-success btn-sm register-class-btn" data-pclass-id="' . $pclass->id . '" data-session="'.$signatureSchedule->session.'" data-shift="1">
+                <button type="button" class="btn btn-success btn-sm register-class-btn" data-pclass-id="' . $pclass->id . '" data-session="' . $signatureSchedule->session . '" data-shift="1">
                     K1
                 </button>
-                <button type="button" class="btn btn-success btn-sm register-class-btn" data-pclass-id="' . $pclass->id . '" data-session="'.$signatureSchedule->session.'" data-shift="2">
+                <button type="button" class="btn btn-success btn-sm register-class-btn" data-pclass-id="' . $pclass->id . '" data-session="' . $signatureSchedule->session . '" data-shift="2">
                     K2
                 </button>
             ';
 
             return [
                 'DT_RowId' => $pclass->id,
-                // 'DT_RowData' => $pclass,
                 'index' => $index + 1,
                 'module_id' => $pclass->module_id,
                 'module_info' => $module_info,
                 'classInfo' => $classInfo,
+                'teacher_name' => $teacher_name,
                 'start_date' => $start_date,
                 'schedule_text' => $schedule_text,
                 'k1Qty' => $k1Qty,
@@ -457,7 +458,7 @@ class StudentController extends Controller
             ]);
         }
 
-        /**@var ModuleClass $moduleClass*/
+        /**@var ModuleClass $moduleClass */
         $moduleClass = $this->moduleClassService->with(['students'])->findOrFail(['students.id' => $studentId]);
 
         try {
@@ -488,5 +489,165 @@ class StudentController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function cancelRegisteredClass(Request $request)
+    {
+        $registrationId = $request->input('registrationId');
 
+        if ($registrationId == null) {
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'title' => 'Error!',
+                'message' => 'Unknown error occurred, try again later!',
+            ]);
+        }
+
+        try {
+            $this->registrationService->delete($registrationId);
+
+            return response()->json([
+                'status' => 200,
+                'title' => 'Success!',
+                'message' => 'Practice Class canceled successfully!',
+                'reloadTarget' => '#pclass-register-table, #registered-pclass-table, #register-schedule-table',
+            ]);
+        } catch (Exception $e) {
+            // Log the exception for internal review
+            Log::error("Practice Class canceled by student failed: {$e->getMessage()}");
+
+            return response()->json([
+                'success' => false,
+                'status' => 500,
+                'title' => 'Error!',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    public function getRegisteredClasses()
+    {
+        /**@var Student $student */
+        $student = Auth::user()->userable;
+        $practiceClasses = $student->practiceClasses;
+
+        $responseData = $practiceClasses->map(function ($pclass, $index) use ($student) {
+            $module = $pclass->module;
+            $module_info = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$module->module_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$module->module_code</strong></span>
+                    </div>
+                </div>
+            ";
+            $schedulesQty = floor($pclass->schedules->count() / 2);
+
+            $classInfo = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$pclass->practice_class_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$pclass->practice_class_code</strong> - </span>
+                        <span class='d-inline-block'><strong>$schedulesQty</strong> schedules - </span>
+                        <span class='d-inline-block'><strong>$pclass->shift_qty</strong> shifts</span>
+                    </div>
+                </div>
+            ";
+
+            $teacher_name = $pclass->teacher->user->name;
+
+            $signatureSchedule = $pclass->getSignatureSchedule();
+            $start_date = '<strong class="btn-sm form-control">' . ($signatureSchedule != null ? $signatureSchedule->schedule_date : 'No info') . '</button>';
+
+            $session_text = match ($signatureSchedule->session) {
+                1 => 'S',
+                2 => 'C',
+                3 => 'T',
+                default => null
+            };
+            $date = new DateTime($signatureSchedule->schedule_date);
+            $weekday_int = (int)$date->format('N');
+            $weekday_text = match ($weekday_int) {
+                1 => 'T2',
+                2 => 'T3',
+                3 => 'T4',
+                4 => 'T5',
+                5 => 'T6',
+                6 => 'T7',
+                7 => 'CN',
+                default => null,
+            };
+            $schedule_text = $session_text . '_' . $weekday_text;
+
+            /**@var Registration $registration */
+            $registration = $this->registrationService->find(['practice_class_id' => $pclass->id, 'student_id' => $student->id])->first();
+            $shift = $registration->shift;
+
+            $actions = '
+                <button type="button" class="btn btn-primary btn-sm schedule-info-btn" data-get-url="' . route('student.get-registered-class-schedules', ['practice_class_id' => $pclass->id, 'shift' => $shift]) . '" data-pclass-id="' . $pclass->id . '">
+                    <i class="fa-solid fa-magnifying-glass align-middle"></i>
+                </button>
+            ';
+
+            return [
+                'DT_RowId' => $pclass->id,
+                'index' => ++$index,
+                'module_id' => $pclass->module_id,
+                'module_info' => $module_info,
+                'classInfo' => $classInfo,
+                'teacher_name' => $teacher_name,
+                'start_date' => $start_date,
+                'schedule_text' => $schedule_text,
+                'actions' => $actions
+            ];
+        });
+
+        return response()->json($responseData);
+    }
+
+    /**
+     * @param $practice_class_id
+     * @param $shift
+     * @return JsonResponse
+     */
+    public function getRegisteredClassSchedules($practice_class_id, $shift)
+    {
+        /**@var PracticeClass $pClass */
+        $pClass = $this->practiceClassService->findOrFail($practice_class_id);
+        $schedules = $pClass->schedules->where('shift', '=', $shift);
+
+        $responseData = [];
+        $index = 0;
+        foreach ($schedules as $schedule) {
+            $weekday = $this->helper->dateToFullCharsWeekday($schedule->schedule_date);
+            $weekdayText = '<span class="weekday-text">' . strtoupper($weekday) . '</span>';
+
+            $schedule_date = $schedule->schedule_date;
+            $session = match ($schedule->session) {
+                1 => 'S',
+                2 => 'C',
+                3 => 'T'
+            };
+
+            $practiceRoom = $schedule->practiceRoom->name . ' - ' . $schedule->practiceRoom->location;
+
+            $responseData[] = [
+                'index' => ++$index,
+                'practice_class_id' => $pClass->id,
+                'weekday' => $weekdayText,
+                'schedule_date' => $schedule_date,
+                'session' => $session,
+                'shift' => 'K' . $shift,
+                'practice_room' => $practiceRoom,
+            ];
+        }
+
+        return response()->json($responseData);
+    }
 }

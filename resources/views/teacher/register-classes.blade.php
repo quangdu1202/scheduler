@@ -100,23 +100,6 @@
         </table>
     </div>
     <hr>
-    <!-- Registered Classes Table -->
-    {{--<div class="table-responsive">
-        <table id="registered-pclass-table" class="table table-bordered table-hover w-100">
-            <thead class="thead-light">
-            <tr>
-                <th>#</th>
-                <th>Module</th>
-                <th>Class Code</th>
-                <th>Class Name</th>
-                <th>Students</th>
-                <th>Shift Qty</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-        </table>
-    </div>--}}
 
     <!-- Class schedules Info modal -->
     <div class="modal modal-xl fade" id="pclass-schedules-modal" style="display: none;" aria-hidden="true">
@@ -151,5 +134,5 @@
     </div>
 
     <!-- Scripts -->
-    @include('teacher.scripts')
+    @include('teacher.register-scripts')
 @endsection

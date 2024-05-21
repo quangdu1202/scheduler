@@ -16,6 +16,9 @@ use App\Services\Teacher\TeacherService;
 use DateTime;
 use Exception;
 use Flasher\Prime\FlasherInterface;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -60,6 +63,11 @@ class TeacherController extends Controller
     protected PracticeRoomService $practiceRoomService;
 
     /**
+     * @var RegistrationService
+     */
+    protected RegistrationService $registrationService;
+
+    /**
      * @var Helper
      */
     protected Helper $helper;
@@ -77,6 +85,7 @@ class TeacherController extends Controller
         RegistrationService           $scheduleRegistrationService,
         TeacherService                $teacherService,
         PracticeRoomService           $practiceRoomService,
+        RegistrationService           $registrationService,
         Helper                        $helper,
         FlasherInterface              $flasher,
     )
@@ -89,10 +98,14 @@ class TeacherController extends Controller
         $this->scheduleRegistrationService = $scheduleRegistrationService;
         $this->teacherService = $teacherService;
         $this->practiceRoomService = $practiceRoomService;
+        $this->registrationService = $registrationService;
         $this->helper = $helper;
         $this->flasher = $flasher;
     }
 
+    /**
+     * @return Application|Factory|View|\Illuminate\Foundation\Application|\Illuminate\View\View
+     */
     public function index()
     {
         /**@var Teacher $teacher */
@@ -103,6 +116,9 @@ class TeacherController extends Controller
         ]);
     }
 
+    /**
+     * @return Application|Factory|View|\Illuminate\Foundation\Application|\Illuminate\View\View
+     */
     public function manageClasses()
     {
         /**@var Teacher $teacher */
@@ -455,8 +471,6 @@ class TeacherController extends Controller
 
             $signatureSchedule = $pclass->getSignatureSchedule();
             $module_info = '(' . $pclass->module->module_code . ') ' . $pclass->module->module_name;
-            $registered_qty = $pclass->registered_qty;
-            $max_qty = $pclass->max_qty;
             $scheduleQty = floor($pclass->schedules_count / 2);
 
             $classInfo = "
@@ -471,6 +485,16 @@ class TeacherController extends Controller
             ";
             $start_date = $signatureSchedule->schedule_date;
             $signatureWeekday = strtoupper($this->helper->dateToFullCharsWeekday($start_date));
+
+            $maxStudentsOfShifts = $this->helper->getMaxStudentOfShifts($pclass);
+            $k1MaxQty = $maxStudentsOfShifts['studentQty1'];
+            $k2MaxQty = $maxStudentsOfShifts['studentQty2'];
+
+            $k1RegisteredQty = $pclass->registrations->where('shift', '=', 1)->count();
+            $k2RegisteredQty = $pclass->registrations->where('shift', '=', 2)->count();
+
+            $k1Qty = $k1RegisteredQty . '/' . $k1MaxQty;
+            $k2Qty = $k2RegisteredQty . '/' . $k2MaxQty;
 
             $status = match ($pclass->status) {
                 1 => [
@@ -495,7 +519,7 @@ class TeacherController extends Controller
                 <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="' . route('practice-classes.get-json-data-for-schedule', ['practice_class_id' => $pclass->id]) . '" data-pclass-id="' . $pclass->id . '">
                     <i class="fa-solid fa-magnifying-glass align-middle"></i>
                 </button>
-                <button type="button" class="btn btn-primary btn-sm pclass-student-list-btn" data-get-url="' . route('practice-classes.get-students-of-pclass') . '">
+                <button type="button" class="btn btn-primary btn-sm pclass-student-list-btn" data-get-url="' . route('practice-classes.get-students-of-pclass') . '" data-pclass-id="' . $pclass->id . '">
                     <i class="fa-solid fa-user-graduate"></i>
                 </button>
             ';
@@ -509,8 +533,8 @@ class TeacherController extends Controller
                 'pclass_info' => $classInfo,
                 'start_date' => $start_date,
                 'weekday' => $signatureWeekday,
-                'registered_qty' => $registered_qty . '/' . $max_qty,
-                'schedule_qty' => $scheduleQty,
+                'k1Qty' => $k1Qty,
+                'k2Qty' => $k2Qty,
                 'status' => $status,
                 'actions' => $actions
             ];
@@ -572,35 +596,6 @@ class TeacherController extends Controller
                 'practice_room' => $practiceRooms,
             ];
         }
-
-        return response()->json($responseData);
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * TODO
-     */
-    public function getStudentOfPracticeClass(Request $request): JsonResponse
-    {
-        $pClassId = $request->input('$pClassId');
-
-        /**@var PracticeClass|null $pClass */
-        $pClass = $this->practiceClassService->findOrFail($pClassId);
-
-        $pClassStudents = $pClass->students;
-
-        $responseData = $pClassStudents->map(function ($student, $index) use ($pClassId) {
-            return [
-                'DT_RowData' => $student,
-                'index' => $index,
-                'student_code' => $student->student_code,
-                'student_name' => $student->user->name,
-                'student_gender' => 'Male',
-                'student_email' => $student->user->email,
-                'student_telephone' => '0123456789',
-            ];
-        });
 
         return response()->json($responseData);
     }

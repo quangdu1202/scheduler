@@ -61,37 +61,13 @@
             <span>Practice Rooms</span>
         </a>
     </li>
-    {{--<li class="sidebar-item">
-        <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-           data-bs-target="#auth" aria-expanded="false" aria-controls="auth">
-            <i class="lni lni-protection"></i>
-            <span>Component Points</span>
-        </a>
-        <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-            <li class="sidebar-item">
-                <a href="{{route('mark-by-module')}}" class="sidebar-link">By module class</a>
-            </li>
-            <li class="sidebar-item">
-                <a href="{{route('mark-by-practice')}}" class="sidebar-link">By practice class</a>
-            </li>
-        </ul>
-    </li>
-    <li class="sidebar-item">
-        <a href="#" class="sidebar-link">
-            <i class="lni lni-popup"></i>
-            <span>Notification</span>
-        </a>
-    </li>
-    <li class="sidebar-item">
-        <a href="#" class="sidebar-link">
-            <i class="lni lni-cog"></i>
-            <span>Setting</span>
-        </a>
-    </li>--}}
 </ul>
 <div class="sidebar-footer">
-    <a href="#" class="sidebar-link">
+    <a href="{{route('logout')}}" class="sidebar-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
         <i class="lni lni-exit"></i>
         <span>Logout</span>
     </a>
+    <form id="logout-form" action="{{route('logout')}}" method="post">
+        @csrf
+    </form>
 </div>

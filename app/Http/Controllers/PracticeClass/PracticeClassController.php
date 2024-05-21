@@ -580,23 +580,25 @@ class PracticeClassController extends Controller
      */
     public function getStudentsOfPracticeClass(Request $request)
     {
-//        $pClassId = $request->input('pClassId');
-//
-//        /**@var PracticeClass $pClass */
-//        $pClass = $this->practiceClassService->findOrFail($pClassId);
-//
-//        $students = $pClass->students;
+        $pClassId = $request->input('pClassId');
+
+        /**@var PracticeClass $pClass */
+        $pClass = $this->practiceClassService->findOrFail($pClassId);
+
+        $students = $pClass->students;
         $responseData = [];
 
-        for ($i = 0; $i < 10; $i++) {
+        $index = 0;
+        foreach ($students as $student) {
+            $registration = $student->registrations->where('practice_class_id', '=', $pClassId)->first();
             $responseData[] = [
-                'index' => $i + 1,
-                'student_code' => '2020604595',
-                'student_name' => 'Du Dang Quang',
+                'index' => ++$index,
+                'student_code' => $student->student_code,
+                'student_name' => $student->user->name,
                 'gender' => 'M',
                 'dob' => '01-02-2002',
-                'k1Shift' => 'Yes',
-                'k2Shift' => 'No',
+                'k1Shift' => $registration->shift == 1 ? '<span><i class="fa-solid fa-check"></i></span>' : '',
+                'k2Shift' => $registration->shift == 2 ? '<span><i class="fa-solid fa-check"></i></span>' : '',
             ];
         }
 

@@ -72,7 +72,7 @@ Route::prefix('teacher')->controller(TeacherController::class)->group(function (
     Route::post('/register-class', 'registerClass')->name('teacher.register-class');
     Route::get('/get-available-classes', 'getJsonData')->name('teacher.get-available-classes');
     Route::get('/get-class-schedules/{practice_class_id}', 'getJsonDataForSchedule')->name('teacher.get-class-schedules');
-    Route::get('/get-registered-class', 'getRegisteredClasses')->name('teacher.get-registered-class');
+    Route::get('/get-registered-classes', 'getRegisteredClasses')->name('teacher.get-registered-classes');
     Route::get('/get-schedule-table', 'getJsonDataForScheduleTable')->name('teacher.get-schedule-table');
     Route::get('/get-registered-schedule-table', 'getJsonDataForScheduleTable')->name('teacher.get-registered-schedule-table');
     Route::get('/get-classes-ondate', 'getClassOndate')->name('teacher.get-classes-ondate');
@@ -81,12 +81,15 @@ Route::prefix('teacher')->controller(TeacherController::class)->group(function (
 
 Route::prefix('student')->controller(StudentController::class)->group(function () {
     Route::get('/register-classes', 'index')->name('student.register-classes');
-    Route::get('/manage-classes', 'index')->name('student.manage-classes');
+    Route::get('/manage-classes', 'manageClasses')->name('student.manage-classes');
     Route::get('/get-schedule-table', 'getJsonDataForScheduleTable')->name('student.get-schedule-table');
     Route::get('/get-registered-schedule-table', 'getJsonDataForScheduleTable')->name('student.get-registered-schedule-table');
     Route::get('/get-available-classes', 'getAvailableClasses')->name('student.get-available-classes');
     Route::get('/get-class-schedules/{practice_class_id}', 'getJsonDataForSchedule')->name('student.get-class-schedules');
     Route::post('/register-class', 'registerClass')->name('student.register-class');
+    Route::post('/cancel-registered-class', 'cancelRegisteredClass')->name('student.cancel-registered-class');
+    Route::get('/get-registered-class', 'getRegisteredClasses')->name('student.get-registered-class');
+    Route::get('/get-registered-class-schedules/{practice_class_id}/{shift}', 'getRegisteredClassSchedules')->name('student.get-registered-class-schedules');
 });
 
 Auth::routes();

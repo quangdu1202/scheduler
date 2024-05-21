@@ -1,42 +1,10 @@
 <script>
     $(document).ready(function () {
-        // Select2 initialize
-        $('form select').not('#recurringSelect, #statusSelect, #multi-schedule-date, #multi-schedule-session').select2({
-            theme: "bootstrap-5",
-            placeholder: "Select an option",
-            // allowClear: true
-        });
-        $('#sessionSelect, #weekdaySelect').select2({
-            theme: "bootstrap-5",
-            minimumResultsForSearch: -1
-        });
-        $('#pRoomSelect').select2({
-            theme: "bootstrap-5",
-            searchable: true,
-            dropdownParent: $('#all-schedule-modal-content')
-        });
-        // end
-
-        // Multi switch
-        $('#multi-switch').change(function () {
-            if ($(this).is(':checked')) {
-                $('.hidden-for-multi input').prop('disabled', true);
-                $('.hidden-for-multi').hide();
-                $('.show-for-multi input').prop('disabled', false);
-                $('.show-for-multi').fadeIn('fast');
-            } else {
-                $('.show-for-multi input').prop('disabled', true);
-                $('.show-for-multi').hide();
-                $('.hidden-for-multi input').prop('disabled', false);
-                $('.hidden-for-multi').fadeIn('fast');
-            }
-        });
-        // end
-
-        //Data table initiate
-        const pclassTable = $('#pclass-management-table').DataTable({
+        //Registered classes table
+        const registeredPclassTable = $('#registered-pclass-table');
+        registeredPclassTable.DataTable({
             ajax: {
-                url: '{{route('practice-classes.get-json-data')}}',
+                url: '{{route('teacher.get-registered-classes')}}',
                 dataSrc: ''
             },
             error: function (xhr, status, error) {
@@ -44,15 +12,15 @@
                 toastr.error("An error occurred while loading the data", "Error");
             },
             columns: [
-                {data: 'index', width: '4%'},
-                {data: 'module_info', type: 'html', width: '15%'},
-                {data: 'practice_class_code', type: 'html', width: '9%'},
-                {data: 'practice_class_name', type: 'html', width: '15%'},
-                {data: 'teacher', type: 'html', width: '10%'},
-                {data: 'registered_qty', type: 'html', width: '7%'},
-                {data: 'schedules_count', type: 'html', width: '7%'},
+                {data: 'index', width: '5%'},
+                {data: 'module_info', type: 'html', width: '20%'},
+                {data: 'pclass_info', type: 'html', width: '25%'},
+                {data: 'start_date', type: 'html', width: '10%'},
+                {data: 'weekday', type: 'html', width: '10%'},
+                {data: 'k1Qty', type: 'html', width: '5%'},
+                {data: 'k2Qty', type: 'html', width: '5%'},
                 {
-                    data: 'status', type: 'html', width: '8%',
+                    data: 'status', type: 'html', width: '10%',
                     render: function (data) {
                         return `
                                 <div class="cell-clamp" title="${data.title}">
@@ -61,226 +29,47 @@
                             `;
                     }
                 },
-                {data: 'actions', type: 'html', width: '5%'},
+                {data: 'actions', type: 'html', width: '10%'},
             ],
             columnDefs: [
                 {
                     className: "dt-center",
-                    targets: [0, 4, 5, 6, 7, 8]
-                },
-                {
-                    targets: [1, 2, 3, 4, 5, 6],
-                    render: function (data) {
-                        return `<div class="cell-clamp" title="${data}">${data}</div>`;
-                    }
+                    targets: [0,3,4,5,6,7,8]
                 },
                 {
                     orderable: false,
-                    targets: [1, 2, 3, 4, 7, 8]
+                    targets: "_all"
                 }
             ],
             layout: {
-                topEnd: {
-                    search: {
-                        placeholder: 'Search anything'
-                    },
-                    buttons: [
-                        'length',
-                        {
-                            extend: 'csv',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6]
-                            }
-                        },
-                        {
-                            extend: 'excel',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6]
-                            }
-                        },
-                        {
-                            extend: 'print',
-                            exportOptions: {
-                                columns: [0, 1, 2, 3, 4, 5, 6]
-                            }
-                        }
-                    ]
-                },
+                topStart: {},
+                topEnd: {},
+                bottomStart: {},
+                bottomEnd: {},
             },
             pageLength: -1,
-            language: {
-                "info": "Showing _START_ to _END_ of _TOTAL_ classes",
-                //customize pagination prev and next buttons: use arrows instead of words
-                'paginate': {
-                    'first': '<span class="fa-solid fa-backward-step"></span>',
-                    'previous': '<span class="fa fa-chevron-left"></span>',
-                    'next': '<span class="fa fa-chevron-right"></span>',
-                    'last': '<span class="fa-solid fa-forward-step"></span>'
-                },
-                //customize number of elements to be displayed
-                "lengthMenu": '<select class="form-control input-sm">' +
-                    '<option value="-1">All</option>' +
-                    '<option value="10">10</option>' +
-                    '<option value="20">20</option>' +
-                    '<option value="30">30</option>' +
-                    '<option value="40">40</option>' +
-                    '<option value="50">50</option>' +
-                    '</select> classes per page'
-            }
         });
-        // end
-
-        // Update the practice class schedule status
-        pclassTable.on('change', '.status-change-btn', function () {
-            const $statusChangeBtn = $(this);
-            const status = $statusChangeBtn.is(':checked') ? 1 : 0;
-            const pclassId = $statusChangeBtn.data('pclass-id');
-            const $row = $statusChangeBtn.closest('tr'); // Get the closest row (<tr>) element
-            const rowData = pclassTable.row($row).data(); // Get the data for this row
-
-            // Show the loading overlay
-            showOverlay();
-
-            $.ajax({
-                url: '{{route('practice-classes.update-practice-class-status')}}',
-                type: 'POST',
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                data: {
-                    status: status,
-                    pclassId: pclassId
-                },
-                success: function (response) {
-                    // Hide the loading overlay
-                    hideOverlay();
-
-                    console.log(response);
-                    switch (response.status) {
-                        case 200:
-                            toastr.success(response.message, response.title || "Success");
-                            // Update the row data here if needed
-                            rowData.status = response.newStatus; // Assume response contains new status
-                            rowData.status_raw = response.newStatusRaw; // Assume response contains new status
-                            pclassTable.row($row).data(rowData).invalidate().draw(false); // Invalidate the data cache
-                            console.log(rowData);
-                            break;
-                        case 500:
-                            console.log('failed');
-                            $statusChangeBtn.prop('checked', false);
-                            toastr.error(response.message || "Unknown error occurred", response.title || "Error");
-                    }
-                },
-                error: function (xhr) {
-                    console.log(xhr.responseText);
-                    toastr.error("A server error occurred. Please try again.", "Error");
-                }
-            });
-        });
-        // end
-
-        // Create p-class form
-        $('#add-pclass-form-toggle').click(function () {
-            $('#new-pclass-form-wrapper').slideToggle(400, 'linear');
-        });
-
-        /*
-         let pcQty = 0; // Variable to store pc quantity
-
-         $('#roomSelect').change(function() {
-             pcQty = $('option:selected', this).data('pc-qty');
-             $('#maxStudentQty').val(pcQty).change().attr('disabled', false); // Set and trigger change to validate immediately
-         });
-
-         $('#maxStudentQty').on('input', function() {
-             if (parseInt($(this).val()) > pcQty) {
-                 $(this).addClass('is-invalid'); // Add Bootstrap's is-invalid class to show tooltip
-                 $(this).removeClass('is-valid');
-             } else {
-                 $(this).removeClass('is-invalid');
-                 $(this).addClass('is-valid'); // Optionally add is-valid class to indicate correct input
-             }
-         });
-
-         $('#recurringSelect').change(function () {
-             if ($(this).val() !== '0') {
-                 $('#repeatLimit').prop('disabled', false).val(1);
-             } else {
-                 $('#repeatLimit').prop('disabled', true);
-             }
-         });
-        */
-
-        const newPracticeClassForm = $('#new-pclass-form');
-        setupAjaxForm(newPracticeClassForm);
-        // end
-
-        // Edit practice class schedule modal
-        const editPclassModal = new bootstrap.Modal('#edit-pclass-modal', {backdrop: true});
-        const editPclassForm = $('#edit-pclass-form');
-
-        $(document).on('click', '.pclass-edit-btn', function () {
-            const data = pclassTable.row($(this).closest('tr')).data();
-
-            console.log(data);
-
-            $('#editModuleId').val(data.DT_RowData.module_id);
-            $('#editClassCode').val(data.practice_class_code || '');
-            $('#editClassName').val(data.practice_class_name || '');
-            $('#editTeacherSelect').val(data.teacher_id || '').change();
-            $('#editStudentQty').val(data.max_qty || 0);
-            $('#editStatusSelect').val(data.status_raw || 0).change();
-
-            const updateURL = $(this).data('post-url');
-            editPclassForm.data('action', updateURL);
-
-            editPclassModal.show();
-        });
-        setupAjaxForm(editPclassForm);
-        // end
-
-        // Delete practice class schedule modal
-        const deletePclassModal = new bootstrap.Modal('#delete-pclass-modal', {backdrop: true})
-        const deletePclassForm = $('#delete-pclass-form');
-        $(document).on('click', '.pclass-delete-btn', function () {
-            const data = $(this).closest('tr').data();
-
-            let deleteURL = "{{ route('practice-classes.destroy', ['practice_class' => ':id'])}}";
-
-            deleteURL = deleteURL.replace(':id', data.id);
-            deletePclassForm.data('action', deleteURL);
-
-            $('#delete-mode').val($(this).data('delete-mode'));
-
-            deletePclassModal.show();
-        });
-        setupAjaxForm(deletePclassForm);
         // end
 
         // View all schedules of a practice class
-        const infoModal = new bootstrap.Modal('#all-schedule-modal', {backdrop: true});
-        const pClassAllScheduleTable = $('#pclass-all-schedule-table');
-
-        pclassTable.on('click', '.schedule-info-btn', function () {
-            showOverlay();
-            if ($.fn.DataTable.isDataTable(pClassAllScheduleTable)) {
-                pClassAllScheduleTable.DataTable().destroy();
-            }
-            pClassAllScheduleTable.data('practice_class_id', $(this).data('pclass-id'));
-
+        function initAllScheduleTable($getUrl) {
             const weekdaySignature = $('#pclass-signature-form #weekdaySelect');
             const startDateSignature = $('#pclass-signature-form #start_date');
             const pRoomSignature = $('#pclass-signature-form #pRoomSelect');
-
+            const studentQty1 = $('#pclass-signature-form #studentQty1');
+            const studentQty2 = $('#pclass-signature-form #studentQty2');
             pClassAllScheduleTable.DataTable({
                 ajax: {
-                    url: $(this).data('get-url'),
+                    url: $getUrl,
                     dataSrc: ''
                 },
                 select: true,
+                scrollCollapse: true,
                 columns: [
                     {data: 'index', width: '5%'},
                     {data: 'schedule_date', type: 'html', width: '15%'},
                     {data: 'weekday', type: 'string', width: '15%'},
-                    {data: 'session', type: 'html', width: '7%', orderable: false},
+                    {data: 'session', type: 'html', width: '5%', orderable: false},
                     {data: 'shifts', type: 'html', width: '10%'},
                     {data: 'practice_room', type: 'html', width: '25%', orderable: false},
                     {data: 'actions', type: 'html', width: '10%'},
@@ -360,6 +149,9 @@
                             }
 
                             pRoomSignature.val(response.pRoomId).change();
+
+                            studentQty1.val(response.studentQty1);
+                            studentQty2.val(response.studentQty2);
                         },
                         error: function (xhr) {
                             console.log(xhr.responseText);
@@ -386,51 +178,33 @@
                     hideOverlay();
                 }
             });
+        }
 
-            infoModal.show();
+        const allScheduleModal = new bootstrap.Modal('#all-schedule-modal', {backdrop: true});
+        const pClassAllScheduleTable = $('#pclass-all-schedule-table');
+        const pClassStudentListTable = $('#pclass-student-list-table');
+        const pClassStudentListModal = new bootstrap.Modal('#pclass-student-list-modal', {backdrop: true});
+        registeredPclassTable.on('click', '.schedule-info-btn', function () {
+            showOverlay();
+            if ($.fn.DataTable.isDataTable(pClassAllScheduleTable)) {
+                pClassAllScheduleTable.DataTable().destroy();
+            }
+            pClassAllScheduleTable.data('practice_class_id', $(this).data('pclass-id'));
+            pClassAllScheduleTable.data('get-url', $(this).data('get-url'));
+
+            initAllScheduleTable(pClassAllScheduleTable.data('get-url'));
+
+            allScheduleModal.show();
+            hideOverlay();
         });
         // end
 
-        // Update signature schedule
-        const signatureForm = $('#pclass-signature-form');
-        signatureForm.on('submit', function (e) {
-            e.preventDefault();
-            const $pclassId = pClassAllScheduleTable.data('practice_class_id');
-            const formData = $(this).serializeObject();
-
-            $.ajax({
-                url: '<?= route('schedules.update-signature-schedule') ?>',
-                method: 'put',
-                data: {
-                    pclassId: $pclassId,
-                    data: formData
-                },
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                success: function (response) {
-                    hideOverlay();
-
-                    console.log(response);
-                    if (response.success === false) {
-                        toastr.error(response.message || "Unknown error occurred", response.title || "Error");
-                    } else {
-                        toastr.success(response.message, response.title || "Success");
-                    }
-
-                    // Reload requested element (mostly data table)
-                    const reloadTarget = $(`${response.reloadTarget}`);
-                    if (reloadTarget) {
-                        reloadTarget.each(function () {
-                            if ($.fn.dataTable.isDataTable($(this))) {
-                                $(this).DataTable().ajax.reload();
-                            }
-                        })
-                    }
-                },
-                error: function (xhr) {
-                    console.log(xhr.responseText);
-                    toastr.error("A server error occurred. Please try again.", "Error");
-                }
-            });
+        // Reload datatable
+        $(document).on('click', '.reload-table-btn', function () {
+            showOverlay();
+            pClassAllScheduleTable.DataTable().destroy();
+            initAllScheduleTable(pClassAllScheduleTable.data('get-url'));
+            hideOverlay();
         });
         // end
 
@@ -438,7 +212,6 @@
         pClassAllScheduleTable.on('change', '.session-select', function () {
             refreshPracticeRooms($(this));
         });
-
         function refreshPracticeRooms($sessionSelect) {
             showOverlay();
             const row = $sessionSelect.closest('tr');
@@ -493,7 +266,6 @@
                 }
             });
         }
-
         pClassAllScheduleTable.on('change', '.schedule-date-select', function () {
             $(this).removeClass('is-invalid');
             const $row = $(this).closest('tr');
@@ -544,7 +316,7 @@
                     // Reload requested element (mostly data table)
                     const reloadTarget = $(`${response.reloadTarget}`);
                     if (reloadTarget) {
-                        reloadTarget.each(function () {
+                        reloadTarget.each(function (){
                             if ($.fn.dataTable.isDataTable($(this))) {
                                 $(this).DataTable().ajax.reload();
                             }
@@ -618,9 +390,9 @@
                     if (response.success === false) {
                         toastr.error(response.message || "Unknown error occurred", response.title || "Error");
                     } else {
-                        if (response.isCaution === true) {
+                        if (response.isCaution === true){
                             toastr.warning(response.message, response.title);
-                        } else {
+                        }else {
                             toastr.success(response.message, response.title || "Success");
                         }
                     }
@@ -628,7 +400,7 @@
                     // Reload requested element (mostly data table)
                     const reloadTarget = $(`${response.reloadTarget}`);
                     if (reloadTarget) {
-                        reloadTarget.each(function () {
+                        reloadTarget.each(function (){
                             if ($.fn.dataTable.isDataTable($(this))) {
                                 $(this).DataTable().ajax.reload();
                             }
@@ -669,7 +441,7 @@
                     // Reload requested element (mostly data table)
                     const reloadTarget = $(`${response.reloadTarget}`);
                     if (reloadTarget) {
-                        reloadTarget.each(function () {
+                        reloadTarget.each(function (){
                             if ($.fn.dataTable.isDataTable($(this))) {
                                 $(this).DataTable().ajax.reload();
                             }
@@ -683,5 +455,131 @@
             });
         });
         // end
-    })
+
+        // Update signature schedule
+        const signatureForm = $('#pclass-signature-form');
+        signatureForm.on('submit', function (e) {
+            e.preventDefault();
+            showOverlay();
+            const $pclassId = pClassAllScheduleTable.data('practice_class_id');
+            const formData = $(this).serializeObject();
+
+            console.log(formData);
+
+            $.ajax({
+                url: '<?= route('schedules.update-signature-schedule') ?>',
+                method: 'put',
+                data: {
+                    pclassId: $pclassId,
+                    data: formData
+                },
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                success: function (response) {
+                    console.log(response);
+                    if (response.success === false) {
+                        toastr.error(response.message || "Unknown error occurred", response.title || "Error");
+                    } else {
+                        toastr.success(response.message, response.title || "Success");
+                    }
+
+                    // Reload requested element (mostly data table)
+                    const reloadTarget = $(`${response.reloadTarget}`);
+                    if (reloadTarget) {
+                        reloadTarget.each(function (){
+                            if ($.fn.dataTable.isDataTable($(this))) {
+                                $(this).DataTable().ajax.reload();
+                            }
+                        })
+                    }
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                    toastr.error("A server error occurred. Please try again.", "Error");
+                }
+            });
+            hideOverlay();
+        });
+        // end
+
+        // Get students list
+        registeredPclassTable.on('click', '.pclass-student-list-btn', function () {
+            showOverlay();
+            if ($.fn.DataTable.isDataTable(pClassStudentListTable)) {
+                pClassStudentListTable.DataTable().destroy();
+            }
+
+            const $pClassId = $(this).data('pclass-id');
+            pClassStudentListTable.data('practice_class_id', $pClassId);
+
+            pClassStudentListTable.DataTable({
+                ajax: {
+                    url: $(this).data('get-url'),
+                    data: {
+                        pClassId: $pClassId
+                    },
+                    dataSrc: ''
+                },
+                scrollCollapse: true,
+                columns: [
+                    {data: 'index', width: '5%'},
+                    {data: 'student_code', type: 'html'},
+                    {data: 'student_name', type: 'string'},
+                    {data: 'gender', type: 'html'},
+                    {data: 'dob', type: 'html'},
+                    {data: 'k1Shift', type: 'html'},
+                    {data: 'k2Shift', type: 'html'},
+                ],
+                autoWidth: false,
+                columnDefs: [
+                    {
+                        className: "dt-center align-middle",
+                        targets: "_all"
+                    },
+                    {
+                        orderable: false,
+                        targets: [1,2,3,4,5,6]
+                    }
+                ],
+                layout: {
+                    topStart: {
+                        search: {
+                            placeholder: 'Search anything'
+                        }
+                    },
+                    topEnd: {
+                        buttons: [
+                            'length',
+                            {
+                                extend: 'csv',
+                                exportOptions: {
+                                    columns: [0,1,2,3,4,5,6]
+                                }
+                            },
+                            {
+                                extend: 'excel',
+                                exportOptions: {
+                                    columns: [0,1,2,3,4,5,6]
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                exportOptions: {
+                                    columns: [0,1,2,3,4,5,6]
+                                }
+                            }
+                        ]
+                    },
+                    bottomStart: {},
+                    bottomEnd: {},
+                },
+                paging: false,
+                initComplete: function () {
+                    hideOverlay();
+                }
+            });
+
+            pClassStudentListModal.show();
+        });
+        // end
+    });
 </script>

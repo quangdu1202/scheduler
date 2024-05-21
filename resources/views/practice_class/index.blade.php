@@ -43,7 +43,8 @@
                         </div>
                         <div class="col-1 show-for-multi" style="display: none">
                             <div class="form-floating mb-3">
-                                <input type="number" name="multi_qty" class="form-control" id="multi-qty" min="2" disabled
+                                <input type="number" name="multi_qty" class="form-control" id="multi-qty" min="2"
+                                       disabled
                                        required>
                                 <label for="multi-qty" class="form-label">Qty</label>
                             </div>
@@ -83,7 +84,8 @@
                         </div>
                         <div class="col-1">
                             <div class="form-floating mb-3">
-                                <input type="number" name="shift_qty" class="form-control" id="shiftQty" min="1" required>
+                                <input type="number" name="shift_qty" class="form-control" id="shiftQty" min="1"
+                                       required>
                                 <label for="shiftQty" class="form-label">Shift QTY</label>
                             </div>
                         </div>
@@ -250,7 +252,8 @@
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table id="pclass-all-schedule-table" class="table table-bordered table-hover w-100" style="table-layout: fixed">
+                        <table id="pclass-all-schedule-table" class="table table-bordered table-hover w-100"
+                               style="table-layout: fixed">
                             <thead class="thead-light">
                             <tr>
                                 <th>#</th>
