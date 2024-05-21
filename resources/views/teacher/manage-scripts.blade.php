@@ -504,6 +504,8 @@
         // Get students list
         registeredPclassTable.on('click', '.pclass-student-list-btn', function () {
             showOverlay();
+            $('#k1qty').text('K1' + ` (${$(this).data('k1qty')} SV)`);
+            $('#k2qty').text('K2' + ` (${$(this).data('k2qty')} SV)`);
             if ($.fn.DataTable.isDataTable(pClassStudentListTable)) {
                 pClassStudentListTable.DataTable().destroy();
             }

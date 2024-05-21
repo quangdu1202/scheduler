@@ -4,14 +4,19 @@ namespace App\Helper;
 
 use App\Models\ModuleClass\ModuleClass;
 use App\Models\PracticeClass\PracticeClass;
+use App\Models\Schedule\Schedule;
 use App\Models\Student\Student;
 use App\Models\StudentModuleClass\StudentModuleClass;
+use App\Models\Teacher\Teacher;
 use App\Services\PracticeClass\PracticeClassService;
 use App\Services\Registration\RegistrationService;
 use App\Services\Student\StudentService;
+use App\Services\Teacher\TeacherService;
 use Exception;
+use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
+use function MongoDB\BSON\toJSON;
 
 class Helper
 {
@@ -30,15 +35,22 @@ class Helper
      */
     protected RegistrationService $registrationService;
 
+    /**
+     * @var TeacherService
+     */
+    protected TeacherService $teacherService;
+
     public function __construct(
         StudentService       $studentService,
         PracticeClassService $practiceClassService,
-        RegistrationService  $registrationService
+        RegistrationService  $registrationService,
+        TeacherService       $teacherService,
     )
     {
         $this->studentService = $studentService;
         $this->practiceClassService = $practiceClassService;
         $this->registrationService = $registrationService;
+        $this->teacherService = $teacherService;
     }
 
     /**
@@ -57,23 +69,6 @@ class Helper
             throw new Exception("no cryptographically secure random function available");
         }
         return substr(bin2hex($bytes), 0, $length);
-    }
-
-    /**
-     * @param int $practice_class_id
-     * @return Collection
-     */
-    public function getStudentsByPracticeClass(int $practice_class_id): Collection
-    {
-        return Student::whereHas('registrations', function ($query) use ($practice_class_id) {
-            $query->where('practice_class_id', $practice_class_id);
-        })->with(['registrations' => function ($query) use ($practice_class_id) {
-            $query->where('practice_class_id', $practice_class_id);
-        }])->get()->map(function ($student) use ($practice_class_id) {
-            $student->registration = $student->registrations->firstWhere('practice_class_id', $practice_class_id);
-            unset($student->registrations);
-            return $student;
-        });
     }
 
     /**
@@ -144,5 +139,42 @@ class Helper
             'studentQty1' => intval($studentQty / 100) ?? 0,
             'studentQty2' => $studentQty % 100 ?? 0,
         ];
+    }
+
+    public function getNextSchedulesOfTeacher($teacherId)
+    {
+        /**@var Teacher $teacher*/
+        $teacher = $this->teacherService->findOrFail($teacherId);
+
+        $practiceClasses = $teacher->practiceClasses;
+
+        $responseData = [];
+
+        foreach ($practiceClasses as $pClass) {
+            /**@var Schedule[] $schedules*/
+            $schedules = $pClass->schedules
+                ->where('order', '!=', 0)
+                ->where('shift', '=', 1)
+                ->map(function ($schedule) {
+                    return [
+                        'schedule_date' => $schedule->schedule_date,
+                        'session' => $schedule->session
+                    ];
+                })
+            ;
+
+            foreach ($schedules as $schedule) {
+                $time = match ($schedule['session']) {
+                    1 => '07:00:00', 2 => '12:30:00', 3 => '17:55:00',
+                };
+
+                $responseData[] = [
+                    'className' => $pClass->practice_class_name,
+                    'classTime' => $schedule['schedule_date'] . ' ' . $time,
+                ];
+            }
+        }
+
+        return Json::encode($responseData);
     }
 }

@@ -4,12 +4,16 @@
     <!-- Page Header -->
     <div class="py-3 mb-3 border-bottom sticky-top bg-body d-flex justify-content-between">
         <h1 class="h2">Manage Classes</h1>
+        <div class="d-flex flex-column text-center">
+            <div class="fw-bold">Current Time: <span id="current-time" class="fw-normal">Loading...</span></div>
+            <div id="next-class-info">Loading next class info...</div>
+        </div>
         @if(auth()->user() !== null)
-            <div class="user-info">
-                <span>Hello Teacher <b>{{Auth::user()->name}}</b>!</span>
-                <span>Teacher ID: {{Auth::user()->userable->id}}</span>
-            </div>
-        @endif
+                <div class="user-info">
+                    <span>Hello Teacher <b>{{Auth::user()->name}}</b>!</span>
+                    <span>Teacher ID: {{Auth::user()->userable->id}}</span>
+                </div>
+            @endif
     </div>
 
     <!-- Schedule table -->
@@ -252,8 +256,8 @@
                                 <th colspan="2" class="text-center">Shift</th>
                             </tr>
                             <tr>
-                                <th>K1</th>
-                                <th>K2</th>
+                                <th id="k1qty">K1</th>
+                                <th id="k2qty">K2</th>
                             </tr>
                             </thead>
                         </table>
@@ -269,4 +273,55 @@
     <!-- Scripts -->
     @include('teacher.register-scripts')
     @include('teacher.manage-scripts')
+    <script>
+        $(document).ready(function() {
+            function displayCurrentTime() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+                const dateTimeString = now.toLocaleDateString('en-US', options);
+                $('#current-time').text(`${dateTimeString}`);
+            }
+
+            function updateNextClassInfo() {
+                const classes = @json($classes);
+                const now = new Date();
+
+                let nextClass = null;
+                let smallestDiff = Number.MAX_SAFE_INTEGER;
+
+                $.each(classes, function(index, cls) {
+                    const classTime = new Date(cls.classTime);
+                    const diffInSeconds = (classTime - now) / 1000;
+
+                    if (diffInSeconds > 0 && diffInSeconds < smallestDiff) {
+                        smallestDiff = diffInSeconds;
+                        nextClass = cls;
+                    }
+                });
+
+                if (nextClass) {
+                    const classTime = new Date(nextClass.classTime);
+                    const options = { weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                    const formattedClassTime = classTime.toLocaleDateString('en-US', options);
+
+                    const hours = Math.floor(smallestDiff / 3600);
+                    const minutes = Math.floor((smallestDiff % 3600) / 60);
+                    const timeToNextClass = `${hours} hours ${minutes} minutes`;
+
+                    $('#next-class-info').html(`Next class: <span class="fw-bold">${nextClass.className}</span> at ${formattedClassTime} in <span class="fw-bold">${timeToNextClass}</span>`);
+                } else {
+                    $('#next-class-info').text('No upcoming classes.');
+                }
+            }
+
+            function updatePage() {
+                displayCurrentTime();
+                updateNextClassInfo();
+            }
+
+            updatePage(); // Initial update on page load
+            setInterval(displayCurrentTime, 1000); // Update every second
+            setInterval(updateNextClassInfo, 60000); // Update every minutes
+        });
+    </script>
 @endsection

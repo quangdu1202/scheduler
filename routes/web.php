@@ -33,7 +33,7 @@ Route::get('/', [HomeController::class, 'index'])->name('calendar');
 
 // New
 
-//Route::get('/test', [HomeController::class, 'test'])->name('test');
+Route::get('/test', [HomeController::class, 'test'])->name('test');
 
 Route::get('modules/{id}/practice-classes', [ModuleController::class, 'showPracticeClasses'])->name('modules.show-practice-classes');
 Route::get('/getModulesJsonData', [ModuleController::class, 'getJsonData'])->name('modules.get-json-data');

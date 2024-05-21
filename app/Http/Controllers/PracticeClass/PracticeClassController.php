@@ -597,8 +597,8 @@ class PracticeClassController extends Controller
                 'student_name' => $student->user->name,
                 'gender' => 'M',
                 'dob' => '01-02-2002',
-                'k1Shift' => $registration->shift == 1 ? '<span><i class="fa-solid fa-check"></i></span>' : '',
-                'k2Shift' => $registration->shift == 2 ? '<span><i class="fa-solid fa-check"></i></span>' : '',
+                'k1Shift' => $registration->shift == 1 ? '<span>&#x2705;</span>' : '',
+                'k2Shift' => $registration->shift == 2 ? '<span>&#x2705;</span>' : '',
             ];
         }
 

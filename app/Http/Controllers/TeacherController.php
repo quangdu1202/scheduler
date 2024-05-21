@@ -125,9 +125,20 @@ class TeacherController extends Controller
         $teacher = Auth::user()->userable;
         $availableModules = $this->helper->getModulesByTeacherId($teacher->id);
         $practiceRooms = $this->practiceRoomService->getAll();
+        $classes = [
+            [
+                'className' => 'Math',
+                'classTime' => '2024-05-22 07:00:00'
+            ],
+            [
+                'className' => 'English',
+                'classTime' => '2024-05-23 12:30:00'
+            ]
+        ];
         return view('teacher.manage-classes', [
             'modules' => $availableModules,
-            'practiceRooms' => $practiceRooms
+            'practiceRooms' => $practiceRooms,
+            'classes' => $classes
         ]);
     }
 
@@ -470,7 +481,15 @@ class TeacherController extends Controller
             /**@var PracticeClass $pclass */
 
             $signatureSchedule = $pclass->getSignatureSchedule();
-            $module_info = '(' . $pclass->module->module_code . ') ' . $pclass->module->module_name;
+            $module = $pclass->module;
+            $module_info = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$module->module_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$module->module_code</strong></span>
+                    </div>
+                </div>
+            ";
             $scheduleQty = floor($pclass->schedules_count / 2);
 
             $classInfo = "
@@ -516,10 +535,10 @@ class TeacherController extends Controller
             };
 
             $actions = '
-                <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="' . route('practice-classes.get-json-data-for-schedule', ['practice_class_id' => $pclass->id]) . '" data-pclass-id="' . $pclass->id . '">
+                <button type="button" class="btn btn-success btn-sm schedule-info-btn" data-get-url="'.route('practice-classes.get-json-data-for-schedule', ['practice_class_id' => $pclass->id]).'" data-pclass-id="'.$pclass->id.'">
                     <i class="fa-solid fa-magnifying-glass align-middle"></i>
                 </button>
-                <button type="button" class="btn btn-primary btn-sm pclass-student-list-btn" data-get-url="' . route('practice-classes.get-students-of-pclass') . '" data-pclass-id="' . $pclass->id . '">
+                <button type="button" class="btn btn-primary btn-sm pclass-student-list-btn" data-get-url="'.route('practice-classes.get-students-of-pclass').'" data-pclass-id="'.$pclass->id.'" data-k1qty="'.$k1RegisteredQty.'" data-k2qty="'.$k2RegisteredQty.'">
                     <i class="fa-solid fa-user-graduate"></i>
                 </button>
             ';
@@ -528,7 +547,6 @@ class TeacherController extends Controller
                 'DT_RowId' => $pclass->id,
                 'DT_RowData' => $pclass,
                 'index' => $index + 1,
-                'module_id' => $pclass->module_id,
                 'module_info' => $module_info,
                 'pclass_info' => $classInfo,
                 'start_date' => $start_date,
