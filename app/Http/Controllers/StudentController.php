@@ -133,11 +133,12 @@ class StudentController extends Controller
     {
         /**@var Student $student */
         $student = Auth::user()->userable;
-
         $availableModules = $this->helper->getModulesByStudentId($student->id);
+        $nextClasses = $this->helper->getNextSchedulesOfStudent($student->id);
 
         return view('student.register-classes', [
-            'modules' => $availableModules
+            'modules' => $availableModules,
+            'classes' => $nextClasses
         ]);
     }
 
@@ -150,9 +151,11 @@ class StudentController extends Controller
         $student = Auth::user()->userable;
         $availableModules = $this->helper->getModulesByStudentId($student->id);
         $practiceRooms = $this->practiceRoomService->getAll();
+        $nextClasses = $this->helper->getNextSchedulesOfStudent($student->id);
         return view('student.manage-classes', [
             'modules' => $availableModules,
-            'practiceRooms' => $practiceRooms
+            'practiceRooms' => $practiceRooms,
+            'classes' => $nextClasses
         ]);
     }
 
@@ -235,7 +238,7 @@ class StudentController extends Controller
                                 $entry[$day] .= '
                                 <button type="button"
                                         class="border-0 btn btn-outline-primary w-100 schedule-table-add-btn"
-                                        data-get-url="' . route('teacher.get-classes-ondate') . '"
+                                        data-get-url="' . route('student.get-classes-ondate') . '"
                                         data-weekday="' . $dayIndex . '"
                                         data-session="' . $i . '"
                                         data-shift="' . $j . '">
@@ -251,7 +254,7 @@ class StudentController extends Controller
                             $entry[$day] .= '
                                 <button type="button"
                                         class="border-0 btn btn-outline-primary w-100 schedule-table-add-btn"
-                                        data-get-url="' . route('teacher.get-classes-ondate') . '"
+                                        data-get-url="' . route('student.get-classes-ondate') . '"
                                         data-weekday="' . $dayIndex . '"
                                         data-session="' . $i . '"
                                         data-shift="' . $j . '">
@@ -272,7 +275,6 @@ class StudentController extends Controller
             $responseData[] = $entry;
         }
 
-//        dd(Route::currentRouteName());
         return response()->json($responseData);
     }
 
@@ -317,7 +319,7 @@ class StudentController extends Controller
                 </div>
             ";
 
-            $teacher_name = $pclass->teacher->user->name;
+            $teacher_name = $pclass->teacher ? $pclass->teacher->user->name : '<i>Not set</i>';
 
             $signatureSchedule = $pclass->getSignatureSchedule();
             $start_date = '<strong class="btn-sm form-control">' . ($signatureSchedule != null ? $signatureSchedule->schedule_date : 'No info') . '</button>';
@@ -458,10 +460,27 @@ class StudentController extends Controller
             ]);
         }
 
-        /**@var ModuleClass $moduleClass */
-        $moduleClass = $this->moduleClassService->with(['students'])->findOrFail(['students.id' => $studentId]);
-
         try {
+            /**@var ModuleClass $moduleClass */
+            $moduleClass = $this->moduleClassService->with(['students'])->findOrFail(['students.id' => $studentId]);
+
+            /**@var PracticeClass $pclass*/
+            $pclass = $this->practiceClassService->findOrFail($pclassId);
+            $maxStudentsOfShifts = $this->helper->getMaxStudentOfShifts($pclass);
+
+            $shiftKey = 'studentQty' . $shift;
+            $maxQty = $maxStudentsOfShifts[$shiftKey];
+            $registeredQty = $pclass->registrations->where('shift', $shift)->count();
+
+            if ($registeredQty >= $maxQty) {
+                return response()->json([
+                    'success' => false,
+                    'status' => 500,
+                    'title' => 'Error!',
+                    'message' => 'This class session has no more seat',
+                ]);
+            }
+
             // Create new registration
             $this->registrationService->create([
                 'student_id' => $studentId,
@@ -469,6 +488,7 @@ class StudentController extends Controller
                 'practice_class_id' => $pclassId,
                 'shift' => $shift
             ]);
+
             return response()->json([
                 'status' => 200,
                 'title' => 'Success!',
@@ -478,7 +498,7 @@ class StudentController extends Controller
             ]);
         } catch (Exception $e) {
             // Log the exception for internal review
-            Log::error("Practice Class registration by teacher failed: {$e->getMessage()}");
+            Log::error("Practice Class registration by student failed: {$e->getMessage()}");
 
             return response()->json([
                 'success' => false,
@@ -560,7 +580,7 @@ class StudentController extends Controller
                 </div>
             ";
 
-            $teacher_name = $pclass->teacher->user->name;
+            $teacher_name = $pclass->teacher ? $pclass->teacher->user->name : '<i>Not set</i>';
 
             $signatureSchedule = $pclass->getSignatureSchedule();
             $start_date = '<strong class="btn-sm form-control">' . ($signatureSchedule != null ? $signatureSchedule->schedule_date : 'No info') . '</button>';
@@ -583,11 +603,13 @@ class StudentController extends Controller
                 7 => 'CN',
                 default => null,
             };
-            $schedule_text = $session_text . '_' . $weekday_text;
 
             /**@var Registration $registration */
             $registration = $this->registrationService->find(['practice_class_id' => $pclass->id, 'student_id' => $student->id])->first();
             $shift = $registration->shift;
+            $shift_text = $shift == 1 ? 'K1' : 'K2';
+
+            $schedule_text = $session_text . '_' . $weekday_text . '_' . $shift_text;
 
             $actions = '
                 <button type="button" class="btn btn-primary btn-sm schedule-info-btn" data-get-url="' . route('student.get-registered-class-schedules', ['practice_class_id' => $pclass->id, 'shift' => $shift]) . '" data-pclass-id="' . $pclass->id . '">
@@ -645,6 +667,104 @@ class StudentController extends Controller
                 'session' => $session,
                 'shift' => 'K' . $shift,
                 'practice_room' => $practiceRoom,
+            ];
+        }
+
+        return response()->json($responseData);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getClassOndate(Request $request)
+    {
+        /**@var Student $student*/
+        $student = Auth::user()->userable;
+
+        $registeredClassIds = $student->practiceClasses->pluck('id')->all();
+
+        $weekDay = $request->input('weekDay');
+        $session = $request->input('session');
+        $shift = $request->input('shift');
+
+        $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll(['status' => 3])->whereNotIn('id', $registeredClassIds);
+
+        $filteredClasses = $practiceClasses->filter(function ($class) use ($weekDay, $session) {
+            /**@var PracticeClass $class */
+            $signatureSchedule = $class->getSignatureSchedule();
+
+            if (!$signatureSchedule) {
+                return false;
+            }
+
+            $date = new DateTime($signatureSchedule->schedule_date);
+            $dayOfWeek = (int)$date->format('N');
+
+            return $dayOfWeek == $weekDay && $signatureSchedule->session == $session;
+        });
+
+        $responseData = [];
+        $index = 0;
+        foreach ($filteredClasses as $pclass) {
+            ++$index;
+
+            /**@var PracticeClass $pclass */
+            $signatureSchedule = $pclass->getSignatureSchedule();
+
+            $module = $pclass->module;
+            $module_info = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$module->module_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$module->module_code</strong></span>
+                    </div>
+                </div>
+            ";
+
+            $schedulesQty = floor($pclass->schedules->count() / 2);
+            $class_info = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$pclass->practice_class_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$pclass->practice_class_code</strong> - </span>
+                        <span class='d-inline-block'><strong>$schedulesQty</strong> schedules</span>
+                    </div>
+                </div>
+            ";
+
+            $teacher_name = $pclass->teacher ? $pclass->teacher->user->name : '<i>Not set</i>';
+
+            $maxStudentsOfShifts = $this->helper->getMaxStudentOfShifts($pclass);
+            $k1MaxQty = $maxStudentsOfShifts['studentQty1'];
+            $k2MaxQty = $maxStudentsOfShifts['studentQty2'];
+
+            $k1RegisteredQty = $pclass->registrations->where('shift', '=', 1)->count();
+            $k2RegisteredQty = $pclass->registrations->where('shift', '=', 2)->count();
+
+            $k1Qty = $k1RegisteredQty . '/' . $k1MaxQty;
+            $k2Qty = $k2RegisteredQty . '/' . $k2MaxQty;
+
+            $actions = '
+                <button type="button" class="btn btn-primary btn-sm schedule-info-btn" data-get-url="' . route('student.get-class-schedules', ['practice_class_id' => $pclass->id]) . '">
+                    <i class="fa-solid fa-magnifying-glass align-middle"></i>
+                </button>
+                <button type="button" class="btn btn-success btn-sm register-class-btn" data-pclass-id="' . $pclass->id . '" data-session="' . $signatureSchedule->session . '" data-shift="1">
+                    K1
+                </button>
+                <button type="button" class="btn btn-success btn-sm register-class-btn" data-pclass-id="' . $pclass->id . '" data-session="' . $signatureSchedule->session . '" data-shift="2">
+                    K2
+                </button>
+            ';
+
+            $responseData[] = [
+                'index' => $index,
+                'module_info' => $module_info,
+                'class_info' => $class_info,
+                'teacher_name' => $teacher_name,
+                'k1Qty' => $k1Qty,
+                'k2Qty' => $k2Qty,
+                'actions' => $actions,
             ];
         }
 

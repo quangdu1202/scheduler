@@ -4,6 +4,7 @@
     <!-- Page Header -->
     <div class="py-3 mb-3 border-bottom sticky-top bg-body d-flex justify-content-between">
         <h1 class="h2">Manage Classes</h1>
+        @include('partials.class-timer-placeholder')
         @if(Auth::user() !== null)
             <div class="user-info">
                 <span>Hello Student <b>{{Auth::user()->name}}</b>!</span>
@@ -147,4 +148,5 @@
 
     <!-- Scripts -->
     @include('student.manage-scripts')
+    @include('partials.class-timer-script')
 @endsection

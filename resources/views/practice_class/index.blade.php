@@ -129,12 +129,12 @@
             <thead class="thead-light">
             <tr>
                 <th>#</th>
-                <th>Module</th>
-                <th>Class Code</th>
-                <th>Class Name</th>
+                <th>Module Info</th>
+                <th>Class Info</th>
                 <th>Teacher</th>
-                <th>StudentQTY</th>
-                <th>ScheduleQTY</th>
+                <th>Weekday</th>
+                <th>K1</th>
+                <th>K2</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -248,6 +248,9 @@
                                             class="btn btn-primary rounded-start-0">Add Multi Schedules
                                     </button>
                                 </form>
+                            </div>
+                            <div class="col-auto ms-auto">
+                                <button class="btn btn-primary reload-table-btn"><i class="lni lni-reload align-middle"></i></button>
                             </div>
                         </div>
                     </div>

@@ -40,7 +40,7 @@ class HomeController extends Controller
     {
         $data = $this->helper->getNextSchedulesOfTeacher(Auth::user()->userable->id);
         return view('test', [
-            'data' => json_decode($data)
+            'data' => $data
         ]);
     }
 }

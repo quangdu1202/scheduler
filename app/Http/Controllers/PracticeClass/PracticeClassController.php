@@ -53,7 +53,7 @@ class PracticeClassController extends Controller
     /**
      * @var RegistrationService
      */
-    protected RegistrationService $scheduleRegistrationService;
+    protected RegistrationService $registrationService;
 
     protected PracticeRoomService $practiceRoomService;
 
@@ -66,7 +66,7 @@ class PracticeClassController extends Controller
      * @param PracticeClassServiceInterface $practiceClassService
      * @param ScheduleServiceInterface $scheduleService
      * @param ModuleServiceInterface $moduleService
-     * @param RegistrationService $scheduleRegistrationService
+     * @param RegistrationService $registrationService
      * @param TeacherService $teacherService
      * @param PracticeRoomService $practiceRoomService
      * @param Helper $helper
@@ -75,7 +75,7 @@ class PracticeClassController extends Controller
         PracticeClassServiceInterface $practiceClassService,
         ScheduleServiceInterface      $scheduleService,
         ModuleServiceInterface        $moduleService,
-        RegistrationService           $scheduleRegistrationService,
+        RegistrationService           $registrationService,
         TeacherService                $teacherService,
         PracticeRoomService           $practiceRoomService,
         Helper                        $helper,
@@ -84,7 +84,7 @@ class PracticeClassController extends Controller
         $this->practiceClassService = $practiceClassService;
         $this->scheduleService = $scheduleService;
         $this->moduleService = $moduleService;
-        $this->scheduleRegistrationService = $scheduleRegistrationService;
+        $this->registrationService = $registrationService;
         $this->teacherService = $teacherService;
         $this->practiceRoomService = $practiceRoomService;
         $this->helper = $helper;
@@ -260,6 +260,17 @@ class PracticeClassController extends Controller
             ]);
         }
 
+        if ($practiceClass->teacher_id != null) {
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'title' => 'Failed!',
+                'message' => 'A teacher registered this class already!',
+            ]);
+        }
+
+        $this->registrationService->deleteMany($practiceClass->registrations);
+
         try {
             $this->practiceClassService->delete($practiceClass);
 
@@ -292,9 +303,47 @@ class PracticeClassController extends Controller
         $responseData = $practiceClasses->map(function ($pclass, $index) {
             /**@var PracticeClass $pclass */
 
-            $registered_qty = $pclass->registered_qty;
-            $max_qty = $pclass->max_qty;
+            $signatureSchedule = $pclass->getSignatureSchedule();
             $module = $pclass->module;
+            $module_info = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$module->module_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$module->module_code</strong></span>
+                    </div>
+                </div>
+            ";
+
+            $schedulesQty = floor($pclass->schedules->count() / 2);
+            $class_info = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$pclass->practice_class_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$pclass->practice_class_code</strong> - </span>
+                        <span class='d-inline-block'><strong>$schedulesQty</strong> schedules</span>
+                        <span class='d-inline-block'><strong>$pclass->shift_qty</strong> shifts</span>
+                    </div>
+                </div>
+            ";
+
+            $session = match ($signatureSchedule->session ?? null) {
+                1 => 'S',
+                2 => 'C',
+                3 => 'T',
+                default => 'Unset'
+            };
+            $start_date = $signatureSchedule->schedule_date ?? null;
+            $signatureWeekday = $session . '_' . ($start_date ? strtoupper($this->helper->dateToFullCharsWeekday($start_date)) : 'Unset');
+
+            $maxStudentsOfShifts = $this->helper->getMaxStudentOfShifts($pclass);
+            $k1MaxQty = $maxStudentsOfShifts['studentQty1'];
+            $k2MaxQty = $maxStudentsOfShifts['studentQty2'];
+
+            $k1RegisteredQty = $pclass->registrations->where('shift', '=', 1)->count();
+            $k2RegisteredQty = $pclass->registrations->where('shift', '=', 2)->count();
+
+            $k1Qty = $k1RegisteredQty . '/' . $k1MaxQty;
+            $k2Qty = $k2RegisteredQty . '/' . $k2MaxQty;
 
             $status = match ($pclass->status) {
                 0 => [
@@ -351,14 +400,13 @@ class PracticeClassController extends Controller
                 'DT_RowId' => $pclass->id,
                 'DT_RowData' => $pclass,
                 'index' => $index + 1,
-                'module_info' => '(' . $module->module_code . ') ' . $module->module_name,
-                'practice_class_code' => $pclass->practice_class_code,
-                'practice_class_name' => $pclass->practice_class_name,
+                'module_info' => $module_info,
+                'class_info' => $class_info,
                 'teacher' => $pclass->teacher != null ? $pclass->teacher->user->name : '<i>Not set</i>',
                 'teacher_id' => $pclass->teacher_id,
-                'registered_qty' => $max_qty == null ? '<i>Not set</i>' : $registered_qty . '/' . $max_qty,
-                'max_qty' => $max_qty,
-                'schedules_count' => floor($pclass->schedules_count / 2),
+                'weekday' => $signatureWeekday,
+                'k1Qty' => $k1Qty,
+                'k2Qty' => $k2Qty,
                 'status' => $status,
                 'status_raw' => $pclass->status,
                 'actions' => $actions

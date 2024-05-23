@@ -4,6 +4,7 @@
     <!-- Page Header -->
     <div class="py-3 mb-3 border-bottom sticky-top bg-body d-flex justify-content-between">
         <h1 class="h2">Register Classes</h1>
+        @include('partials.class-timer-placeholder')
         @if(auth()->user() !== null)
             <div class="user-info">
                 <span>Hello Teacher <b>{{Auth::user()->name}}</b>!</span>
@@ -135,4 +136,5 @@
 
     <!-- Scripts -->
     @include('teacher.register-scripts')
+    @include('partials.class-timer-script')
 @endsection

@@ -4,6 +4,7 @@
     <!-- Page Header -->
     <div class="py-3 mb-3 border-bottom sticky-top bg-body d-flex justify-content-between align-items-center">
         <h1 class="h2">(S) Register Classes</h1>
+        @include('partials.class-timer-placeholder')
         @if(auth()->user() !== null)
             <div class="user-info">
                 <span>Hello Student <b>{{Auth::user()->name}}</b>!</span>
@@ -48,9 +49,11 @@
                             <thead class="thead-light">
                             <tr>
                                 <th>#</th>
-                                <th>Module</th>
-                                <th>Class Code</th>
-                                <th>Class Name</th>
+                                <th>Module Info</th>
+                                <th>Class Info</th>
+                                <th>Teacher</th>
+                                <th>K1 QTY</th>
+                                <th>K2 QTY</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
@@ -137,4 +140,77 @@
 
     <!-- Scripts -->
     @include('student.register-scripts')
+    @include('partials.class-timer-script')
+    <script>
+        $(document).ready(function () {
+            const registerScheduleTable = $('#register-schedule-table');
+
+            // show class on date
+            const classOnDateModal = new bootstrap.Modal('#pclass-ondate-modal', {backdrop: true});
+            const pClassOndateTable = $('#pclass-ondate-table');
+            registerScheduleTable.on('click', '.schedule-table-add-btn', function () {
+                showClassesOnDate($(this));
+            });
+
+            function showClassesOnDate($addBtn) {
+                showOverlay();
+                const $weekDay = $addBtn.data('weekday');
+                const $session = $addBtn.data('session');
+                const $shift = $addBtn.data('shift');
+
+                if ($.fn.DataTable.isDataTable(pClassOndateTable)) {
+                    pClassOndateTable.DataTable().destroy();
+                }
+
+                pClassOndateTable.DataTable({
+                    ajax: {
+                        url: $($addBtn).data('get-url'),
+                        data: {
+                            weekDay: $weekDay,
+                            session: $session,
+                            shift: $shift,
+                        },
+                        dataSrc: ''
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching data: ", error);
+                        toastr.error("An error occurred while loading the data", "Error");
+                        hideOverlay();
+                    },
+                    columns: [
+                        {data: 'index', width: '5%'},
+                        {data: 'module_info', type: 'html', width: '15%'},
+                        {data: 'class_info', type: 'html', width: '20%'},
+                        {data: 'teacher_name', type: 'html', width: '9%'},
+                        {data: 'k1Qty', type: 'html', width: '6%'},
+                        {data: 'k2Qty', type: 'html', width: '6%'},
+                        {data: 'actions', type: 'html', width: '9%'},
+                    ],
+                    autoWidth: false,
+                    columnDefs: [
+                        {
+                            className: "dt-center",
+                            targets: [0,4,5,6]
+                        },
+                        {
+                            orderable: false,
+                            targets: [1,2,3,4,5]
+                        }
+                    ],
+                    layout: {
+                        topStart: {},
+                        topEnd: {},
+                        bottomStart: {},
+                        bottomEnd: {},
+                    },
+                    paging: false,
+                    initComplete: function () {
+                        hideOverlay();
+                        classOnDateModal.show();
+                    }
+                });
+            }
+            // end
+        })
+    </script>
 @endsection

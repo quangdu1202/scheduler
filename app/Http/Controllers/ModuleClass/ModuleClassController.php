@@ -189,13 +189,13 @@ class ModuleClassController extends Controller
      */
     public function destroy(ModuleClass $moduleClass): JsonResponse
     {
-//        if ($this->moduleClassService->count(['studentModuleClasses']) > 0) {
-//            return response()->json([
-//                'status' => 500,
-//                'title' => 'Cannot delete!',
-//                'message' => 'There is at least 1 active class for this module',
-//            ]);
-//        }
+        if ($moduleClass->student_qty > 0) {
+            return response()->json([
+                'status' => 500,
+                'title' => 'Cannot delete!',
+                'message' => 'There are students belong to this module class',
+            ]);
+        }
 
         try {
             $this->moduleClassService->delete($moduleClass);

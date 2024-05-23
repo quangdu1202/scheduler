@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 ::after,
 ::before {
@@ -21,7 +21,8 @@ h1 {
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    /*font-family: "Open Sans", sans-serif;*/
+    font-optical-sizing: auto;
 }
 
 select, input {
@@ -35,6 +36,7 @@ select, input {
 .main {
     max-height: 100vh;
     width: 100%;
+    margin-left: 70px;
     overflow-y: scroll;
     overflow-x: hidden;
     transition: all 0.35s ease-in-out;
@@ -42,6 +44,7 @@ select, input {
 }
 
 #sidebar {
+    position: absolute;
     width: 70px;
     min-width: 70px;
     z-index: 1000;

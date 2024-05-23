@@ -38,7 +38,7 @@ final class ModuleClassFactory extends Factory
             'teacher_id' => Teacher::inRandomOrder()->value('id'),
             'start_date' => Carbon::now(),
             'end_date' => $this->faker->dateTimeBetween('now', '+3 months'),
-            'student_qty' => $this->faker->numberBetween(0, 75),
+            'student_qty' => $this->faker->numberBetween(60, 75),
             'status' => 0,
         ];
     }

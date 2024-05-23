@@ -30,7 +30,7 @@ final class PracticeRoomFactory extends Factory
             'name' => $this->faker->word(),
             'location' => $this->faker->unique()->word(),
             'pc_qty' => $this->faker->numberBetween(25, 35),
-            'status' => $this->faker->randomElement([1, 2 ,3])
+            'status' => 1
         ];
     }
 }

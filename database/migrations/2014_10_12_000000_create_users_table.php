@@ -17,11 +17,14 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('is_admin')->default(0);
             $table->rememberToken();
             $table->timestamps();
 
-            $table->unsignedBigInteger('userable_id');
-            $table->string('userable_type');
+            $table->date('dob')->nullable();
+            $table->string('telephone')->nullable();
+            $table->unsignedBigInteger('userable_id')->nullable();
+            $table->string('userable_type')->nullable();
         });
     }
 

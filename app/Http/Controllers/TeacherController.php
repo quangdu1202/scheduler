@@ -111,8 +111,10 @@ class TeacherController extends Controller
         /**@var Teacher $teacher */
         $teacher = Auth::user()->userable;
         $availableModules = $this->helper->getModulesByTeacherId($teacher->id);
+        $nextClasses = $this->helper->getNextSchedulesOfTeacher($teacher->id);
         return view('teacher.register-classes', [
-            'modules' => $availableModules
+            'modules' => $availableModules,
+            'classes' => $nextClasses
         ]);
     }
 
@@ -125,20 +127,11 @@ class TeacherController extends Controller
         $teacher = Auth::user()->userable;
         $availableModules = $this->helper->getModulesByTeacherId($teacher->id);
         $practiceRooms = $this->practiceRoomService->getAll();
-        $classes = [
-            [
-                'className' => 'Math',
-                'classTime' => '2024-05-22 07:00:00'
-            ],
-            [
-                'className' => 'English',
-                'classTime' => '2024-05-23 12:30:00'
-            ]
-        ];
+        $nextClasses = $this->helper->getNextSchedulesOfTeacher($teacher->id);
         return view('teacher.manage-classes', [
             'modules' => $availableModules,
             'practiceRooms' => $practiceRooms,
-            'classes' => $classes
+            'classes' => $nextClasses
         ]);
     }
 
@@ -331,6 +324,10 @@ class TeacherController extends Controller
         return response()->json($responseData);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function getClassOndate(Request $request)
     {
         $weekDay = $request->input('weekDay');
@@ -491,7 +488,6 @@ class TeacherController extends Controller
                 </div>
             ";
             $scheduleQty = floor($pclass->schedules_count / 2);
-
             $classInfo = "
                 <div>
                     <span class='d-block fw-bold text-primary'>$pclass->practice_class_name</span>
@@ -502,8 +498,14 @@ class TeacherController extends Controller
                     </div>
                 </div>
             ";
+
+            $session = match ($signatureSchedule->session) {
+                1 => 'S',
+                2 => 'C',
+                3 => 'T',
+            };
             $start_date = $signatureSchedule->schedule_date;
-            $signatureWeekday = strtoupper($this->helper->dateToFullCharsWeekday($start_date));
+            $signatureWeekday = $session . '_' . strtoupper($this->helper->dateToFullCharsWeekday($start_date));
 
             $maxStudentsOfShifts = $this->helper->getMaxStudentOfShifts($pclass);
             $k1MaxQty = $maxStudentsOfShifts['studentQty1'];

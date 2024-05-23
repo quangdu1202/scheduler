@@ -158,7 +158,7 @@ class ModuleController extends Controller
      */
     public function destroy(Module $module)
     {
-        if ($this->moduleService->count(['practiceClasses']) > 0 || $this->moduleService->count(['moduleClasses']) > 0) {
+        if ($module->practice_classes_count > 0 || $module->module_classes_count > 0) {
             return response()->json([
                 'status' => 500,
                 'title' => 'Cannot delete!',

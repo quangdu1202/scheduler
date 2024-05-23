@@ -2,7 +2,7 @@
 
 @section('content')
     <!-- Page Header -->
-    <div class="py-3 mb-3 border-bottom">
+    <div class="py-3 mb-3 border-bottom sticky-top bg-body">
         <h1 class="h2">Practice Rooms Management</h1>
     </div>
 

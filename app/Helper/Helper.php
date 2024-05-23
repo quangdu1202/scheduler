@@ -141,7 +141,11 @@ class Helper
         ];
     }
 
-    public function getNextSchedulesOfTeacher($teacherId)
+    /**
+     * @param $teacherId
+     * @return array
+     */
+    public function getNextSchedulesOfTeacher($teacherId): array
     {
         /**@var Teacher $teacher*/
         $teacher = $this->teacherService->findOrFail($teacherId);
@@ -156,9 +160,12 @@ class Helper
                 ->where('order', '!=', 0)
                 ->where('shift', '=', 1)
                 ->map(function ($schedule) {
+                    $pRoom = $schedule->practiceRoom ?? null;
                     return [
                         'schedule_date' => $schedule->schedule_date,
-                        'session' => $schedule->session
+                        'session' => $schedule->session,
+                        'room_location' => $pRoom ? $pRoom->location : 'No info',
+                        'room_name' => $pRoom ? $pRoom->name : 'No info',
                     ];
                 })
             ;
@@ -175,6 +182,49 @@ class Helper
             }
         }
 
-        return Json::encode($responseData);
+        return $responseData;
+    }
+
+    /**
+     * @param $studentId
+     * @return array
+     */
+    public function getNextSchedulesOfStudent($studentId): array
+    {
+        /**@var Student $student*/
+        $student = $this->studentService->findOrFail($studentId);
+
+        $practiceClasses = $student->practiceClasses;
+
+        $responseData = [];
+
+        foreach ($practiceClasses as $pClass) {
+            /**@var Schedule[] $schedules*/
+            $schedules = $pClass->schedules
+                ->where('order', '!=', 0)
+                ->where('shift', '=', 1)
+                ->map(function ($schedule) {
+                    return [
+                        'schedule_date' => $schedule->schedule_date,
+                        'session' => $schedule->session,
+                        'room_location' => $schedule->practiceRoom->location,
+                        'room_name' => $schedule->practiceRoom->name,
+                    ];
+                })
+            ;
+
+            foreach ($schedules as $schedule) {
+                $time = match ($schedule['session']) {
+                    1 => '07:00:00', 2 => '12:30:00', 3 => '17:55:00',
+                };
+
+                $responseData[] = [
+                    'className' => $pClass->practice_class_name,
+                    'classTime' => $schedule['schedule_date'] . ' ' . $time,
+                ];
+            }
+        }
+
+        return $responseData;
     }
 }

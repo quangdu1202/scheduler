@@ -46,11 +46,11 @@
             columns: [
                 {data: 'index', width: '4%'},
                 {data: 'module_info', type: 'html', width: '15%'},
-                {data: 'practice_class_code', type: 'html', width: '9%'},
-                {data: 'practice_class_name', type: 'html', width: '15%'},
+                {data: 'class_info', type: 'html', width: '25%'},
                 {data: 'teacher', type: 'html', width: '10%'},
-                {data: 'registered_qty', type: 'html', width: '7%'},
-                {data: 'schedules_count', type: 'html', width: '7%'},
+                {data: 'weekday', type: 'html', width: '7%'},
+                {data: 'k1Qty', type: 'html', width: '5%'},
+                {data: 'k2Qty', type: 'html', width: '5%'},
                 {
                     data: 'status', type: 'html', width: '8%',
                     render: function (data) {
@@ -66,17 +66,11 @@
             columnDefs: [
                 {
                     className: "dt-center",
-                    targets: [0, 4, 5, 6, 7, 8]
-                },
-                {
-                    targets: [1, 2, 3, 4, 5, 6],
-                    render: function (data) {
-                        return `<div class="cell-clamp" title="${data}">${data}</div>`;
-                    }
+                    targets: [0,4,5,6,7,8]
                 },
                 {
                     orderable: false,
-                    targets: [1, 2, 3, 4, 7, 8]
+                    targets: [1,2,3,4,7,8]
                 }
             ],
             layout: {
@@ -107,7 +101,7 @@
                     ]
                 },
             },
-            pageLength: -1,
+            pageLength: 10,
             language: {
                 "info": "Showing _START_ to _END_ of _TOTAL_ classes",
                 //customize pagination prev and next buttons: use arrows instead of words
@@ -259,20 +253,14 @@
         const infoModal = new bootstrap.Modal('#all-schedule-modal', {backdrop: true});
         const pClassAllScheduleTable = $('#pclass-all-schedule-table');
 
-        pclassTable.on('click', '.schedule-info-btn', function () {
-            showOverlay();
-            if ($.fn.DataTable.isDataTable(pClassAllScheduleTable)) {
-                pClassAllScheduleTable.DataTable().destroy();
-            }
-            pClassAllScheduleTable.data('practice_class_id', $(this).data('pclass-id'));
-
+        function initAllScheduleTable($getUrl) {
             const weekdaySignature = $('#pclass-signature-form #weekdaySelect');
             const startDateSignature = $('#pclass-signature-form #start_date');
             const pRoomSignature = $('#pclass-signature-form #pRoomSelect');
 
             pClassAllScheduleTable.DataTable({
                 ajax: {
-                    url: $(this).data('get-url'),
+                    url: $getUrl,
                     dataSrc: ''
                 },
                 select: true,
@@ -331,7 +319,7 @@
                     bottomEnd: {},
                 },
                 paging: false,
-                initComplete: function (settings, json) {
+                initComplete: function () {
                     // console.log(json);
 
                     // Setup for adding multi schedules
@@ -386,8 +374,28 @@
                     hideOverlay();
                 }
             });
+        }
+
+        pclassTable.on('click', '.schedule-info-btn', function () {
+            showOverlay();
+            if ($.fn.DataTable.isDataTable(pClassAllScheduleTable)) {
+                pClassAllScheduleTable.DataTable().destroy();
+            }
+            pClassAllScheduleTable.data('practice_class_id', $(this).data('pclass-id'));
+            pClassAllScheduleTable.data('get-url', $(this).data('get-url'));
+            initAllScheduleTable(pClassAllScheduleTable.data('get-url'));
 
             infoModal.show();
+            hideOverlay();
+        });
+        // end
+
+        // Reload datatable
+        $(document).on('click', '.reload-table-btn', function () {
+            showOverlay();
+            pClassAllScheduleTable.DataTable().destroy();
+            initAllScheduleTable(pClassAllScheduleTable.data('get-url'));
+            hideOverlay();
         });
         // end
 

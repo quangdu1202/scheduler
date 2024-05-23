@@ -90,6 +90,7 @@ Route::prefix('student')->controller(StudentController::class)->group(function (
     Route::post('/cancel-registered-class', 'cancelRegisteredClass')->name('student.cancel-registered-class');
     Route::get('/get-registered-class', 'getRegisteredClasses')->name('student.get-registered-class');
     Route::get('/get-registered-class-schedules/{practice_class_id}/{shift}', 'getRegisteredClassSchedules')->name('student.get-registered-class-schedules');
+    Route::get('/get-classes-ondate', 'getClassOndate')->name('student.get-classes-ondate');
 });
 
 Auth::routes();

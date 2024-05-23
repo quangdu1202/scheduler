@@ -146,6 +146,14 @@ class PracticeRoomController extends Controller
      */
     public function destroy(PracticeRoom $practiceRoom): JsonResponse
     {
+        if ($practiceRoom->schedules_count > 0) {
+            return response()->json([
+                'status' => 500,
+                'title' => 'Cannot delete!',
+                'message' => 'There is at least 1 active class for this room',
+            ]);
+        }
+
         try {
             $this->practiceRoomService->delete($practiceRoom);
             return response()->json([

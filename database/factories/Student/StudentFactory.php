@@ -28,7 +28,7 @@ final class StudentFactory extends Factory
     public function definition(): array
     {
         return [
-            'student_code' => $this->faker->unique()->word(),
+            'student_code' => $this->faker->unique()->numberBetween(2020604000, 2020604594),
             'original_class_id' => OriginalClass::inRandomOrder()->value('id'),
         ];
     }
