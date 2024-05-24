@@ -144,7 +144,7 @@
 
     <!-- All schedules Info modal -->
     <div class="modal modal-xl fade" id="all-schedule-modal" style="display: none;" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-fullscreen">
             <div class="modal-content" id="all-schedule-modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="edit-modal-title">
@@ -152,8 +152,8 @@
                     </h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="pclass-signature-data">
+                <div class="modal-body d-flex flex-column overflow-y-hidden py-0">
+                    <div class="pclass-signature-data sticky-top p-2 bg-white">
                         <h4>Data to show in Calendar (signature data)</h4>
                         <form id="pclass-signature-form"
                               class="p-3"
@@ -254,7 +254,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="table-responsive">
+                    <div class="table-responsive p-2">
                         <table id="pclass-all-schedule-table" class="table table-bordered table-hover w-100"
                                style="table-layout: fixed">
                             <thead class="thead-light">

@@ -264,6 +264,7 @@
                     dataSrc: ''
                 },
                 select: true,
+                scrollCollapse: true,
                 columns: [
                     {data: 'index', width: '5%'},
                     {data: 'schedule_date', type: 'html', width: '15%'},
