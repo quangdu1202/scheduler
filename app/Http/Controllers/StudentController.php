@@ -280,6 +280,7 @@ class StudentController extends Controller
 
     /**
      * @return JsonResponse
+     * @throws Exception
      */
     public function getAvailableClasses()
     {
@@ -292,9 +293,16 @@ class StudentController extends Controller
         $practiceClasses = $this->practiceClassService
             ->with(['registrations'])
             ->withCount(['schedules'])
-            ->getAll([['id', 'not_in', $registeredModulesIds], ['status', '=', '3'], ['module_id', 'in', $availableModulesIds]]);
+            ->getAll()
+            ->whereIn('module_id', $availableModulesIds)
+            ->whereNotIn('id', $registeredModulesIds)
+            ->where('status', '=', '3')
+        ;
 
-        $responseData = $practiceClasses->map(function ($pclass, $index) {
+        $index = 0;
+        $responseData = [];
+
+        foreach ($practiceClasses as $pclass) {
             /**@var PracticeClass $pclass */
 
             $module = $pclass->module;
@@ -366,9 +374,9 @@ class StudentController extends Controller
                 </button>
             ';
 
-            return [
+            $responseData[] = [
                 'DT_RowId' => $pclass->id,
-                'index' => $index + 1,
+                'index' => ++$index,
                 'module_id' => $pclass->module_id,
                 'module_info' => $module_info,
                 'classInfo' => $classInfo,
@@ -379,7 +387,7 @@ class StudentController extends Controller
                 'k2Qty' => $k2Qty,
                 'actions' => $actions
             ];
-        });
+        }
 
         return response()->json($responseData);
     }

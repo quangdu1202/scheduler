@@ -22,7 +22,7 @@
                 <th>K</th>
                 <th>MON</th>
                 <th>TUE</th>
-                <th>WED</th>
+                <th class="text-bg-primary">WED</th>
                 <th>THU</th>
                 <th>FRI</th>
                 <th>SAT</th>

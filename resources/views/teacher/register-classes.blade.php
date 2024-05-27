@@ -79,7 +79,7 @@
                     <select name="module" id="module-filter-select" class="form-select">
                         <option></option>
                         @foreach($modules as $module)
-                            <option value="{{$module->id}}">{{'(' . $module->module_code . ') ' . $module->module_name}}</option>
+                            <option value="{{$module->module_code}}">{{'(' . $module->module_code . ') ' . $module->module_name}}</option>
                         @endforeach
                     </select>
                 </div>

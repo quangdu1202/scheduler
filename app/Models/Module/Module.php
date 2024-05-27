@@ -5,9 +5,12 @@ namespace App\Models\Module;
 use Adobrovolsky97\LaravelRepositoryServicePattern\Models\BaseModel;
 use App\Models\ModuleClass\ModuleClass;
 use App\Models\PracticeClass\PracticeClass;
+use App\Models\Teacher\Teacher;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Ramsey\Collection\Collection;
 
 /**
  * Class Module
@@ -17,8 +20,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $module_name
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property ModuleClass $moduleClasses
- * @property PracticeClass $practiceClasses
+ * @property Teacher[]|Collection $teachers
+ * @property ModuleClass[]|Collection $moduleClasses
+ * @property PracticeClass[]|Collection $practiceClasses
  */
 class Module extends BaseModel
 {
@@ -43,5 +47,13 @@ class Module extends BaseModel
     public function practiceClasses(): HasMany
     {
         return $this->hasMany(PracticeClass::class);
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function teachers(): BelongsToMany
+    {
+        return $this->belongsToMany(Teacher::class, 'module_classes', 'module_id', 'teacher_id');
     }
 }

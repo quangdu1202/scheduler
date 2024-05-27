@@ -2,21 +2,17 @@
 
 namespace App\Helper;
 
-use App\Models\ModuleClass\ModuleClass;
 use App\Models\PracticeClass\PracticeClass;
 use App\Models\Schedule\Schedule;
 use App\Models\Student\Student;
-use App\Models\StudentModuleClass\StudentModuleClass;
 use App\Models\Teacher\Teacher;
 use App\Services\PracticeClass\PracticeClassService;
 use App\Services\Registration\RegistrationService;
 use App\Services\Student\StudentService;
 use App\Services\Teacher\TeacherService;
 use Exception;
-use Illuminate\Database\Eloquent\Casts\Json;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
-use function MongoDB\BSON\toJSON;
+use Illuminate\Support\Collection;
 
 class Helper
 {
@@ -72,29 +68,13 @@ class Helper
     }
 
     /**
-     * @param $teacherId
-     * @return \Illuminate\Support\Collection
-     */
-    public function getModulesByTeacherId($teacherId): \Illuminate\Support\Collection
-    {
-        return ModuleClass::whereHas('teacher', function ($query) use ($teacherId) {
-            $query->where('id', $teacherId);
-        })->with('module')
-            ->get()
-            ->map(function ($moduleClass) {
-                return $moduleClass->module;
-            })
-            ->unique('id')
-            ->values();
-    }
-
-    /**
      * @param $studentId
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
-    public function getModulesByStudentId($studentId): \Illuminate\Support\Collection
+    public function getModulesByStudentId($studentId): Collection
     {
-        $student = Student::with(['moduleClasses.module'])->find($studentId);
+        /**@var Student $student */
+        $student = $this->studentService->findOrFail($studentId);
 
         return $student->moduleClasses->map(function ($moduleClass) {
             return $moduleClass->module;
@@ -147,7 +127,7 @@ class Helper
      */
     public function getNextSchedulesOfTeacher($teacherId): array
     {
-        /**@var Teacher $teacher*/
+        /**@var Teacher $teacher */
         $teacher = $this->teacherService->findOrFail($teacherId);
 
         $practiceClasses = $teacher->practiceClasses;
@@ -155,7 +135,7 @@ class Helper
         $responseData = [];
 
         foreach ($practiceClasses as $pClass) {
-            /**@var Schedule[] $schedules*/
+            /**@var Schedule[] $schedules */
             $schedules = $pClass->schedules
                 ->where('order', '!=', 0)
                 ->where('shift', '=', 1)
@@ -167,12 +147,13 @@ class Helper
                         'room_location' => $pRoom ? $pRoom->location : 'No info',
                         'room_name' => $pRoom ? $pRoom->name : 'No info',
                     ];
-                })
-            ;
+                });
 
             foreach ($schedules as $schedule) {
                 $time = match ($schedule['session']) {
-                    1 => '07:00:00', 2 => '12:30:00', 3 => '17:55:00',
+                    1 => '07:00:00',
+                    2 => '12:30:00',
+                    3 => '17:55:00',
                 };
 
                 $responseData[] = [
@@ -191,7 +172,7 @@ class Helper
      */
     public function getNextSchedulesOfStudent($studentId): array
     {
-        /**@var Student $student*/
+        /**@var Student $student */
         $student = $this->studentService->findOrFail($studentId);
 
         $practiceClasses = $student->practiceClasses;
@@ -199,7 +180,7 @@ class Helper
         $responseData = [];
 
         foreach ($practiceClasses as $pClass) {
-            /**@var Schedule[] $schedules*/
+            /**@var Schedule[] $schedules */
             $schedules = $pClass->schedules
                 ->where('order', '!=', 0)
                 ->where('shift', '=', 1)
@@ -207,15 +188,16 @@ class Helper
                     return [
                         'schedule_date' => $schedule->schedule_date,
                         'session' => $schedule->session,
-                        'room_location' => $schedule->practiceRoom->location,
-                        'room_name' => $schedule->practiceRoom->name,
+                        'room_location' => $schedule->practiceRoom->location ?? 'No info',
+                        'room_name' => $schedule->practiceRoom->name ?? 'No info',
                     ];
-                })
-            ;
+                });
 
             foreach ($schedules as $schedule) {
                 $time = match ($schedule['session']) {
-                    1 => '07:00:00', 2 => '12:30:00', 3 => '17:55:00',
+                    1 => '07:00:00',
+                    2 => '12:30:00',
+                    3 => '17:55:00',
                 };
 
                 $responseData[] = [

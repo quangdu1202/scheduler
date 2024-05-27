@@ -1,5 +1,12 @@
 <script>
     $(document).ready(function () {
+        $('#module-filter-select').select2({
+            theme: "bootstrap-5",
+            searchable: true,
+            placeholder: 'Filter by module',
+            allowClear: true
+        })
+
         //Registered classes table
         const registeredPclassTable = $('#registered-pclass-table');
         registeredPclassTable.DataTable({
@@ -50,6 +57,13 @@
             pageLength: -1,
         });
         // end
+
+        // Module filter
+        $('#module-filter-select').on('change', function () {
+            showOverlay();
+            registeredPclassTable.search(this.value).draw();
+            hideOverlay();
+        });
 
         // View all schedules of a practice class
         function initAllScheduleTable($getUrl) {
@@ -120,7 +134,7 @@
                     bottomEnd: {},
                 },
                 paging: false,
-                initComplete: function (settings, json) {
+                initComplete: function () {
                     // console.log(json);
 
                     // Setup for adding multi schedules

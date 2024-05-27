@@ -106,11 +106,11 @@ class TeacherController extends Controller
     /**
      * @return Application|Factory|View|\Illuminate\Foundation\Application|\Illuminate\View\View
      */
-    public function index()
+    public function registerClasses()
     {
         /**@var Teacher $teacher */
         $teacher = Auth::user()->userable;
-        $availableModules = $this->helper->getModulesByTeacherId($teacher->id);
+        $availableModules = $teacher->modules;
         $nextClasses = $this->helper->getNextSchedulesOfTeacher($teacher->id);
         return view('teacher.register-classes', [
             'modules' => $availableModules,
@@ -125,7 +125,7 @@ class TeacherController extends Controller
     {
         /**@var Teacher $teacher */
         $teacher = Auth::user()->userable;
-        $availableModules = $this->helper->getModulesByTeacherId($teacher->id);
+        $availableModules = $teacher->modules;
         $practiceRooms = $this->practiceRoomService->getAll();
         $nextClasses = $this->helper->getNextSchedulesOfTeacher($teacher->id);
         return view('teacher.manage-classes', [
@@ -330,9 +330,17 @@ class TeacherController extends Controller
      */
     public function getClassOndate(Request $request)
     {
+        /**@var Teacher $teacher */
+        $teacher = Auth::user()->userable;
+        $availableModuleIds = $teacher->modules->pluck('id');
         $weekDay = $request->input('weekDay');
         $session = $request->input('session');
-        $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll(['status' => 1]);
+        $practiceClasses = $this->practiceClassService
+            ->with(['schedules'])
+            ->getAll()
+            ->whereIn('module_id', $availableModuleIds)
+            ->where('status', '=', '1')
+        ;
 
         // Filter the classes by signature schedule
         $filteredClasses = $practiceClasses->filter(function ($class) use ($weekDay, $session) {
@@ -384,7 +392,13 @@ class TeacherController extends Controller
      */
     public function getJsonData(): JsonResponse
     {
-        $practiceClasses = $this->practiceClassService->getAll([['status', '=', '1']]);
+        /**@var Teacher $teacher */
+        $teacher = Auth::user()->userable;
+        $availableModuleIds = $teacher->modules->pluck('id');
+        $practiceClasses = $this->practiceClassService->getAll()
+            ->whereIn('module_id', $availableModuleIds)
+            ->where('status', '=', '1')
+        ;
 
         $responseData = $practiceClasses->map(function ($pclass, $index) {
             /**@var PracticeClass $pclass */

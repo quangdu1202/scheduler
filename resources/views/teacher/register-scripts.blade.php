@@ -6,6 +6,13 @@
             placeholder: "Select an option",
             allowClear: true
         });
+
+        $('#module-filter-select').select2({
+            theme: "bootstrap-5",
+            searchable: true,
+            placeholder: 'Filter by module',
+            allowClear: true
+        })
         // end
 
         // Schedule table initiate
@@ -80,7 +87,6 @@
 
         // Available Schedules for register initiate
         const pclassRegisterTable = $('#pclass-register-table');
-
         $('#toggle-register-table').click(function () {
             const $button = $(this);
             if (!$button.hasClass('loaded')) {
@@ -105,7 +111,6 @@
             $button.addClass('loaded');
             $('#toggle-register-table-target').slideToggle();
         });
-
         function loadAvailableClasses() {
             showOverlay();
             pclassRegisterTable.DataTable({
@@ -184,8 +189,14 @@
                 }
             });
         }
-
         // end
+
+        // Module filter
+        $('#module-filter-select').on('change', function () {
+            showOverlay();
+            pclassRegisterTable.DataTable().search(this.value).draw();
+            hideOverlay();
+        });
 
         // View schedule info
         $(document).on('click', '.schedule-info-btn', function () {
