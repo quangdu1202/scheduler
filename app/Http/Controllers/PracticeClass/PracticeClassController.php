@@ -175,7 +175,34 @@ class PracticeClassController extends Controller
                     $this->practiceClassService->create($practiceClassData);
                 }
             } else {
-                $this->practiceClassService->create($data);
+                /**@var Module|null $module */
+                $module = $this->moduleService->findOrFail($data['module_id']);
+
+                $practiceClasses = $this->practiceClassService->find(['module_id' => $module->id]);
+
+                // Find the last practice class based on the index of the practice_class_code
+                $lastPracticeClass = $practiceClasses->sortByDesc('practice_class_code')->first();
+
+                if ($lastPracticeClass)
+                    $lastIndex = intval(substr($lastPracticeClass->practice_class_code, -3));
+                else
+                    $lastIndex = 0;
+
+                $practiceClassData = [
+                    'module_id' => $module->id,
+                    'practice_class_name' => $module->module_name,
+                    'registered_qty' => 0,
+                    'shift_qty' => 2,
+                    'max_qty' => null,
+                    'status' => 0,
+                ];
+
+                $newIndex = $lastIndex + 1;
+
+                // Format the new practice_class_code
+                $practiceClassData['practice_class_code'] = '2024' . $module->module_code . 'TH' . str_pad($newIndex, 3, '0', STR_PAD_LEFT);
+
+                $this->practiceClassService->create($practiceClassData);
             }
 
             DB::commit();
@@ -269,8 +296,6 @@ class PracticeClassController extends Controller
             ]);
         }
 
-        $this->registrationService->deleteMany($practiceClass->registrations);
-
         try {
             $this->practiceClassService->delete($practiceClass);
 
@@ -288,7 +313,7 @@ class PracticeClassController extends Controller
             return response()->json([
                 'status' => 500,
                 'title' => 'Error!',
-                'message' => 'Unknown error occurred, try again later!',
+                'message' => $e->getMessage()
             ]);
         }
     }
@@ -342,8 +367,8 @@ class PracticeClassController extends Controller
             $k1RegisteredQty = $pclass->registrations->where('shift', '=', 1)->count();
             $k2RegisteredQty = $pclass->registrations->where('shift', '=', 2)->count();
 
-            $k1Qty = $k1RegisteredQty . '/' . $k1MaxQty;
-            $k2Qty = $k2RegisteredQty . '/' . $k2MaxQty;
+            $k1Qty = "<span class='". ($k1RegisteredQty > $k1MaxQty ? "text-danger" : "") ."'>$k1RegisteredQty/$k1MaxQty</span>";
+            $k2Qty = "<span class='". ($k2RegisteredQty > $k2MaxQty ? "text-danger" : "") ."'>$k2RegisteredQty/$k2MaxQty</span>";
 
             $status = match ($pclass->status) {
                 0 => [

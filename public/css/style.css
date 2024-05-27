@@ -166,6 +166,10 @@ a.sidebar-link:hover {
     margin-left: 0.25rem;
 }
 
+.select2-selection.select2-selection--single {
+    padding-right: 50px !important;
+}
+
 /*Datatable*/
 .cell-clamp {
     display: -webkit-box;

@@ -22,44 +22,38 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('calendar');
-//Route::get('/filter', [HomeController::class, 'filter'])->name('calendar.filter');
-//Route::get('rooms', [HomeController::class, 'rooms'])->name('rooms');
-//Route::get('weekly', [HomeController::class, 'weeklyCalendar'])->name('weekly');
-//Route::get('getCellData', [HomeController::class, 'getCellData']);
-//Route::post('registerSchedule', [HomeController::class, 'registerSchedule']);
-
-//Route::get('mark-by-module', [MarkController::class, 'markByModule'])->name('mark-by-module');
-//Route::get('mark-by-practice', [MarkController::class, 'markByPractice'])->name('mark-by-practice');
-
-// New
 
 Route::get('/test', [HomeController::class, 'test'])->name('test');
 
-Route::get('modules/{id}/practice-classes', [ModuleController::class, 'showPracticeClasses'])->name('modules.show-practice-classes');
-Route::get('/getModulesJsonData', [ModuleController::class, 'getJsonData'])->name('modules.get-json-data');
+Route::prefix('modules')->controller(ModuleController::class)->group(function () {
+    Route::get('/getModulesJsonData', 'getJsonData')->name('modules.get-json-data');
+});
 Route::resource('modules', ModuleController::class);
 
-Route::get('/getSinglePracticeRoomJsonData', [PracticeRoomController::class, 'getSinglePracticeRoomJsonData'])->name('practice-rooms.get-single-room-json-data');
-Route::get('/getPracticeRoomsJsonData', [PracticeRoomController::class, 'getJsonData'])->name('practice-rooms.get-json-data');
+Route::prefix('practice-rooms')->controller(PracticeRoomController::class)->group(function () {
+    Route::get('/getSinglePracticeRoomJsonData', 'getSinglePracticeRoomJsonData')->name('practice-rooms.get-single-room-json-data');
+    Route::get('/getPracticeRoomsJsonData', 'getJsonData')->name('practice-rooms.get-json-data');
+});
 Route::resource('practice-rooms', PracticeRoomController::class);
 
-Route::get('/getSignatureClassInfo', [PracticeClassController::class, 'getSignatureClassInfo'])->name('practice-classes.get-signature-info');
-Route::get('/getPracticeClassesJsonData', [PracticeClassController::class, 'getJsonData'])->name('practice-classes.get-json-data');
-Route::get('/getJsonDataForSchedule/{practice_class_id}', [PracticeClassController::class, 'getJsonDataForSchedule'])->name('practice-classes.get-json-data-for-schedule');
-Route::get('/getStudentsList', [PracticeClassController::class, 'getStudentsOfPracticeClass'])->name('practice-classes.get-students-of-pclass');
-Route::post('/updatePracticeClassStatus', [PracticeClassController::class, 'updatePracticeClassStatus'])->name('practice-classes.update-practice-class-status');
+Route::prefix('practice-classes')->controller(PracticeClassController::class)->group(function () {
+    Route::get('/getSignatureClassInfo', 'getSignatureClassInfo')->name('practice-classes.get-signature-info');
+    Route::get('/getPracticeClassesJsonData', 'getJsonData')->name('practice-classes.get-json-data');
+    Route::get('/getJsonDataForSchedule/{practice_class_id}', 'getJsonDataForSchedule')->name('practice-classes.get-json-data-for-schedule');
+    Route::get('/getStudentsList', 'getStudentsOfPracticeClass')->name('practice-classes.get-students-of-pclass');
+    Route::post('/updatePracticeClassStatus', 'updatePracticeClassStatus')->name('practice-classes.update-practice-class-status');
+});
 Route::resource('practice-classes', PracticeClassController::class);
 
-Route::get('/getStudentsOfModuleClass', [ModuleClassController::class, 'getJsonDataForStudentsOfModuleClass'])->name('module-classes.get-student-data-for-mclass');
-Route::get('/getModuleClassJsonData', [ModuleClassController::class, 'getJsonData'])->name('module-classes.get-json-data');
-Route::post('/updateModuleClassStatus', [ModuleClassController::class, 'updateModuleClassStatus'])->name('module-classes.update-mclass-status');
+Route::prefix('module-classes')->controller(ModuleClassController::class)->group(function () {
+    Route::get('/getStudentsOfModuleClass', 'getJsonDataForStudentsOfModuleClass')->name('module-classes.get-student-data-for-mclass');
+    Route::get('/getModuleClassJsonData', 'getJsonData')->name('module-classes.get-json-data');
+    Route::post('/updateModuleClassStatus', 'updateModuleClassStatus')->name('module-classes.update-mclass-status');
+});
 Route::resource('module-classes', ModuleClassController::class);
 
-//Route::get('/getMarkJsonDataByPracticeClass/{practice_class_id}', [StudentMarkController::class, 'getMarkJsonDataByPracticeClass'])->name('student-marks.get-json-data-by-pclass');
-//Route::resource('student-marks', StudentMarkController::class);
-
 Route::prefix('schedules')->controller(ScheduleController::class)->group(function () {
-    Route::get('/getAvailableRooms','getAvailableRooms')->name('schedules.get-available-rooms');
+    Route::get('/getAvailableRooms', 'getAvailableRooms')->name('schedules.get-available-rooms');
     Route::put('/', 'updateSingleSchedule')->name('schedules.update-single-schedule');
     Route::put('/signature', 'updateSignatureSchedule')->name('schedules.update-signature-schedule');
     Route::delete('/', 'deleteSingleSchedule')->name('schedules.delete-single-schedule');
@@ -94,5 +88,3 @@ Route::prefix('student')->controller(StudentController::class)->group(function (
 });
 
 Auth::routes();
-//
-//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

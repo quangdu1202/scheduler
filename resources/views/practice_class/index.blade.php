@@ -8,13 +8,8 @@
 
     <!-- Action Buttons (Add new, etc.) -->
     <div class="row">
-        <div class="input-group">
-            <button id="add-pclass-form-toggle" class="btn btn-primary btn-sm" type="button">
-                <i class="lni lni-circle-plus align-middle"></i> Add new
-            </button>
-        </div>
         <!-- Create form -->
-        <div id="new-pclass-form-wrapper" class="new-form-hidden border border-primary col-12 m-2">
+        <div id="new-pclass-form-wrapper" class="border border-primary col-12 m-2">
             <form id="new-pclass-form"
                   class="p-3"
                   data-action="{{route('practice-classes.store')}}"
@@ -50,77 +45,39 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row hidden-for-multi">
-                        <div class="col-3">
-                            <div class="form-floating mb-3">
-                                <select name="teacher_id" id="teacherSelect" class="form-select">
-                                    <option></option>
-                                    @foreach($teachers as $teacher)
-                                        <option value="{{$teacher->id}}">{{$teacher->user->name}}</option>
-                                    @endforeach
-                                </select>
-                                <label for="teacherSelect" class="form-label">Teacher</label>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-floating mb-3">
-                                <input type="text" name="practice_class_code" class="form-control" id="classCode"
-                                       placeholder="Class Code" required>
-                                <label for="classCode" class="form-label">Class Code</label>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-floating mb-3">
-                                <input type="text" name="practice_class_name" class="form-control" id="className"
-                                       placeholder="Class Name" required>
-                                <label for="className" class="form-label">Class Name</label>
-                            </div>
-                        </div>
-                        <div class="col-1">
-                            <div class="form-floating mb-3">
-                                <input type="number" name="max_qty" class="form-control" id="studentQty" min="0">
-                                <label for="studentQty" class="form-label">Max Student</label>
-                            </div>
-                        </div>
-                        <div class="col-1">
-                            <div class="form-floating mb-3">
-                                <input type="number" name="shift_qty" class="form-control" id="shiftQty" min="1"
-                                       required>
-                                <label for="shiftQty" class="form-label">Shift QTY</label>
-                            </div>
-                        </div>
-                        <div class="col-1">
-                            <div class="form-floating mb-3">
-                                <select name="status" id="statusSelect" class="form-select">
-                                    <option value="0"></option>
-                                    <option value="1">Ready</option>
-                                    <option value="2">Approval</option>
-                                    <option value="3">Approved</option>
-                                </select>
-                                <label for="statusSelect" class="form-label">Status</label>
-                            </div>
-                        </div>
-                    </div>
                     <div class="row">
                         <div class="col-12">
-                            <button type="submit" class="btn btn-sm btn-dark" id="create-pclass-btn">Create</button>
+                            <button type="submit" class="btn btn-sm btn-primary" id="create-pclass-btn">Create</button>
                         </div>
                     </div>
                 </fieldset>
             </form>
         </div>
         <!-- Filters -->
-        <form id="module-filter" action="#" class="d-flex align-items-center my-2 col-3">
-            <div class="input-group">
-                <label for="module-filter-select" class="input-group-text">MODULE</label>
-                <select name="module" id="module-filter-select" class="form-select">
-                    <option></option>
-                    @foreach($modules as $module)
-                        <option value="{{$module->id}}">{{'(' . $module->module_code . ') ' . $module->module_name}}</option>
-                    @endforeach
-                </select>
+        <div class="my-2 row">
+            <div class="col-3">
+                <div class="input-group">
+                    <label for="module-filter-select" class="input-group-text">MODULE</label>
+                    <select name="module" id="module-filter-select" class="form-select">
+                        <option value="">&nbsp;</option>
+                        @foreach($modules as $module)
+                            <option value="{{$module->module_code}}">{{'(' . $module->module_code . ') ' . $module->module_name}}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
-        </form>
+            <div class="col-3">
+                <div class="input-group">
+                    <label for="teacher-filter-select" class="input-group-text">TEACHER</label>
+                    <select name="teacher" id="teacher-filter-select" class="form-select">
+                        <option value="">&nbsp;</option>
+                        @foreach($teachers as $teacher)
+                            <option value="{{$teacher->user->name}}">{{ $teacher->user->name  }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Practice Classes Table -->
@@ -215,6 +172,19 @@
                                                     <option value="{{$practiceRoom->id}}">{{$practiceRoom->name . ' - ' . $practiceRoom->location}}</option>
                                                 @endforeach
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="d-flex multi-schedule-session-select border border-success">
+                                            <div class="input-group-text">STUDENT QTY</div>
+
+                                            <label class="btn btn-primary border-primary" for="studentQty1">K1</label>
+                                            <input type="number" min="0" max="99" name="studentQty1" value=""
+                                                   class="form-control form-control-sm" id="studentQty1" autocomplete="off">
+
+                                            <label class="btn btn-primary border-primary" for="studentQty2">K2</label>
+                                            <input type="number" min="0" max="99" name="studentQty2" value=""
+                                                   class="form-control form-control-sm" id="studentQty2" autocomplete="off">
                                         </div>
                                     </div>
                                     <div class="col-1 ms-auto">
@@ -324,13 +294,6 @@
                                             @endforeach
                                         </select>
                                         <label for="editTeacherSelect" class="form-label">Teacher</label>
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="form-floating mb-3">
-                                        <input type="number" name="max_qty" class="form-control" id="editStudentQty"
-                                               min="0" required>
-                                        <label for="editStudentQty" class="form-label">Max Student</label>
                                     </div>
                                 </div>
                                 <div class="col-3">

@@ -15,20 +15,28 @@
             searchable: true,
             dropdownParent: $('#all-schedule-modal-content')
         });
+        $('#module-filter-select').select2({
+            theme: "bootstrap-5",
+            searchable: true,
+            placeholder: 'Filter by module',
+            allowClear: true
+        })
+        $('#teacher-filter-select').select2({
+            theme: "bootstrap-5",
+            searchable: true,
+            placeholder: 'Filter by teacher',
+            allowClear: true
+        })
         // end
 
         // Multi switch
         $('#multi-switch').change(function () {
             if ($(this).is(':checked')) {
-                $('.hidden-for-multi input').prop('disabled', true);
-                $('.hidden-for-multi').hide();
                 $('.show-for-multi input').prop('disabled', false);
                 $('.show-for-multi').fadeIn('fast');
             } else {
                 $('.show-for-multi input').prop('disabled', true);
                 $('.show-for-multi').hide();
-                $('.hidden-for-multi input').prop('disabled', false);
-                $('.hidden-for-multi').fadeIn('fast');
             }
         });
         // end
@@ -39,6 +47,7 @@
                 url: '{{route('practice-classes.get-json-data')}}',
                 dataSrc: ''
             },
+            scrollY: '53vh',
             error: function (xhr, status, error) {
                 console.error("Error fetching data: ", error);
                 toastr.error("An error occurred while loading the data", "Error");
@@ -124,6 +133,20 @@
         });
         // end
 
+        // Module filter
+        $('#module-filter-select').on('change', function () {
+            showOverlay();
+            pclassTable.search(this.value).draw();
+            hideOverlay();
+        });
+
+        $('#teacher-filter-select').on('change', function () {
+            showOverlay();
+            pclassTable.search(this.value).draw();
+            hideOverlay();
+        });
+        // end
+
         // Update the practice class schedule status
         pclassTable.on('change', '.status-change-btn', function () {
             const $statusChangeBtn = $(this);
@@ -176,33 +199,6 @@
             $('#new-pclass-form-wrapper').slideToggle(400, 'linear');
         });
 
-        /*
-         let pcQty = 0; // Variable to store pc quantity
-
-         $('#roomSelect').change(function() {
-             pcQty = $('option:selected', this).data('pc-qty');
-             $('#maxStudentQty').val(pcQty).change().attr('disabled', false); // Set and trigger change to validate immediately
-         });
-
-         $('#maxStudentQty').on('input', function() {
-             if (parseInt($(this).val()) > pcQty) {
-                 $(this).addClass('is-invalid'); // Add Bootstrap's is-invalid class to show tooltip
-                 $(this).removeClass('is-valid');
-             } else {
-                 $(this).removeClass('is-invalid');
-                 $(this).addClass('is-valid'); // Optionally add is-valid class to indicate correct input
-             }
-         });
-
-         $('#recurringSelect').change(function () {
-             if ($(this).val() !== '0') {
-                 $('#repeatLimit').prop('disabled', false).val(1);
-             } else {
-                 $('#repeatLimit').prop('disabled', true);
-             }
-         });
-        */
-
         const newPracticeClassForm = $('#new-pclass-form');
         setupAjaxForm(newPracticeClassForm);
         // end
@@ -217,10 +213,9 @@
             console.log(data);
 
             $('#editModuleId').val(data.DT_RowData.module_id);
-            $('#editClassCode').val(data.practice_class_code || '');
-            $('#editClassName').val(data.practice_class_name || '');
-            $('#editTeacherSelect').val(data.teacher_id || '').change();
-            $('#editStudentQty').val(data.max_qty || 0);
+            $('#editClassCode').val(data.DT_RowData.practice_class_code || '');
+            $('#editClassName').val(data.DT_RowData.practice_class_name || '');
+            $('#editTeacherSelect').val(data.DT_RowData.teacher_id || '').change();
             $('#editStatusSelect').val(data.status_raw || 0).change();
 
             const updateURL = $(this).data('post-url');
@@ -257,6 +252,8 @@
             const weekdaySignature = $('#pclass-signature-form #weekdaySelect');
             const startDateSignature = $('#pclass-signature-form #start_date');
             const pRoomSignature = $('#pclass-signature-form #pRoomSelect');
+            const studentQty1 = $('#pclass-signature-form #studentQty1');
+            const studentQty2 = $('#pclass-signature-form #studentQty2');
 
             pClassAllScheduleTable.DataTable({
                 ajax: {
@@ -349,6 +346,8 @@
                             }
 
                             pRoomSignature.val(response.pRoomId).change();
+                            studentQty1.val(response.studentQty1);
+                            studentQty2.val(response.studentQty2);
                         },
                         error: function (xhr) {
                             console.log(xhr.responseText);

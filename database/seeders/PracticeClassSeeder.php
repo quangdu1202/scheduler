@@ -34,18 +34,18 @@ class PracticeClassSeeder extends Seeder
                 $pClassName = '';
 
                 if ($j == 1) {
-                    $pClassCode = 20241050319500 . $i . 'TH';
-                    $pClassName = 'Lập trình Java 00' . $i . 'TH';
+                    $pClassCode = 202410503195 . 'TH00' . $i;
+                    $pClassName = 'Lập trình Java TH00' . $i . 'TH';
                 }
 
                 if ($j == 2) {
-                    $pClassCode = 20241050318400 . $i . 'TH';
-                    $pClassName = 'Lập trình Web bằng PHP 00' . $i . 'TH';
+                    $pClassCode = 202410503184 . 'TH00' . $i;
+                    $pClassName = 'Lập trình Web bằng PHP TH00' . $i . 'TH';
                 }
 
                 if ($j == 3) {
-                    $pClassCode = 20241050313000 . $i . 'TH';
-                    $pClassName = 'Lập trình hướng đối tượng 00' . $i . 'TH';
+                    $pClassCode = 202410503130 . 'TH00' . $i;
+                    $pClassName = 'Lập trình hướng đối tượng TH00' . $i;
                 }
 
                 PracticeClass::create([

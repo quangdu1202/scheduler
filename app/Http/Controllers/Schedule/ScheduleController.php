@@ -324,7 +324,7 @@ class ScheduleController extends Controller
                 'success' => true,
                 'title' => 'Success!',
                 'message' => 'Signature data set successfully!',
-                'reloadTarget' => '#registered-pclass-table'
+                'reloadTarget' => '#registered-pclass-table, #pclass-management-table'
             ]);
         } catch (Exception $e) {
             DB::rollBack();

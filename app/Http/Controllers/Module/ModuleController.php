@@ -158,7 +158,7 @@ class ModuleController extends Controller
      */
     public function destroy(Module $module)
     {
-        if ($module->practice_classes_count > 0 || $module->module_classes_count > 0) {
+        if ($module->practiceClasses->count() > 0 || $module->moduleClasses->count() > 0) {
             return response()->json([
                 'status' => 500,
                 'title' => 'Cannot delete!',
@@ -180,28 +180,9 @@ class ModuleController extends Controller
             return response()->json([
                 'status' => 500,
                 'title' => 'Error!',
-                'message' => 'Unknown error occurred, try again later!',
+                'message' => $e->getMessage()
             ]);
         }
-    }
-
-    /**
-     * @param int $id
-     * @return \Illuminate\Contracts\Foundation\Application|Factory|\Illuminate\Contracts\View\View|Application|View
-     */
-    public function showPracticeClasses(int $id)
-    {
-        $module = $this->moduleService->findOrFail($id);
-
-        $practiceClasses = $module->practiceClasses;
-
-        return view(
-            'module.practice-classes',
-            [
-                'module' => $module,
-                'practiceClasses' => $practiceClasses
-            ]
-        );
     }
 
     /**
@@ -219,22 +200,13 @@ class ModuleController extends Controller
             ->getAll();
 
         $responseData = $modules->map(function ($module, $index) {
-            $actions = '<div class="dropup d-inline-flex">
-                            <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="lni lni-angle-double-up align-middle"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a href="'. route('modules.show-practice-classes', $module) .'" class="btn btn-sm dropdown-item">Module Classes</a></li>
-                                <li><hr class="dropdown-divider" /></li>
-                                <li><a href="'. route('modules.show-practice-classes', $module) .'" class="btn btn-sm dropdown-item">Practice Classes</a></li>
-                            </ul>
-                        </div>
-                        <button type="button" title="Edit module" class="btn btn-primary btn-sm module-edit-btn">
+            $actions = '<button type="button" title="Edit module" class="btn btn-primary btn-sm module-edit-btn">
                             <i class="lni lni-pencil-alt align-middle"></i>
                         </button>
                         <button type="button" title="Delete module" class="btn btn-danger btn-sm module-delete-btn">
                             <i class="lni lni-trash-can align-middle"></i>
-                        </button>';
+                        </button>
+            ';
             return [
                 'DT_RowId' => $module->id,
                 'DT_RowData' => $module,

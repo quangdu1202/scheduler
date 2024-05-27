@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('practice_class_id')->constrained('practice_classes');
+            $table->foreignId('practice_class_id')->constrained('practice_classes')->cascadeOnDelete();
             $table->date('schedule_date')->nullable();
             $table->foreignId('practice_room_id')->nullable()->constrained('practice_rooms');
             $table->integer('session')->nullable();
