@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [HomeController::class, 'index'])->name('calendar');
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('root');
 
 Route::get('/test', [HomeController::class, 'test'])->name('test');
 

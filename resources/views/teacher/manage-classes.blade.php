@@ -3,30 +3,31 @@
 @section('content')
     <!-- Page Header -->
     <div class="py-3 mb-3 border-bottom sticky-top bg-body d-flex justify-content-between">
-        <h1 class="h2">Manage Classes</h1>
+        <h1 class="h2 fw-bold">Manage Classes</h1>
         @include('partials.class-timer-placeholder')
-        @if(auth()->user() !== null)
-                <div class="user-info">
-                    <span>Hello Teacher <b>{{Auth::user()->name}}</b>!</span>
-                    <span>Teacher ID: {{Auth::user()->userable->id}}</span>
-                </div>
-            @endif
+        @if(Auth::user() !== null)
+            <div class="user-info">
+                <span class="d-block text-end">Hello Teacher <b>{{Auth::user()->name}}</b>!</span>
+                <span class="d-block text-end">Teacher ID: <b>{{Auth::user()->userable->id}}</b></span>
+            </div>
+        @endif
     </div>
 
     <!-- Schedule table -->
+    @php
+        $days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']; // Weekday names as in your <th> elements
+        $today = $days[date('w')]; // 'w' gives the day of the week (0 for Sunday, 6 for Saturday)
+    @endphp
+
     <div class="table-responsive">
         <table id="register-schedule-table" class="table table-bordered w-100" style="table-layout: fixed">
             <thead class="border-black">
             <tr>
                 <th>#</th>
                 <th>K</th>
-                <th>MON</th>
-                <th>TUE</th>
-                <th>WED</th>
-                <th>THU</th>
-                <th>FRI</th>
-                <th>SAT</th>
-                <th>SUN</th>
+                @foreach ($days as $day)
+                    <th class="{{ $day === $today ? 'text-bg-primary' : '' }}">{{ $day }}</th>
+                @endforeach
             </tr>
             </thead>
         </table>
@@ -265,6 +266,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="position-fixed" style="bottom: 50px; right: 35px; pointer-events: none;">
+        <h2 class="text-danger fw-bold fs-1" style="text-shadow: 2px 0 #dc3545; letter-spacing:2px;">TEACHER ACCOUNT</h2>
     </div>
 
     <!-- Scripts -->

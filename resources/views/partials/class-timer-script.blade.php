@@ -44,7 +44,7 @@
 
                 $('#next-class-info').html(`
                         Next class:
-                        <span class="fw-bold">${nextClass.className}</span>
+                        <span class="fw-bold">${nextClass.className} (${nextClass.roomLocation})</span>
                         on ${formattedClassTime}
                         in <span class="fw-bold">${timeToNextClass}</span>
                     `);

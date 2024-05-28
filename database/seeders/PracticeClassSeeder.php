@@ -28,24 +28,24 @@ class PracticeClassSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 1; $i <= 7; $i++) {
+        for ($i = 1; $i <= 3; $i++) {
             for ($j = 1; $j <= 3; $j++) {
                 $pClassCode = '';
                 $pClassName = '';
 
                 if ($j == 1) {
                     $pClassCode = 202410503195 . 'TH00' . $i;
-                    $pClassName = 'Lập trình Java TH00' . $i . 'TH';
+                    $pClassName = 'Lập trình Java ' . $i;
                 }
 
                 if ($j == 2) {
                     $pClassCode = 202410503184 . 'TH00' . $i;
-                    $pClassName = 'Lập trình Web bằng PHP TH00' . $i . 'TH';
+                    $pClassName = 'Lập trình Web bằng PHP' . $i;
                 }
 
                 if ($j == 3) {
                     $pClassCode = 202410503130 . 'TH00' . $i;
-                    $pClassName = 'Lập trình hướng đối tượng TH00' . $i;
+                    $pClassName = 'Lập trình hướng đối tượng ' . $i;
                 }
 
                 PracticeClass::create([

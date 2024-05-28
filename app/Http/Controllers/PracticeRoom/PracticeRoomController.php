@@ -146,7 +146,7 @@ class PracticeRoomController extends Controller
      */
     public function destroy(PracticeRoom $practiceRoom): JsonResponse
     {
-        if ($practiceRoom->schedules_count > 0) {
+        if ($practiceRoom->schedules->count() > 0) {
             return response()->json([
                 'status' => 500,
                 'title' => 'Cannot delete!',
@@ -193,10 +193,7 @@ class PracticeRoomController extends Controller
                     break;
             }
 
-            $actions = '<button type="button" class="btn btn-success btn-sm">
-                            <i class="fa-solid fa-magnifying-glass align-middle"></i>
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm room-edit-btn">
+            $actions = '<button type="button" class="btn btn-primary btn-sm room-edit-btn">
                             <i class="lni lni-pencil-alt align-middle"></i>
                         </button>
                         <button type="button" class="btn btn-danger btn-sm room-delete-btn">

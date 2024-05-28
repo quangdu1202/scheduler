@@ -48,8 +48,7 @@
 
     <div class="wrapper">
 
-        {{--@if(auth()->user())--}}
-        @if(true)
+        @if(auth()->user())
             {{-- Sidebar --}}
             <aside id="sidebar">
                 @include('partials/sidebar')

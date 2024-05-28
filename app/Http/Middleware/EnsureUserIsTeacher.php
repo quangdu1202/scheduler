@@ -17,7 +17,7 @@ class EnsureUserIsTeacher
     {
         // Check if the user is logged in and if the user is a teacher
         if (auth()->check() && !auth()->user()->isTeacher()) {
-            return redirect()->route('practice-classes.index')->with('error', 'Access restricted to teachers only.');
+            return redirect()->back()->with('error', 'Access restricted to teachers only.');
 
         }
 

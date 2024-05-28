@@ -258,6 +258,10 @@
         </div>
     </div>
 
+    <div class="position-fixed" style="bottom: 50px; right: 35px; pointer-events: none;">
+        <h2 class="text-danger fw-bold fs-1" style="text-shadow: 2px 0 #dc3545; letter-spacing:2px;">ADMIN ACCOUNT</h2>
+    </div>
+
     <!-- Script -->
     <script>
         $(document).ready(function() {

@@ -7,12 +7,12 @@
     </div>
 </div>
 <ul class="sidebar-nav">
-    <li class="sidebar-item">
+    {{--<li class="sidebar-item">
         <a href="{{route('calendar')}}" class="sidebar-link">
             <i class="lni lni-calendar"></i>
             <span>Calendar</span>
         </a>
-    </li>
+    </li>--}}
     <li class="sidebar-item">
         <a href="{{route('teacher.register-classes')}}" class="sidebar-link">
             <i class="lni lni-grid"></i>

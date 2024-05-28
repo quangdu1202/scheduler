@@ -144,8 +144,8 @@ class Helper
                     return [
                         'schedule_date' => $schedule->schedule_date,
                         'session' => $schedule->session,
-                        'room_location' => $pRoom ? $pRoom->location : 'No info',
-                        'room_name' => $pRoom ? $pRoom->name : 'No info',
+                        'room_location' => $schedule->practiceRoom->location ?? 'No room info',
+                        'room_name' => $schedule->practiceRoom->name ?? 'No room info',
                     ];
                 });
 
@@ -159,6 +159,8 @@ class Helper
                 $responseData[] = [
                     'className' => $pClass->practice_class_name,
                     'classTime' => $schedule['schedule_date'] . ' ' . $time,
+                    'roomLocation' => $schedule['room_location'],
+                    'roomName' => $schedule['room_name'],
                 ];
             }
         }
@@ -188,8 +190,8 @@ class Helper
                     return [
                         'schedule_date' => $schedule->schedule_date,
                         'session' => $schedule->session,
-                        'room_location' => $schedule->practiceRoom->location ?? 'No info',
-                        'room_name' => $schedule->practiceRoom->name ?? 'No info',
+                        'room_location' => $schedule->practiceRoom->location ?? 'No room info',
+                        'room_name' => $schedule->practiceRoom->name ?? 'No room info',
                     ];
                 });
 
@@ -203,6 +205,8 @@ class Helper
                 $responseData[] = [
                     'className' => $pClass->practice_class_name,
                     'classTime' => $schedule['schedule_date'] . ' ' . $time,
+                    'roomLocation' => $schedule['room_location'],
+                    'roomName' => $schedule['room_name'],
                 ];
             }
         }

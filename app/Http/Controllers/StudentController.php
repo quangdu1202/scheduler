@@ -665,7 +665,12 @@ class StudentController extends Controller
                 3 => 'T'
             };
 
-            $practiceRoom = $schedule->practiceRoom->name . ' - ' . $schedule->practiceRoom->location;
+            if ($schedule->practiceRoom) {
+                $practiceRoom = $schedule->practiceRoom->name . ' - ' . $schedule->practiceRoom->location;
+            }else {
+                $practiceRoom = 'No info';
+            }
+
 
             $responseData[] = [
                 'index' => ++$index,

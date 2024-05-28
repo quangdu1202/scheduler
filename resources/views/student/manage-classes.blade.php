@@ -3,34 +3,36 @@
 @section('content')
     <!-- Page Header -->
     <div class="py-3 mb-3 border-bottom sticky-top bg-body d-flex justify-content-between">
-        <h1 class="h2">Manage Classes</h1>
+        <h1 class="h2 fw-bold">Manage Classes</h1>
         @include('partials.class-timer-placeholder')
         @if(Auth::user() !== null)
             <div class="user-info">
-                <span>Hello Student <b>{{Auth::user()->name}}</b>!</span>
-                <span>Student Code: {{Auth::user()->userable->id}}</span>
+                <span class="d-block text-end">Hello Student <b>{{Auth::user()->name}}</b>!</span>
+                <span class="d-block text-end">Student Code: <b>{{Auth::user()->userable->student_code}}</b></span>
             </div>
         @endif
     </div>
 
     <!-- Schedule table -->
+    @php
+        $days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']; // Weekday names as in your <th> elements
+        $today = $days[date('w')]; // 'w' gives the day of the week (0 for Sunday, 6 for Saturday)
+    @endphp
+
     <div class="table-responsive">
         <table id="register-schedule-table" class="table table-bordered w-100" style="table-layout: fixed">
             <thead class="border-black">
             <tr>
                 <th>#</th>
                 <th>K</th>
-                <th>MON</th>
-                <th>TUE</th>
-                <th class="text-bg-primary">WED</th>
-                <th>THU</th>
-                <th>FRI</th>
-                <th>SAT</th>
-                <th>SUN</th>
+                @foreach ($days as $day)
+                    <th class="{{ $day === $today ? 'text-bg-primary' : '' }}">{{ $day }}</th>
+                @endforeach
             </tr>
             </thead>
         </table>
     </div>
+
 
     <!-- Registered Classes Table -->
     <div class="table-responsive">
