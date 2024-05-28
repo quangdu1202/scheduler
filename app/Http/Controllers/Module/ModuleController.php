@@ -43,6 +43,11 @@ class ModuleController extends Controller
         PracticeClassService $practiceClassService
     )
     {
+        $this->middleware('admin', [
+            'only' => [
+                'index'
+            ]
+        ]);
         $this->moduleService = $service;
         $this->practiceClassService = $practiceClassService;
     }

@@ -77,6 +77,19 @@
                     </select>
                 </div>
             </div>
+            <div class="col-3">
+                <div class="input-group">
+                    <label for="status-filter-select" class="input-group-text">STATUS</label>
+                    <select name="status" id="status-filter-select" class="form-select">
+                        <option value="">&nbsp;</option>
+                        <option value="Created">Created</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Approval">Approval</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Archived">Archived</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -303,6 +316,7 @@
                                             <option value="1">Ready</option>
                                             <option value="2">Approval</option>
                                             <option value="3">Approved</option>
+                                            <option value="4">Archived</option>
                                         </select>
                                         <label for="editStatusSelect" class="form-label">Status</label>
                                     </div>

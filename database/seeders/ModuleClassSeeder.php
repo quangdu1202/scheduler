@@ -46,6 +46,17 @@ class ModuleClassSeeder extends Seeder
         ]);
 
         ModuleClass::create([
+            'module_id' => 1,
+            'teacher_id' => '4',
+            'module_class_code' => '202410503195004',
+            'module_class_name' => 'Lập trình Java 004',
+            'start_date' => '2024-05-13',
+            'end_date' => '2024-09-13',
+            'student_qty' => '65',
+            'status' => '1',
+        ]);
+
+        ModuleClass::create([
             'module_id' => 2,
             'teacher_id' => '1',
             'module_class_code' => '202410503184001',
@@ -79,6 +90,17 @@ class ModuleClassSeeder extends Seeder
         ]);
 
         ModuleClass::create([
+            'module_id' => 2,
+            'teacher_id' => '4',
+            'module_class_code' => '202410503184004',
+            'module_class_name' => 'Lập trình Web bằng PHP 004',
+            'start_date' => '2024-05-13',
+            'end_date' => '2024-09-13',
+            'student_qty' => '65',
+            'status' => '1',
+        ]);
+
+        ModuleClass::create([
             'module_id' => 3,
             'teacher_id' => '1',
             'module_class_code' => '202410503130001',
@@ -105,6 +127,17 @@ class ModuleClassSeeder extends Seeder
             'teacher_id' => '3',
             'module_class_code' => '202410503130003',
             'module_class_name' => 'Lập trình hướng đối tượng 003',
+            'start_date' => '2024-05-13',
+            'end_date' => '2024-09-13',
+            'student_qty' => '65',
+            'status' => '1',
+        ]);
+
+        ModuleClass::create([
+            'module_id' => 3,
+            'teacher_id' => '4',
+            'module_class_code' => '202410503130004',
+            'module_class_name' => 'Lập trình hướng đối tượng 004',
             'start_date' => '2024-05-13',
             'end_date' => '2024-09-13',
             'student_qty' => '65',

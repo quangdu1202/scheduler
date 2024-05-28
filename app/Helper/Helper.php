@@ -213,4 +213,21 @@ class Helper
 
         return $responseData;
     }
+
+    /**
+     * @param $scheduleDate
+     * @param $session
+     * @param $shift
+     * @param $pRoomId
+     * @return bool
+     */
+    public function isPracticeRoomAvailable($scheduleDate, $session, $shift, $pRoomId): bool
+    {
+        return !Schedule::where('schedule_date', $scheduleDate)
+            ->where('session', $session)
+            ->where('shift', $shift)
+            ->where('practice_room_id', $pRoomId)
+            ->exists();
+    }
+
 }

@@ -27,6 +27,13 @@
             placeholder: 'Filter by teacher',
             allowClear: true
         })
+
+        $('#status-filter-select').select2({
+            theme: "bootstrap-5",
+            searchable: true,
+            placeholder: 'Filter by status',
+            allowClear: true
+        })
         // end
 
         // Multi switch
@@ -141,6 +148,12 @@
         });
 
         $('#teacher-filter-select').on('change', function () {
+            showOverlay();
+            pclassTable.search(this.value).draw();
+            hideOverlay();
+        });
+
+        $('#status-filter-select').on('change', function () {
             showOverlay();
             pclassTable.search(this.value).draw();
             hideOverlay();

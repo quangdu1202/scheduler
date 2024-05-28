@@ -46,8 +46,9 @@ select, input {
 #sidebar {
     position: absolute;
     width: 70px;
+    height: 100vh;
     min-width: 70px;
-    z-index: 1000;
+    z-index: 1021;
     transition: all .25s ease-in-out;
     background-color: #0e2238;
     display: flex;

@@ -30,6 +30,11 @@ class PracticeRoomController extends Controller
      */
     public function __construct(PracticeRoomServiceInterface $practiceRoomService)
     {
+        $this->middleware('admin', [
+            'only' => [
+                'index'
+            ]
+        ]);
         $this->practiceRoomService = $practiceRoomService;
     }
 

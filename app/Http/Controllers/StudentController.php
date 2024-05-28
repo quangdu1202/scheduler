@@ -149,7 +149,7 @@ class StudentController extends Controller
     {
         /**@var Student $student */
         $student = Auth::user()->userable;
-        $availableModules = $this->helper->getModulesByStudentId($student->id);
+        $availableModules = $this->helper->getModulesByStudentId($student->id)->unique();
         $practiceRooms = $this->practiceRoomService->getAll();
         $nextClasses = $this->helper->getNextSchedulesOfStudent($student->id);
         return view('student.manage-classes', [
@@ -172,6 +172,9 @@ class StudentController extends Controller
         foreach ($registrations as $registration) {
             /**@var Registration $registration */
             $practiceClass = $registration->practiceClass;
+            if ($practiceClass->status != 3) {
+                continue;
+            }
             $signatureSchedule = $practiceClass->schedules->where('order', '=', 0)->first();
             $weekday = date('N', strtotime($signatureSchedule->schedule_date));
 
@@ -619,6 +622,21 @@ class StudentController extends Controller
 
             $schedule_text = $session_text . '_' . $weekday_text . '_' . $shift_text;
 
+            $status = match ($pclass->status) {
+                3 => [
+                    'title' => 'In progress',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-success status-change-btn" data-status="3">In progress</button>'
+                ],
+                4 => [
+                    'title' => 'Class is archived',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-dark" data-status="3">Complete</button>'
+                ],
+                default => [
+                    'title' => 'Unknown',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-dark">Unknown</button>'
+                ],
+            };
+
             $actions = '
                 <button type="button" class="btn btn-primary btn-sm schedule-info-btn" data-get-url="' . route('student.get-registered-class-schedules', ['practice_class_id' => $pclass->id, 'shift' => $shift]) . '" data-pclass-id="' . $pclass->id . '">
                     <i class="fa-solid fa-magnifying-glass align-middle"></i>
@@ -634,6 +652,7 @@ class StudentController extends Controller
                 'teacher_name' => $teacher_name,
                 'start_date' => $start_date,
                 'schedule_text' => $schedule_text,
+                'status' => $status,
                 'actions' => $actions
             ];
         });

@@ -414,16 +414,17 @@
                 },
                 columns: [
                     {data: 'index', width: '5%'},
-                    {data: 'module_info', type: 'html', width: '20%'},
-                    {data: 'practice_class_code', type: 'html', width: '10%'},
-                    {data: 'practice_class_name', type: 'html', width: '20%'},
+                    {data: 'module_info', type: 'html', width: '15%'},
+                    {data: 'practice_class_info', type: 'html', width: '25%'},
+                    {data: 'weekday', type: 'html', width: '10%'},
+                    {data: 'room', type: 'html', width: '10%'},
                     {data: 'actions', type: 'html', width: '10%'},
                 ],
                 autoWidth: false,
                 columnDefs: [
                     {
                         className: "dt-center",
-                        targets: "_all"
+                        targets: [0,3,4,5]
                     }
                 ],
                 layout: {

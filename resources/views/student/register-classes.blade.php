@@ -15,8 +15,9 @@
 
     <!-- Schedule table -->
     @php
-        $days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']; // Weekday names as in your <th> elements
-        $today = $days[date('w')]; // 'w' gives the day of the week (0 for Sunday, 6 for Saturday)
+        $days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']; // Weekday names starting from Monday
+        $todayIndex = date('w') - 1; // 'w' gives the day of the week (0 for Sunday, 6 for Saturday)
+        $today = $todayIndex >= 0 ? $days[$todayIndex] : 'SUN'; // Adjust for Sunday case
     @endphp
 
     <div class="table-responsive">
@@ -136,6 +137,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="position-fixed" style="bottom: 50px; right: 35px; pointer-events: none;">
+        <h2 class="text-danger fw-bold fs-1" style="text-shadow: 2px 0 #dc3545; letter-spacing:2px;">STUDENT ACCOUNT</h2>
     </div>
 
     <!-- Scripts -->

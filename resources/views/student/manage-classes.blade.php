@@ -15,8 +15,9 @@
 
     <!-- Schedule table -->
     @php
-        $days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']; // Weekday names as in your <th> elements
-        $today = $days[date('w')]; // 'w' gives the day of the week (0 for Sunday, 6 for Saturday)
+        $days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']; // Weekday names starting from Monday
+        $todayIndex = date('w') - 1; // 'w' gives the day of the week (0 for Sunday, 6 for Saturday)
+        $today = $todayIndex >= 0 ? $days[$todayIndex] : 'SUN'; // Adjust for Sunday case
     @endphp
 
     <div class="table-responsive">
@@ -33,8 +34,34 @@
         </table>
     </div>
 
-
     <!-- Registered Classes Table -->
+    <!-- Action Buttons (Add new, etc.) -->
+    <div class="row">
+        <!-- Filters -->
+        <div class="row">
+            <div class="col-4">
+                <div class="input-group mb-3">
+                    <label for="module-filter-select" class="input-group-text">MODULE</label>
+                    <select name="module" id="module-filter-select" class="form-select">
+                        <option></option>
+                        @foreach($modules as $module)
+                            <option value="{{$module->module_code}}">{{'(' . $module->module_code . ') ' . $module->module_name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="input-group">
+                    <label for="status-filter-select" class="input-group-text">STATUS</label>
+                    <select name="status" id="status-filter-select" class="form-select">
+                        <option value=""></option>
+                        <option value="In progress">In progress</option>
+                        <option value="Complete">Complete</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="table-responsive">
         <table id="registered-pclass-table" class="table table-bordered table-hover w-100">
             <thead class="thead-light">
@@ -45,6 +72,7 @@
                 <th>Teacher</th>
                 <th>Start Date</th>
                 <th>Schedule</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -146,6 +174,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="position-fixed" style="bottom: 50px; right: 35px; pointer-events: none;">
+        <h2 class="text-danger fw-bold fs-1" style="text-shadow: 2px 0 #dc3545; letter-spacing:2px;">STUDENT ACCOUNT</h2>
     </div>
 
     <!-- Scripts -->

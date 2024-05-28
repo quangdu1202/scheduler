@@ -6,6 +6,20 @@
             placeholder: "Select an option",
             allowClear: true
         });
+
+        $('#module-filter-select').select2({
+            theme: "bootstrap-5",
+            searchable: true,
+            placeholder: 'Filter by module',
+            allowClear: true
+        })
+
+        $('#status-filter-select').select2({
+            theme: "bootstrap-5",
+            searchable: true,
+            placeholder: 'Filter by status',
+            allowClear: true
+        })
         // end
 
         //Registered classes table
@@ -26,12 +40,22 @@
                 {data: 'teacher_name', type: 'html', width: '10%'},
                 {data: 'start_date', type: 'html', width: '10%'},
                 {data: 'schedule_text', type: 'html', width: '10%'},
+                {
+                    data: 'status', type: 'html', width: '10%',
+                    render: function (data) {
+                        return `
+                                <div class="cell-clamp" title="${data.title}">
+                                    ${data.value}
+                                </div>
+                            `;
+                    }
+                },
                 {data: 'actions', type: 'html', width: '10%'},
             ],
             columnDefs: [
                 {
                     className: "dt-center",
-                    targets: [0, 3, 4, 5, 6]
+                    targets: [0,3,4,5,6,7]
                 },
                 {
                     orderable: false,
@@ -45,6 +69,20 @@
                 bottomEnd: {},
             },
             pageLength: -1,
+        });
+        // end
+
+        // Module filter
+        $('#module-filter-select').on('change', function () {
+            showOverlay();
+            registeredPclassTable.DataTable().search(this.value).draw();
+            hideOverlay();
+        });
+
+        $('#status-filter-select').on('change', function () {
+            showOverlay();
+            registeredPclassTable.DataTable().search(this.value).draw();
+            hideOverlay();
         });
         // end
 

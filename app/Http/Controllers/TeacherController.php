@@ -242,7 +242,7 @@ class TeacherController extends Controller
     {
         /**@var Teacher $teacher */
         $teacher = Auth::user()->userable;
-        $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll(['teacher_id' => $teacher->id]);
+        $practiceClasses = $this->practiceClassService->with(['schedules'])->getAll(['teacher_id' => $teacher->id])->where('status', '=', 3);
 
         $practiceClassesMapped = $practiceClasses->mapWithKeys(function ($practiceClass) {
             /**@var PracticeClass $practiceClass */
@@ -364,7 +364,39 @@ class TeacherController extends Controller
         $responseData = [];
         $index = 0;
         foreach ($filteredClasses as $pclass) {
+            /**@var PracticeClass $pclass*/
             $index++;
+            $signatureSchedule = $pclass->getSignatureSchedule();
+            $module = $pclass->module;
+            $module_info = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$module->module_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$module->module_code</strong></span>
+                    </div>
+                </div>
+            ";
+
+            $scheduleQty = floor($pclass->schedules->count() / 2);
+            $classInfo = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$pclass->practice_class_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$pclass->practice_class_code</strong> - </span>
+                        <span class='d-inline-block'><strong>$scheduleQty</strong> schedules - </span>
+                        <span class='d-inline-block'><strong>$pclass->shift_qty</strong> shifts</span>
+                    </div>
+                </div>
+            ";
+
+            $session = match ($signatureSchedule->session) {
+                1 => 'S',
+                2 => 'C',
+                3 => 'T',
+            };
+            $start_date = $signatureSchedule->schedule_date;
+            $signatureWeekday = $session . '_' . strtoupper($this->helper->dateToFullCharsWeekday($start_date));
+
             $actions = '
                 <button type="button" class="btn btn-primary btn-sm schedule-info-btn" data-get-url="' . route('teacher.get-class-schedules', ['practice_class_id' => $pclass->id]) . '">
                     <i class="fa-solid fa-magnifying-glass align-middle"></i>
@@ -377,9 +409,10 @@ class TeacherController extends Controller
             $responseData[] = [
                 'index' => $index,
                 'practice_class_id' => $pclass->id,
-                'module_info' => '(' . $pclass->module->module_code . ') ' . $pclass->module->module_name,
-                'practice_class_name' => $pclass->practice_class_name,
-                'practice_class_code' => $pclass->practice_class_code,
+                'module_info' => $module_info,
+                'practice_class_info' => $classInfo,
+                'weekday' => $signatureWeekday,
+                'room' => $signatureSchedule->practiceRoom ? $signatureSchedule->practiceRoom->location . ' - ' . $signatureSchedule->practiceRoom->name : '<span>Not set</span>',
                 'actions' => $actions
             ];
         }
@@ -389,6 +422,7 @@ class TeacherController extends Controller
 
     /**
      * @return JsonResponse
+     * @throws Exception
      */
     public function getJsonData(): JsonResponse
     {
@@ -400,7 +434,10 @@ class TeacherController extends Controller
             ->where('status', '=', '1')
         ;
 
-        $responseData = $practiceClasses->map(function ($pclass, $index) {
+        $responseData = [];
+        $index = 0;
+
+        foreach ($practiceClasses as $pclass) {
             /**@var PracticeClass $pclass */
 
             $module_info = '(' . $pclass->module->module_code . ') ' . $pclass->module->module_name;
@@ -460,10 +497,10 @@ class TeacherController extends Controller
                 </button>
             ';
 
-            return [
+            $responseData[] = [
                 'DT_RowId' => $pclass->id,
                 'DT_RowData' => $pclass,
-                'index' => $index + 1,
+                'index' => ++$index,
                 'module_id' => $pclass->module_id,
                 'module_info' => $module_info,
                 'practice_class_code' => $pclass->practice_class_code,
@@ -474,7 +511,7 @@ class TeacherController extends Controller
                 'status' => $status,
                 'actions' => $actions
             ];
-        });
+        }
 
         return response()->json($responseData);
     }
@@ -542,7 +579,11 @@ class TeacherController extends Controller
                 ],
                 3 => [
                     'title' => 'Approved',
-                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-success status-change-btn" data-status="3">Approved</button>'
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-success status-change-btn" data-status="3">In progress</button>'
+                ],
+                4 => [
+                    'title' => 'Class is archived',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-dark" data-status="3">Complete</button>'
                 ],
                 default => [
                     'title' => 'Unknown',

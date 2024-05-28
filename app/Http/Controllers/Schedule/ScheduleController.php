@@ -119,24 +119,28 @@ class ScheduleController extends Controller
                     ]);
                 }
 
-//                if ($lastOrder == 0) {
-//                    $lastOrder = 1;
-//                }
+                $pRoomId = $signatureSchedule->practice_room_id ?? null;
 
                 foreach ($newDates as $date) {
                     $sessionId = $this->helper->uniqidReal();
+
                     $data = [
                         'schedule_date' => $date,
                         'session' => $session,
+                        'practice_room_id' => $pRoomId,
                         'order' => ++$lastOrder
                     ];
                     $this->createSchedules($practiceClassId, $sessionId, $shift_qty, $data);
                 }
             } else {
+                $pRoomId = $signatureSchedule->practice_room_id ?? null;
                 $sessionId = $this->helper->uniqidReal();
+                $date = date('Y-m-d', strtotime('+1 week', strtotime($lastScheduleDate)));
+
                 $data = [
-                    'schedule_date' => date('Y-m-d', strtotime('+1 week', strtotime($lastScheduleDate))),
+                    'schedule_date' => $date,
                     'session' => $session,
+                    'practice_room_id' => $pRoomId,
                     'order' => $lastOrder + 1
                 ];
                 $this->createSchedules($practiceClassId, $sessionId, $shift_qty, $data);
@@ -148,7 +152,7 @@ class ScheduleController extends Controller
                 'status' => 200,
                 'success' => true,
                 'title' => 'Success!',
-                'message' => 'Schedule(s) created successfully!',
+                'message' => 'Schedule(s) created successfully! <br> If room is not set meant it\'s not available',
                 'reloadTarget' => '#pclass-management-table, #pclass-all-schedule-table',
             ]);
         } catch (Exception $e) {
@@ -175,14 +179,20 @@ class ScheduleController extends Controller
      */
     private function createSchedules(int $practiceClassId, string $sessionId, int $shiftQty, $data)
     {
-        for ($i = 0; $i < $shiftQty; $i++) {
+        for ($i = 1; $i <= $shiftQty; $i++) {
+            $pRoomId = $data['practice_room_id'];
+            $session = $data['session'];
+            $date = $data['schedule_date'];
+            $pRoomId = $this->helper->isPracticeRoomAvailable($date, $session, $i, $pRoomId) ? $pRoomId : null;
+
             $this->scheduleService->create([
                 'practice_class_id' => $practiceClassId,
-                'schedule_date' => $data['schedule_date'],
-                'session' => $data['session'],
+                'schedule_date' => $date,
+                'session' => $session,
                 'session_id' => $sessionId,
+                'practice_room_id' => $pRoomId,
                 'order' => $data['order'],
-                'shift' => $i + 1,
+                'shift' => $i,
             ]);
 
         }

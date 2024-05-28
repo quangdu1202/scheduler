@@ -15,8 +15,9 @@
 
     <!-- Schedule table -->
     @php
-        $days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']; // Weekday names as in your <th> elements
-        $today = $days[date('w')]; // 'w' gives the day of the week (0 for Sunday, 6 for Saturday)
+        $days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']; // Weekday names starting from Monday
+        $todayIndex = date('w') - 1; // 'w' gives the day of the week (0 for Sunday, 6 for Saturday)
+        $today = $todayIndex >= 0 ? $days[$todayIndex] : 'SUN'; // Adjust for Sunday case
     @endphp
 
     <div class="table-responsive">
@@ -49,9 +50,10 @@
                             <thead class="thead-light">
                             <tr>
                                 <th>#</th>
-                                <th>Module</th>
-                                <th>Class Code</th>
-                                <th>Class Name</th>
+                                <th>Module Info</th>
+                                <th>Class Info</th>
+                                <th>Weekday</th>
+                                <th>Room</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
@@ -74,17 +76,19 @@
         <!-- Action Buttons (Add new, etc.) -->
         <div class="row">
             <!-- Filters -->
-            <form id="module-filter" action="#" class="d-flex align-items-center my-2 col-3">
-                <div class="input-group mb-3">
-                    <label for="module-filter-select" class="input-group-text">MODULE</label>
-                    <select name="module" id="module-filter-select" class="form-select">
-                        <option></option>
-                        @foreach($modules as $module)
-                            <option value="{{$module->module_code}}">{{'(' . $module->module_code . ') ' . $module->module_name}}</option>
-                        @endforeach
-                    </select>
+            <div class="row">
+                <div class="col-4">
+                    <div class="input-group mb-3">
+                        <label for="module-filter-select" class="input-group-text">MODULE</label>
+                        <select name="module" id="module-filter-select" class="form-select">
+                            <option></option>
+                            @foreach($modules as $module)
+                                <option value="{{$module->module_code}}">{{'(' . $module->module_code . ') ' . $module->module_name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
         <table id="pclass-register-table" class="table table-bordered table-hover w-100">
             <thead class="thead-light">

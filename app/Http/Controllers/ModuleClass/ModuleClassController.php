@@ -50,6 +50,11 @@ class ModuleClassController extends Controller
         ModuleService               $moduleService
     )
     {
+        $this->middleware('admin', [
+            'only' => [
+                'index'
+            ]
+        ]);
         $this->moduleClassService = $moduleClassService;
         $this->teacherService = $teacherService;
         $this->moduleService = $moduleService;

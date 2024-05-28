@@ -81,6 +81,11 @@ class PracticeClassController extends Controller
         Helper                        $helper,
     )
     {
+        $this->middleware('admin', [
+            'only' => [
+                'index'
+            ]
+        ]);
         $this->practiceClassService = $practiceClassService;
         $this->scheduleService = $scheduleService;
         $this->moduleService = $moduleService;
@@ -392,6 +397,10 @@ class PracticeClassController extends Controller
                 3 => [
                     'title' => 'Approved',
                     'value' => '<button type="button" class="btn badge rounded-pill text-bg-success status-change-btn" data-status="3">Approved</button>'
+                ],
+                4 => [
+                    'title' => 'Class is archived',
+                    'value' => '<button type="button" class="btn badge rounded-pill text-bg-dark" data-status="3">Archived</button>'
                 ],
                 default => [
                     'title' => 'Unknown',

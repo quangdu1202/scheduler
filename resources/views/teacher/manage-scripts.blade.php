@@ -7,6 +7,15 @@
             allowClear: true
         })
 
+        $('#status-filter-select').select2({
+            theme: "bootstrap-5",
+            searchable: true,
+            placeholder: 'Filter by status',
+            allowClear: true
+        })
+
+        // end
+
         //Registered classes table
         const registeredPclassTable = $('#registered-pclass-table');
         registeredPclassTable.DataTable({
@@ -61,9 +70,16 @@
         // Module filter
         $('#module-filter-select').on('change', function () {
             showOverlay();
-            registeredPclassTable.search(this.value).draw();
+            registeredPclassTable.DataTable().search(this.value).draw();
             hideOverlay();
         });
+
+        $('#status-filter-select').on('change', function () {
+            showOverlay();
+            registeredPclassTable.DataTable().search(this.value).draw();
+            hideOverlay();
+        });
+        // end
 
         // View all schedules of a practice class
         function initAllScheduleTable($getUrl) {
