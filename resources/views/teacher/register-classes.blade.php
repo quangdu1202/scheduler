@@ -94,11 +94,11 @@
             <thead class="thead-light">
             <tr>
                 <th>#</th>
-                <th>Module</th>
-                <th>Class Code</th>
-                <th>Class Name</th>
+                <th>Module Info</th>
+                <th>Class Info</th>
                 <th>Start Date</th>
-                <th>Schedule</th>
+                <th>Weekday</th>
+                <th>Room</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>

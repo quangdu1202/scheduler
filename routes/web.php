@@ -64,7 +64,7 @@ Route::prefix('teacher')->controller(TeacherController::class)->group(function (
     Route::get('/register-classes', 'registerClasses')->name('teacher.register-classes');
     Route::get('/manage-classes', 'manageClasses')->name('teacher.manage-classes');
     Route::post('/register-class', 'registerClass')->name('teacher.register-class');
-    Route::get('/get-available-classes', 'getJsonData')->name('teacher.get-available-classes');
+    Route::get('/get-available-classes', 'getAvailableClasses')->name('teacher.get-available-classes');
     Route::get('/get-class-schedules/{practice_class_id}', 'getJsonDataForSchedule')->name('teacher.get-class-schedules');
     Route::get('/get-registered-classes', 'getRegisteredClasses')->name('teacher.get-registered-classes');
     Route::get('/get-schedule-table', 'getJsonDataForScheduleTable')->name('teacher.get-schedule-table');

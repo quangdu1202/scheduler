@@ -424,7 +424,7 @@ class TeacherController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function getJsonData(): JsonResponse
+    public function getAvailableClasses(): JsonResponse
     {
         /**@var Teacher $teacher */
         $teacher = Auth::user()->userable;
@@ -439,12 +439,31 @@ class TeacherController extends Controller
 
         foreach ($practiceClasses as $pclass) {
             /**@var PracticeClass $pclass */
-
-            $module_info = '(' . $pclass->module->module_code . ') ' . $pclass->module->module_name;
-
             $signatureSchedule = $pclass->schedules->where('order', '=', 0)->first();
+
+            $module = $pclass->module;
+            $module_info = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$module->module_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$module->module_code</strong></span>
+                    </div>
+                </div>
+            ";
+
+            $scheduleQty = floor($pclass->schedules->count() / 2);
+            $classInfo = "
+                <div>
+                    <span class='d-block fw-bold text-primary'>$pclass->practice_class_name</span>
+                    <div class='fst-italic'>
+                        <span class='d-inline-block'><strong>$pclass->practice_class_code</strong> - </span>
+                        <span class='d-inline-block'><strong>$scheduleQty</strong> schedules - </span>
+                        <span class='d-inline-block'><strong>$pclass->shift_qty</strong> shifts</span>
+                    </div>
+                </div>
+            ";
+
             $start_date = '<strong class="btn-sm form-control">' . ($signatureSchedule != null ? $signatureSchedule->schedule_date : 'No info') . '</button>';
-            $max_qty = $pclass->max_qty;
 
             $session_text = match ($signatureSchedule->session) {
                 1 => 'S',
@@ -503,11 +522,10 @@ class TeacherController extends Controller
                 'index' => ++$index,
                 'module_id' => $pclass->module_id,
                 'module_info' => $module_info,
-                'practice_class_code' => $pclass->practice_class_code,
-                'practice_class_name' => $pclass->practice_class_name,
+                'practice_class_info' => $classInfo,
                 'start_date' => $start_date,
-                'max_qty' => $max_qty,
                 'schedule_text' => $schedule_text,
+                'room' => $signatureSchedule->practiceRoom ? $signatureSchedule->practiceRoom->location . ' - ' . $signatureSchedule->practiceRoom->name : '<span>Not set</span>',
                 'status' => $status,
                 'actions' => $actions
             ];
