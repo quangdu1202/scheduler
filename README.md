@@ -14,7 +14,9 @@
 <h2>🚀 Demo</h2>
 
 [quangdd.site](quangdd.site)
-
+*   Admin account: admin@gmail.com / 123
+*   Teacher account: gva@gmail.com / 123
+*   Student account: hsa@gmail.com / 123
   
   
 <h2>🧐 Features</h2>
